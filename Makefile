@@ -4,7 +4,7 @@
 all: help
 
 test:
-	pytest tests
+	poetry run pytest tests
 
 test_integration:
 	poetry run pytest tests/integration
