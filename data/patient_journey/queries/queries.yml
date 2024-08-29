@@ -1,0 +1,51 @@
+queries:
+
+  - question: For patient (ID="f9437ac7"), get the patient's encounters (aka the patient journey or patient encounter journey) in order.
+    cql: |-
+      MATCH (p:Patient {id:"f9437ac7"})-[:HAS_ENCOUNTER]->(e)
+      WHERE apoc.node.degree.in(e,'NEXT') = 0
+      WITH e
+      MATCH (e)-[:NEXT*]->(e2)
+      with e as e1, collect(e2) as erest
+      with e1 + erest as encounters
+      unwind encounters as e
+      return e.class as encounterType, e.description as encounterDescription, e.date as startDate, e.end as endDate
+
+  - question: For patient with ID="26ec7fd0," what is the patient's encounter journey and return back all the related Events in order.
+    cql: |-
+      MATCH (p:Patient {id:"26ec7fd0"})-[:HAS_ENCOUNTER]->(e)
+      WHERE apoc.node.degree.in(e, 'NEXT') = 0
+      WITH e
+      MATCH (e)-[:NEXT*]->(e2)-[:HAS_CONDITION|:HAS_DRUG|:HAS_CARE_PLAN|:HAS_ALLERGY|:HAS_PROCEDURE]->(x)
+      OPTIONAL MATCH (e2)-[:HAS_END]->(end)
+      RETURN labels(x)[0] AS eventType, x.description AS name,
+          e2.date AS startDate,coalesce(end.date, 'NA') AS endDate
+
+  # todo keep patients ehre?
+  - question: What are the Encounters in which an Allergy ceased to be present. Get all the related drugs taken by patients prior to the allergy ending.
+    cql: |-
+      MATCH (a:Allergy)<-[:HAS_ALLERGY]-(e)-[:HAS_END]->(),
+          (e)<-[:HAS_ENCOUNTER]-(patient)
+      WITH patient, a, e LIMIT 10
+      MATCH p=(e0)-[:NEXT*]->(e)
+      WITH patient, a, nodes(p) AS nodes
+      UNWIND nodes AS tempe
+      MATCH (tempe)-[:HAS_DRUG]->(d)
+      RETURN patient.firstName AS firstName, patient.lastName AS lastName,
+          a.description AS Allergy, collect(d.description) AS drugs
+
+  - question: What are the top 5 conditions that emerge as side effects to taking the drugs with Hydrochlorothiazide
+    cql: |-
+      MATCH (e)-[:HAS_DRUG]->(d)
+      WHERE toLower(d.description) contains "hydrochlorothiazide"
+      WITH d.description as drug, e
+      MATCH (e)-[:NEXT]->{1,3}(e2)-[:HAS_CONDITION]->(c)
+      WITH drug, c.description as condition, count(*) as cnt
+      ORDER by cnt desc
+      WITH drug, collect(condition) as conditions
+      RETURN drug, conditions[1..5] as top5Conditions
+
+
+  # - question: what medical procedures are folowed after diagnosis with disease
+
+  # - question: how effect procedures are
