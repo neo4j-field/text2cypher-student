@@ -15,6 +15,12 @@ test_unit:
 init:
 	poetry install --with dev, ui
 	pre-commit install
+	poetry run python3 -m pip install -U --no-cache-dir  \
+            --config-settings="--global-option=build_ext" \
+            --config-settings="--global-option=-I$(brew --prefix graphviz)/include/" \
+            --config-settings="--global-option=-L$(brew --prefix graphviz)/lib/" \
+            pygraphviz
+
 
 ######################
 # LINTING AND FORMATTING

@@ -18,16 +18,21 @@ def create_neo4j_text2cypher_tool(
     custom_prompt: Optional[str] = None,
 ) -> Any:
     """
-    Create a Neo4jVectorSearch tool with the provided vector chain.
+    Create a Text2Cypher tool.
 
     Parameters
     ----------
     driver : Driver
         The Neo4j Python driver instance to use.
-    embedder: Embedder
-        An embedding service that adheres to the Neo4j GenAI Python library Embedder interface.
-    index_name: str
-        The name of the vector index in the database.
+    llm : LLMInterface
+        The LLM that will generate Cypher to be run against the Neo4j database.
+    schema : Optional[str], optional
+        The graph schema to provide as context for Cypher generation. By default None
+    examples : Optional[str], optional
+        Any examples of question and Cypher pairs to provide to the LLM.  By default None
+        example : ['Human: How many nodes are there?\\nAssistant: MATCH (n) RETURN COUNT(*)']
+    custom_prompt : Optional[str], optional
+        A custom prompt to use for Cypher generation. Will overwrite any schema or examples provided.
 
     Returns
     -------
