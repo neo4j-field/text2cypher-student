@@ -26,7 +26,7 @@ def create_cypher_prompt(
 
     example_prompt = PromptTemplate(
         input_variables=["human", "assistant"],
-        template="Human: {human}\nAssistant: {assistant}",
+        template="Human: {human}\nAssistant: {assistant}\n\n",
     )
 
     examples = get_example_queries(file_path=examples_yaml_path)
@@ -53,7 +53,9 @@ def create_cypher_prompt(
     </schema>
 
     The samples below follow the instructions and the schema mentioned above. So, please follow the same when you generate the cypher:
-    <samples>"""
+    <samples>
+
+    """
 
     suffix = """</samples>
 
@@ -61,10 +63,17 @@ def create_cypher_prompt(
     Assistant:
     """
 
-    return FewShotPromptTemplate(
-        examples=examples,
-        example_prompt=example_prompt,
-        suffix=suffix,
-        input_variables=["question"],
-        prefix=prefix,
-    )
+    # return FewShotPromptTemplate(
+    #     examples=examples,
+    #     example_prompt=example_prompt,
+    #     suffix=suffix,
+    #     input_variables=["question"],
+    #     prefix=prefix,
+    # )
+    examples_str = ""
+    for ex in examples:
+        examples_str += example_prompt.format(**ex)
+
+    return f"""{prefix}
+{examples_str}
+{suffix}"""

@@ -15,6 +15,7 @@ from langchain_openai.chat_models import ChatOpenAI
 from langgraph.graph import END, StateGraph
 from langgraph.prebuilt.tool_executor import ToolExecutor, ToolInvocation
 from neo4j import GraphDatabase
+from neo4j_genai.schema import get_schema
 
 from ....prompts import (
     create_agent_prompt,
@@ -47,8 +48,10 @@ driver = GraphDatabase.driver(
 
 # tools = [neo4j_vector_search, text2cypher]
 text2cypher_prompt = create_cypher_prompt(
-    graph_schema="", examples_yaml_path="../data/iqs/queries/queries.yml"
+    graph_schema=get_schema(driver=driver),
+    examples_yaml_path="../data/iqs/queries/queries.yml",
 )
+
 text2cypher_tool = create_neo4j_text2cypher_tool(
     driver=driver, llm=chat_llm, custom_prompt="text2cypher_prompt"
 )
@@ -155,7 +158,7 @@ def execute_text2cypher(query: str) -> Dict[str, Any]:
             print(output)
             print()
             query = f"""
-The following Cypher not accurate. Fix the errors and return valid Cypher.
+The following Cypher is not accurate. Fix the errors and return valid Cypher.
 {str(output['intermediate_steps'][-1]['query'])}
 
 Consider the following fixes:

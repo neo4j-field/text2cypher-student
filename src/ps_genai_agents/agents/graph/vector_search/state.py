@@ -21,5 +21,5 @@ class AgentState(TypedDict):
     intermediate_steps: Annotated[list[tuple[AgentAction, str]], operator.add]
     # The vector search source node IDs
     sources: Annotated[Union[List[Any], None], operator.add]
-    # The vector search text results
-    vector_search_result: Annotated[Union[List[Any], None], operator.add]
+    # The context retrieved
+    context: Annotated[Union[List[Any], None], operator.add]
