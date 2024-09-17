@@ -6,19 +6,16 @@ import neo4j
 from langchain.agents import (
     create_openai_tools_agent,
 )
-from langchain.tools import tool
 from langchain_core.runnables.base import Runnable
 from langchain_openai.chat_models import ChatOpenAI
 from langgraph.graph import END, StateGraph
 from langgraph.prebuilt.tool_executor import ToolExecutor, ToolInvocation
 from neo4j import GraphDatabase
 from neo4j_genai.embeddings.openai import OpenAIEmbeddings
-from neo4j_genai.schema import get_schema
 from neo4j_genai.types import RetrieverResultItem
 
 from ....prompts import (
     create_agent_prompt,
-    create_cypher_prompt,
     create_final_summary_prompt_without_lists,
 )
 from ....tools import create_neo4j_vector_search_tool
@@ -32,11 +29,6 @@ driver = GraphDatabase.driver(
     auth=(os.environ.get("NEO4J_USERNAME"), os.environ.get("NEO4J_PASSWORD")),
 )
 
-
-text2cypher_prompt = create_cypher_prompt(
-    graph_schema=get_schema(driver=driver),
-    examples_yaml_path="../data/iqs/queries/queries.yml",
-)
 
 INDEX_NAME = "adaEmbeddings"
 
@@ -134,7 +126,15 @@ def execute_vector_search(query: str) -> Dict[str, Any]:
     }
 
 
-def router(data: Dict[str, Any]) -> str:
+def initial_router(data: Dict[str, Any]) -> str:
+    print("> router")
+    if isinstance(data["agent_outcome"], list):
+        return "Neo4jVectorSearch"
+    else:
+        return "error"
+
+
+def main_router(data: Dict[str, Any]) -> str:
     print("> router")
     if isinstance(data["agent_outcome"], list):
         return "Neo4jVectorSearch"
@@ -163,7 +163,6 @@ def final_answer(data: Dict[str, Any]) -> Dict[str, Any]:
         "question": query,
         "sub_questions": data["sub_questions"] if "sub_questions" in data else None,
     }
-    # print("res_temp: ", res_temp)
     return {"agent_outcome": Response(**res_temp)}
 
 
@@ -222,7 +221,15 @@ def create_vector_search_graph_agent() -> Runnable:
 
     workflow.add_conditional_edges(
         "agent",
-        router,
+        initial_router,
+        {
+            "Neo4jVectorSearch": "vector_search",
+            "error": "error",
+        },
+    )
+    workflow.add_conditional_edges(
+        "vector_search",
+        initial_router,
         {
             "Neo4jVectorSearch": "vector_search",
             "error": "error",
