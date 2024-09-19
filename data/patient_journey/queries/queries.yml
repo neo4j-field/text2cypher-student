@@ -1,5 +1,21 @@
 queries:
 
+  - question: What are the top 5 most common patient encounters
+    cql: |-
+      MATCH (e:Encounter)
+      WITH e.description as description, count(*) as count
+      ORDER BY count desc
+      RETURN description LIMIT 5
+
+  - question: What are the top 5 most common patient encounters that are not procedures
+    cql: |-
+      MATCH (e:Encounter)
+      WITH e.description as description, count(*) as count
+      ORDER BY count desc
+      WITH description
+      WHERE NOT toLower(description) CONTAINS "procedure"
+      RETURN description LIMIT 5
+
   - question: For patient (ID="f9437ac7"), get the patient's encounters (aka the patient journey or patient encounter journey) in order.
     cql: |-
       MATCH (p:Patient {id:"f9437ac7"})-[:HAS_ENCOUNTER]->(e)
