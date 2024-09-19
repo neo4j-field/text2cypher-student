@@ -16,6 +16,13 @@ queries:
       WHERE NOT toLower(description) CONTAINS "procedure"
       RETURN description LIMIT 5
 
+  - question: What are the 10 most commonly prescribed drugs for patients between ages of 30 and 40?
+    cql: |-
+      MATCH (e:Encounter) where e.patientAge >= 30 and e.patientAge <= 40
+      MATCH (e)-[:HAS_DRUG]->(d)
+      with d.description as drug, count(*) as ct order by ct desc
+      return drug, ct limit 10
+
   - question: For patient (ID="f9437ac7"), get the patient's encounters (aka the patient journey or patient encounter journey) in order.
     cql: |-
       MATCH (p:Patient {id:"f9437ac7"})-[:HAS_ENCOUNTER]->(e)
