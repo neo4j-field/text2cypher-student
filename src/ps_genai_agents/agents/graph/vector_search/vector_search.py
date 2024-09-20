@@ -6,6 +6,7 @@ import neo4j
 from langchain.agents import (
     create_openai_tools_agent,
 )
+from langchain_core.agents import AgentAction
 from langchain_core.runnables.base import Runnable
 from langchain_openai.chat_models import ChatOpenAI
 from langgraph.graph import END, StateGraph
@@ -85,38 +86,35 @@ def run_agent(data: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def vector_search_node(data: Dict[str, Any]) -> Dict[str, Any]:
-    print("> vector_search_node")
+    print("> vector search node")
     agent_action = data["agent_outcome"]
     print("agent action: ", len(agent_action), agent_action)
     intermediate_steps = []
-    sources = []
-    context = []
-    for idx, action in enumerate(agent_action):
-        print("action: ", action)
-        tool_call = action.message_log[-1].additional_kwargs["tool_calls"][idx]
-        tool_name = action.tool
-        print(tool_name)
-        print(tool_call)
+    tool_params = agent_action[0].tool_input
 
-        output = execute_vector_search(
-            query=json.loads(tool_call["function"]["arguments"])
-        )
-        sources.append(output["sources"])
-        context.append(output["context"])
-
-        intermediate_steps.append(output["intermediate_steps"][0])
-        print(output)
-        print()
-
+    output = execute_vector_search(tool_params)
+    intermediate_steps.append(output["intermediate_steps"][0])
+    agent_outcome = (
+        agent_action[1:]
+        if len(agent_action) > 1
+        else [
+            AgentAction(
+                tool="final_answer",
+                tool_input="",
+                log="No more actions to perform. Moving to summarization step.",
+            )
+        ]
+    )
     return {
+        "agent_outcome": agent_outcome,
         "intermediate_steps": intermediate_steps,
-        "sources": sources,
-        "context": context,
+        "sources": output.get("sources"),
+        "context": output.get("context"),
     }
 
 
-def execute_vector_search(query: str) -> Dict[str, Any]:
-    invocation = ToolInvocation(tool="Neo4jVectorSearch", tool_input=query)
+def execute_vector_search(params: Dict[str, Any]) -> Dict[str, Any]:
+    invocation = ToolInvocation(tool="Neo4jVectorSearch", tool_input=params)
     output = tool_executor.invoke(invocation)
 
     return {
@@ -126,20 +124,15 @@ def execute_vector_search(query: str) -> Dict[str, Any]:
     }
 
 
-def initial_router(data: Dict[str, Any]) -> str:
+def router(data: Dict[str, Any]) -> str:
     print("> router")
     if isinstance(data["agent_outcome"], list):
-        return "Neo4jVectorSearch"
-    else:
-        return "error"
-
-
-def main_router(data: Dict[str, Any]) -> str:
-    print("> router")
-    if isinstance(data["agent_outcome"], list):
-        return "Neo4jVectorSearch"
-    else:
-        return "error"
+        next_action = data["agent_outcome"][0]
+        if isinstance(next_action, AgentAction):
+            return str(next_action.tool)
+        elif isinstance(next_action, str):
+            return next_action
+    return "error"
 
 
 def final_answer(data: Dict[str, Any]) -> Dict[str, Any]:
@@ -221,7 +214,7 @@ def create_vector_search_graph_agent() -> Runnable:
 
     workflow.add_conditional_edges(
         "agent",
-        initial_router,
+        router,
         {
             "Neo4jVectorSearch": "vector_search",
             "error": "error",
@@ -229,13 +222,14 @@ def create_vector_search_graph_agent() -> Runnable:
     )
     workflow.add_conditional_edges(
         "vector_search",
-        initial_router,
+        router,
         {
             "Neo4jVectorSearch": "vector_search",
             "error": "error",
+            "final_answer": "final_answer",
         },
     )
-    workflow.add_edge("vector_search", "final_answer")
+    # workflow.add_edge("vector_search", "final_answer")
     workflow.add_edge("error", END)
     workflow.add_edge("final_answer", END)
 

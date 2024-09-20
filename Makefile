@@ -14,6 +14,7 @@ test_unit:
 
 init:
 	poetry install --with dev, ui
+	poetry run pip install --upgrade https://github.com/neo4j/neo4j-graphrag-python/tarball/master
 	pre-commit install
 	poetry run python3 -m pip install -U --no-cache-dir  \
             --config-settings="--global-option=build_ext" \

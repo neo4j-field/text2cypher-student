@@ -7,6 +7,7 @@ from langchain.agents import (
     create_openai_tools_agent,
 )
 from langchain.tools import tool
+from langchain_core.agents import AgentAction
 from langchain_core.runnables.base import Runnable
 
 # from services.llms import get_openai_chat_llm
@@ -15,7 +16,7 @@ from langchain_openai.chat_models import ChatOpenAI
 from langgraph.graph import END, StateGraph
 from langgraph.prebuilt.tool_executor import ToolExecutor, ToolInvocation
 from neo4j import GraphDatabase
-from neo4j_genai.schema import get_schema
+from neo4j_graphrag.schema import get_schema
 
 from ....prompts import (
     create_agent_prompt,
@@ -53,7 +54,7 @@ text2cypher_prompt = create_cypher_prompt(
 )
 
 text2cypher_tool = create_neo4j_text2cypher_tool(
-    driver=driver, llm=chat_llm, custom_prompt="text2cypher_prompt"
+    driver=driver, llm=chat_llm, custom_prompt=text2cypher_prompt
 )
 tools = [text2cypher_tool]
 
@@ -102,47 +103,50 @@ def agent(data: Any) -> Dict[str, Any]:
 
 
 # # Define the function to execute tools
-def multitool_node(data: Any) -> Dict[str, Any]:
+def text2cypher_node(data: Dict[str, Any]) -> Dict[str, Any]:
     # Get the most recent agent_outcome - this is the key added in the `agent` above
 
-    print("> multitool_node")
+    print("> text2cypher node")
     agent_action = data["agent_outcome"]
     print("agent action: ", len(agent_action), agent_action)
     intermediate_steps = list()
-    cypher: List[str] = list()
-    cypher_result: List[str] = list()
+    # cypher: List[str] = list()
+    # cypher_result: List[str] = list()
 
-    for idx, action in enumerate(agent_action):
-        print("action: ", action)
-        tool_call = action.message_log[-1].additional_kwargs["tool_calls"][idx]
-        tool_name = action.tool
-        print(tool_name)
-        print(tool_call)
+    tool_params = agent_action[0].tool_input
 
-        output = execute_text2cypher(
-            query=json.loads(tool_call["function"]["arguments"])
-        )
-        cypher.append(output["cypher"])
-        cypher_result.append(output["cypher_result"])
+    output = execute_text2cypher(tool_params)
+    intermediate_steps.append(output["intermediate_steps"][0])
+    agent_outcome = (
+        agent_action[1:]
+        if len(agent_action) > 1
+        else [
+            AgentAction(
+                tool="final_answer",
+                tool_input="",
+                log="No more actions to perform. Moving to summarization step.",
+            )
+        ]
+    )
 
-        intermediate_steps.append(output["intermediate_steps"][0])
-        print(output)
-        print()
+    print(output)
+    print()
 
     return {
+        "agent_outcome": agent_outcome,
         "intermediate_steps": intermediate_steps,
-        "cypher": cypher,
-        "cypher_result": cypher_result,
+        "cypher": output.get("cypher"),
+        "cypher_result": output.get("cypher_result"),
     }
 
 
-def execute_text2cypher(query: str) -> Dict[str, Any]:
+def execute_text2cypher(params: Dict[str, Any]) -> Dict[str, Any]:
     retries: int = 0
     output: Dict[str, Any] = {"result": list()}
     while retries < 2 and not output["result"]:
-        print("query: ", query)
-        invocation = ToolInvocation(tool="Text2Cypher", tool_input=query)
-        output = tool_executor.invoke(invocation)
+        print("params: ", params)
+        invocation = ToolInvocation(tool="Text2Cypher", tool_input=params)
+        # output = tool_executor.invoke(invocation)
 
         try:
             retries += 1
@@ -154,10 +158,10 @@ def execute_text2cypher(query: str) -> Dict[str, Any]:
 
         if not output["result"]:
             print()
-            print("current Cypher query: ", query)
+            print("current Cypher query: ", params.get("query"))
             print(output)
             print()
-            query = f"""
+            params["query"] = f"""
 The following Cypher is not accurate. Fix the errors and return valid Cypher.
 {str(output['intermediate_steps'][-1]['query'])}
 
@@ -174,29 +178,26 @@ Consider the following fixes:
     }
 
 
-def text2cypher_node(data: Any) -> Dict[str, Any]:
-    # Get the most recent agent_outcome - this is the key added in the `agent` above
+# def text2cypher_node(data: Any) -> Dict[str, Any]:
+#     # Get the most recent agent_outcome - this is the key added in the `agent` above
 
-    print("> text2cypher_node")
-    agent_action = data["agent_outcome"]
-    tool_call = agent_action[-1].message_log[-1].additional_kwargs["tool_calls"][-1]
+#     print("> text2cypher_node")
+#     agent_action = data["agent_outcome"]
+#     tool_call = agent_action[-1].message_log[-1].additional_kwargs["tool_calls"][-1]
 
-    return execute_text2cypher(query=json.loads(tool_call["function"]["arguments"]))
+#     return execute_text2cypher(query=json.loads(tool_call["function"]["arguments"]))
 
 
 # Define logic that will be used to determine which conditional edge to go down
-def router(data: Any) -> str:
+def router(data: Dict[str, Any]) -> str:
     print("> router")
     if isinstance(data["agent_outcome"], list):
-        print("tools in order: ", [x.tool for x in data["agent_outcome"]])
-        if len(data["agent_outcome"]) > 1:
-            return "multi_tool"
-
-        task = data["agent_outcome"][-1]
-        print("routing to: ", task.tool)
-        return str(task.tool)
-    else:
-        return "error"
+        next_action = data["agent_outcome"][0]
+        if isinstance(next_action, AgentAction):
+            return str(next_action.tool)
+        elif isinstance(next_action, str):
+            return next_action
+    return "error"
 
 
 # this forced final_answer LLM call will be used to structure output from our
@@ -294,7 +295,6 @@ def create_text2cypher_graph_agent() -> Runnable:
 
     workflow.add_node("agent", agent)
     workflow.add_node("text2cypher", text2cypher_node)
-    workflow.add_node("multi_tool", multitool_node)
     workflow.add_node("error", handle_error)
     workflow.add_node("final_answer", final_answer)
 
@@ -305,13 +305,19 @@ def create_text2cypher_graph_agent() -> Runnable:
         router,
         {
             "Text2Cypher": "text2cypher",
-            "multi_tool": "multi_tool",
             "error": "error",
         },
     )
+    workflow.add_conditional_edges(
+        "text2cypher",
+        router,
+        {
+            "Text2Cypher": "text2cypher",
+            "error": "error",
+            "final_answer": "final_answer",
+        },
+    )
 
-    workflow.add_edge("text2cypher", "final_answer")
-    workflow.add_edge("multi_tool", "final_answer")
     workflow.add_edge("error", END)
     workflow.add_edge("final_answer", END)
 

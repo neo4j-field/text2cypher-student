@@ -6,8 +6,8 @@ from typing import Any, Callable, Dict, List, Optional
 
 from langchain.tools import tool
 from neo4j import Driver
-from neo4j_genai.llm import LLMInterface
-from neo4j_genai.retrievers import Text2CypherRetriever
+from neo4j_graphrag.llm import LLMInterface
+from neo4j_graphrag.retrievers import Text2CypherRetriever
 
 
 def create_neo4j_text2cypher_tool(
@@ -45,7 +45,7 @@ def create_neo4j_text2cypher_tool(
     ), "Please provide `schema` and `examples` args or `custom_prompt` arg to `create_neo4j_text2cypher_tool` function."
 
     @tool("Text2Cypher", return_direct=False)  # type: ignore[misc]
-    def text2cypher(query: str, top_k: int = 100) -> Dict[str, Any]:
+    def text2cypher(query: str) -> Dict[str, Any]:
         """
         * Use only for:
             - Answering questions about summaries of verbatims.
@@ -64,7 +64,7 @@ def create_neo4j_text2cypher_tool(
             examples=examples,
             custom_prompt=custom_prompt,
         )
-        result = retriever.search(query_text=query, top_k=top_k)
+        result = retriever.search(query_text=query)
         return {"result": result.items, "cypher": result.metadata.get("cypher")}
 
     return text2cypher
