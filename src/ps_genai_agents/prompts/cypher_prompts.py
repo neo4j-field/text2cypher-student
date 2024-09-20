@@ -41,10 +41,12 @@ def create_cypher_prompt(
     * Do not use EXISTS in the cypher. Use alias when using the WITH keyword
     * Only use SIZE when checking the size of a list
     * Use only Nodes and relationships mentioned in the schema
-    * Always enclose the Cypher output inside 3 backticks (```)
     * Always do a case-insensitive and fuzzy search for any properties related search. Eg: to search for a Company name use `toLower(c.name) contains 'neo4j'`
     * Cypher is NOT SQL. So, do not mix and match the syntaxes
     * Ensure that null results are filtered out before running aggregations!
+    * Do not include any header
+    * Do not wrap in backticks (```)
+    * Return only Cypher
     </instructions>
 
     Strictly use this Schema for Cypher generation:
@@ -59,7 +61,7 @@ def create_cypher_prompt(
 
     suffix = """</samples>
 
-    Human: {question}
+    Human: {query_text}
     Assistant:
     """
 

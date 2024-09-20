@@ -7,6 +7,8 @@ from typing import Dict, List
 
 import yaml
 
+from .formatters import format_curly_braces
+
 
 def get_example_queries(file_path: str) -> List[Dict[str, str]]:
     """
@@ -20,19 +22,9 @@ def get_example_queries(file_path: str) -> List[Dict[str, str]]:
             print(exc)
 
     return [
-        {"human": q["question"], "assistant": _format_cypher_for_example(q["cql"])}
+        {"human": q["question"], "assistant": format_curly_braces(q["cql"])}
         for q in queries
     ]
-
-
-def _format_cypher_for_example(cypher: str) -> str:
-    """
-    Formats Cypher for use in LangChain's Example Templates.
-    This involves replacing '{' with '{{' and '}' with '}}'.
-    """
-
-    cypher = cypher.replace("{", "{{")
-    return cypher.replace("}", "}}")
 
 
 def get_evaluation_queries(file_path: str) -> List[Dict[str, str]]:
