@@ -5,9 +5,10 @@ This file contains the Text2Cypher tool used in the Agent architecture.
 from typing import Any, Callable, Dict, List, Optional
 
 from langchain.tools import tool
-from neo4j import Driver
+from neo4j import Driver, Record
 from neo4j_graphrag.llm import LLMInterface
 from neo4j_graphrag.retrievers import Text2CypherRetriever
+from neo4j_graphrag.types import RetrieverResultItem
 
 
 def create_neo4j_text2cypher_tool(
@@ -16,6 +17,7 @@ def create_neo4j_text2cypher_tool(
     schema: Optional[str] = None,
     examples: Optional[List[str]] = None,
     custom_prompt: Optional[str] = None,
+    result_formatter: Optional[Callable[[Record], RetrieverResultItem]] = None,
 ) -> Any:
     """
     Create a Text2Cypher tool.
@@ -33,6 +35,8 @@ def create_neo4j_text2cypher_tool(
         example : ['Human: How many nodes are there?\\nAssistant: MATCH (n) RETURN COUNT(*)']
     custom_prompt : Optional[str], optional
         A custom prompt to use for Cypher generation. Will overwrite any schema or examples provided.
+    result_formatter : Optional[Callable[[Record], RetrieverResultItem]], optional
+        A function that defines how a neo4j.Record should be parsed.
 
     Returns
     -------
@@ -63,8 +67,12 @@ def create_neo4j_text2cypher_tool(
             neo4j_schema=schema,
             examples=examples,
             custom_prompt=custom_prompt,
+            result_formatter=result_formatter,
         )
         result = retriever.search(query_text=query)
-        return {"result": result.items, "cypher": result.metadata.get("cypher")}
+        return {
+            "result": [x.content.data() for x in result.items],
+            "cypher": [result.metadata.get("cypher")],
+        }
 
     return text2cypher

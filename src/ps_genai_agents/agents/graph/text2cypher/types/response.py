@@ -40,17 +40,21 @@ Question:
 {self.question}
 """
         if self.sub_questions:
-            q = ""
+            questions = ""
             for q in self.sub_questions:
-                q += "\n"
+                questions += q + "\n"
             base += f"""
 Sub Questions:
-{q}
+{questions}
             """
 
         if self.cypher:
+            cyphers = ""
+            for c in self.cypher:
+                cyphers += c + "\n\n"
             base += f"""
-Cypher: {self.cypher}
+Cypher:
+{cyphers}
 
 Cypher Result:
 {self.cypher_result}

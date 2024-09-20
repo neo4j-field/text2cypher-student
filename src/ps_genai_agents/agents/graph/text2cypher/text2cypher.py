@@ -1,79 +1,59 @@
-import json
 import os
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Union
 
 from langchain.agents import (
-    AgentExecutor,
     create_openai_tools_agent,
 )
-from langchain.tools import tool
 from langchain_core.agents import AgentAction
 from langchain_core.runnables.base import Runnable
-
-# from services.llms import get_openai_chat_llm
-# from neo4j_genai.llm import OpenAILLM
 from langchain_openai.chat_models import ChatOpenAI
 from langgraph.graph import END, StateGraph
 from langgraph.prebuilt.tool_executor import ToolExecutor, ToolInvocation
-from neo4j import GraphDatabase
+from neo4j import GraphDatabase, Record
 from neo4j_graphrag.schema import get_schema
+from neo4j_graphrag.types import RetrieverResultItem
 
 from ....prompts import (
     create_agent_prompt,
     create_cypher_prompt,
     create_final_summary_prompt_without_lists,
 )
-
-# from tools import (
-#     final_answer_tool,
-#     get_openai_neo4j_vector_search_tool,
-#     get_openai_text2cypher_tool,
-# )
+from ....prompts.formatters import format_curly_braces
 from ....tools import create_neo4j_text2cypher_tool
-
-# from agents import create_gpt_4o_tools_agent
-# from chains import get_cypher_chain, get_vector_chain
-# from database import get_neo4j_graph, get_neo4j_vectorstore
 from .state import AgentState
 from .types.response import Response
 
-# chat_llm = OpenAILLM(model_name="gpt-4o")
 chat_llm = ChatOpenAI(model="gpt-4o")
 driver = GraphDatabase.driver(
     uri=os.environ.get("NEO4J_URI", ""),
     auth=(os.environ.get("NEO4J_USERNAME"), os.environ.get("NEO4J_PASSWORD")),
 )
 
-# neo4j_vector_search = get_openai_neo4j_vector_search_tool()
-# text2cypher = get_openai_text2cypher_tool()
-
-# tools = [neo4j_vector_search, text2cypher]
 text2cypher_prompt = create_cypher_prompt(
-    graph_schema=get_schema(driver=driver),
+    graph_schema=format_curly_braces(get_schema(driver=driver)),
     examples_yaml_path="../data/iqs/queries/queries.yml",
 )
 
+
+def record_formatter(record: Record) -> RetrieverResultItem:
+    """
+    Define how the returned Neo4j Record is parsed.
+    """
+    return RetrieverResultItem(content=record, metadata=record.get("metadata"))
+
+
 text2cypher_tool = create_neo4j_text2cypher_tool(
-    driver=driver, llm=chat_llm, custom_prompt=text2cypher_prompt
+    driver=driver,
+    llm=chat_llm,
+    custom_prompt=text2cypher_prompt,
+    result_formatter=record_formatter,
 )
 tools = [text2cypher_tool]
 
-# agent_runnable = create_gpt_4o_tools_agent(chat_llm=chat_llm, tools=tools)
 agent_prompt = create_agent_prompt()
 agent_runnable = create_openai_tools_agent(
     prompt=agent_prompt, llm=chat_llm, tools=tools
 )
-# text2cypher_agent_runnable = create_gpt_4o_tools_agent(
-#     chat_llm=chat_llm, tools=[text2cypher]
-# )
-
-
-# def get_sources(tool_execution_result: Dict[str, Any]) -> List[str]:
-#     if "source_documents" not in tool_execution_result:
-#         return []
-
-#     return [doc.metadata["source"] for doc in tool_execution_result["source_documents"]]
-
 
 # -----------
 # NODES
@@ -92,7 +72,6 @@ def agent(data: Any) -> Dict[str, Any]:
     agent_outcome = agent_runnable.invoke(data)
     for x in agent_outcome:
         print(x)
-    # print([x.tool_input["query"] for x in agent_outcome])
     return {
         "agent_outcome": agent_outcome,
         "sub_questions": [
@@ -110,8 +89,6 @@ def text2cypher_node(data: Dict[str, Any]) -> Dict[str, Any]:
     agent_action = data["agent_outcome"]
     print("agent action: ", len(agent_action), agent_action)
     intermediate_steps = list()
-    # cypher: List[str] = list()
-    # cypher_result: List[str] = list()
 
     tool_params = agent_action[0].tool_input
 
@@ -146,7 +123,6 @@ def execute_text2cypher(params: Dict[str, Any]) -> Dict[str, Any]:
     while retries < 2 and not output["result"]:
         print("params: ", params)
         invocation = ToolInvocation(tool="Text2Cypher", tool_input=params)
-        # output = tool_executor.invoke(invocation)
 
         try:
             retries += 1
@@ -173,19 +149,9 @@ Consider the following fixes:
 
     return {
         "intermediate_steps": [{"Text2Cypher", str(output)}],
-        "cypher": output["intermediate_steps"][-1]["query"],
-        "cypher_result": output["result"],
+        "cypher": output.get("cypher"),
+        "cypher_result": output.get("result"),
     }
-
-
-# def text2cypher_node(data: Any) -> Dict[str, Any]:
-#     # Get the most recent agent_outcome - this is the key added in the `agent` above
-
-#     print("> text2cypher_node")
-#     agent_action = data["agent_outcome"]
-#     tool_call = agent_action[-1].message_log[-1].additional_kwargs["tool_calls"][-1]
-
-#     return execute_text2cypher(query=json.loads(tool_call["function"]["arguments"]))
 
 
 # Define logic that will be used to determine which conditional edge to go down
@@ -223,7 +189,6 @@ def final_answer(data: Any) -> Dict[str, Any]:
         "question": query,
         "sub_questions": data["sub_questions"] if "sub_questions" in data else None,
     }
-    # print("res_temp: ", res_temp)
     return {"agent_outcome": Response(**res_temp)}
 
 
