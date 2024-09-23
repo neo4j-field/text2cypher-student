@@ -68,6 +68,7 @@ loading_queries:
             e.baseCost=toFloat(row.BASE_ENCOUNTER_COST),
             e.claimCost=toFloat(row.TOTAL_CLAIM_COST),
             e.coveredAmount=toFloat(row.PAYER_COVERAGE),
+            e.reasonDescription=row.REASONDESCRIPTION,
             e.isEnd=false
         FOREACH (ignore in CASE WHEN row.STOP IS NOT NULL AND row.STOP <> '' THEN [1] ELSE [] END |
           SET e.end=datetime(row.STOP)
@@ -185,7 +186,7 @@ loading_queries:
         WITH $rows as rows UNWIND rows as row
         MERGE (p:Patient {id:row.PATIENT})
         MERGE (d:Drug {code:row.CODE})
-        SET d.description=row.DESCRIPTION
+        SET d.description=row.DESCRIPTION, d.reasonDescription=row.REASONDESCRIPTION
         MERGE (ps:Encounter {id:row.ENCOUNTER})
         ON CREATE
           SET ps.code=row.CODE, ps.date=datetime(row.START), ps.class='assertfalse'
@@ -227,7 +228,7 @@ loading_queries:
         MATCH (p:Patient {id:row.PATIENT})
         MATCH (oe:Encounter {id:row.ENCOUNTER})
         MERGE (oe)-[:HAS_OBSERVATION]->(o:Observation)
-        SET o += attr
+        SET o += attr, o.description=row.DESCRIPTION, o.category=row.CATEGORY
 
     CarePlans:
       # skip: true
@@ -238,7 +239,7 @@ loading_queries:
         WITH $rows as rows UNWIND rows as row
         MATCH (p:Patient {id:row.PATIENT})
         MERGE (c:CarePlan {code:row.CODE})
-        SET c.description=row.DESCRIPTION
+        SET c.description=row.DESCRIPTION, c.reasonDescription=row.REASONDESCRIPTION
         MERGE (cs:Encounter {id:row.ENCOUNTER})
         ON CREATE
           SET cs.code=row.CODE, cs.date=datetime(row.START), cs.class='assertfalse'
@@ -265,6 +266,7 @@ loading_queries:
 
 post_ingest:
   # Create NEXT relationship between encounters of a patient
+  # todo change first statement to return id(node)
   - |
     CALL apoc.periodic.iterate(
     'MATCH (p)-[:HAS_ENCOUNTER]->(e)
@@ -282,6 +284,7 @@ post_ingest:
     'MERGE (first)-[:NEXT]->(second)',{});
 
   # Pre-compute patient counts for each Condition
+  # todo change first statement to return id(node)
   - |
     CALL apoc.periodic.iterate('MATCH (c:Condition) RETURN c',
       'MATCH (c)<-[:HAS_CONDITION]-(:Encounter)<-[:HAS_ENCOUNTER]-(p:Patient)
@@ -298,15 +301,21 @@ post_ingest:
       {}
     )
 
-  ##### OLD
+  # # todo embedding
   # - |
-  #   CALL apoc.periodic.iterate(
-  #   'MATCH (p:Patient) RETURN p',
-  #   'MATCH (p)-[:HAS_ENCOUNTER]->(e)
-  #   WITH e
-  #   ORDER BY e.date
-  #   WITH collect(e) AS encounters
-  #   WITH encounters, encounters[1..] as nextEncounters
-  #   UNWIND range(0,size(nextEncounters)-1,1) as index
-  #   WITH encounters[index] as first, nextEncounters[index] as second
-  #   CREATE (first)-[:NEXT]->(second)',{iterateList:false});
+  #   MATCH (v:Verbatim)
+  #     WHERE v.verbatim <> ''
+  #   WITH collect(v) AS verbatimList,
+  #       count(*) AS total,
+  #       100 AS batchSize
+  #   UNWIND range(0, total, batchSize) AS batchStart
+  #   CALL {
+  #     WITH verbatimList,
+  #       batchStart,
+  #       batchSize
+  #     WITH verbatimList,
+  #       batchStart,
+  #       [v IN verbatimList [batchStart .. batchStart + batchSize] |'Vehicle: '|| v.make + ' ' + v.model ||' | Category: '|| [(v)-[:HAS_CATEGORY]->(c:Category) | c.id][0] ||' | Problem: '||[(v)-[:HAS_PROBLEM]->(p:Problem) | p.problem][0] || ' | Question: ' ||[(v)-[:HAS_QUESTION]->(q:Question) | q.question][0] ||' | Survey Verbatim Response: '||v.verbatim] AS batch
+  #     CALL genai.vector.encodeBatch(batch, 'OpenAI', { token: $key }) YIELD index, vector
+  #     CALL db.create.setNodeVectorProperty(verbatimList[batchStart + index], 'adaEmbedding', vector)
+  #   } IN TRANSACTIONS OF 1 ROW
