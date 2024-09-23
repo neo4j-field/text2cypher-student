@@ -23,7 +23,63 @@ queries:
       with d.description as drug, count(*) as ct order by ct desc
       return drug, ct limit 10
 
-  - question: For patient (ID="f9437ac7"), get the patient's encounters (aka the patient journey or patient encounter journey) in order.
+  # - question: How often do encounters for problems or symptoms lead to drugs being prescribed?
+  #   cql: |-
+
+  # - question: what medical procedures are folowed after diagnosis with disease
+
+  # - question: how effect procedures are
+
+  - question: How often on average to patients in their 20s see the doctor?
+    cql: |-
+      MATCH (e:Encounter) where e.patientAge >= 20 and e.patientAge < 30
+      MATCH (p)-[:HAS_ENCOUNTER]->(e)
+      WITH p, count(e) as numEncounters
+      RETURN avg(numEncounters) as averageNumberOfEncounters
+
+  - question: What is average age most patients receive their first diagnoses?
+    cql: |-
+      MATCH (p)-[:HAS_ENCOUNTER]->(e)-[:HAS_CONDITION]->()
+      WITH p, e order by e.date asc
+      WITH p, collect(e)[0] as firstDiagEnc
+      WITH firstDiagEnc
+      MATCH (firstDiagEnc)-[:HAS_CONDITION]->(c)
+      RETURN toInteger(avg(firstDiagEnc.patientAge)) as averageDiagnosisAge
+
+  - question: In the cohort of patients above 50, what proportion of total diagnoses do their top 5 diagnoses make up?
+    cql: |-
+      MATCH (e:Encounter)-[:HAS_CONDITION]->(c)
+      WHERE e.patientAge > 50
+      WITH count(c) as total
+      MATCH (e:Encounter)-[:HAS_CONDITION]->(c)
+      WHERE e.patientAge > 50
+      WITH total, c.description as condition, count(*) as cnt order by cnt desc
+      WITH total, condition, cnt limit 5
+      WITH sum(cnt) as top5Count, total
+      RETURN toFloat(top5Count) / toFloat(total) as percentDiagnosed
+
+
+  # - question: patient has an address
+  #   cql: |-
+
+  # - question: organization has an address, or anything with address
+  #   cql: |-
+
+  # - question:
+  #   cql: |-
+
+  # - question: ""
+  #   cql: |-
+
+  # - question: ""
+  #   cql: |-
+
+  # - question: ""
+  #   cql: |-
+
+
+
+  - question: For patient id f9437ac7, get the patient's encounters in order.
     cql: |-
       MATCH (p:Patient {id:"f9437ac7"})-[:HAS_ENCOUNTER]->(e)
       WHERE apoc.node.degree.in(e,'NEXT') = 0
@@ -34,7 +90,7 @@ queries:
       unwind encounters as e
       return e.class as encounterType, e.description as encounterDescription, e.date as startDate, e.end as endDate
 
-  - question: For patient with ID="26ec7fd0," what is the patient's encounter journey and return back all the related Events in order.
+  - question: For patient id 26ec7fd0, what is the patient's encounter journey and return back all the related events in order.
     cql: |-
       MATCH (p:Patient {id:"26ec7fd0"})-[:HAS_ENCOUNTER]->(e)
       WHERE apoc.node.degree.in(e, 'NEXT') = 0
@@ -44,8 +100,7 @@ queries:
       RETURN labels(x)[0] AS eventType, x.description AS name,
           e2.date AS startDate,coalesce(end.date, 'NA') AS endDate
 
-  # todo keep patients ehre?
-  - question: What are the Encounters in which an Allergy ceased to be present. Get all the related drugs taken by patients prior to the allergy ending.
+  - question: What are the encounters in which an Allergy ceased to be present. Get all the related drugs taken by patients prior to the allergy ending.
     cql: |-
       MATCH (a:Allergy)<-[:HAS_ALLERGY]-(e)-[:HAS_END]->(),
           (e)<-[:HAS_ENCOUNTER]-(patient)
@@ -67,8 +122,3 @@ queries:
       ORDER by cnt desc
       WITH drug, collect(condition) as conditions
       RETURN drug, conditions[1..5] as top5Conditions
-
-
-  # - question: what medical procedures are folowed after diagnosis with disease
-
-  # - question: how effect procedures are
