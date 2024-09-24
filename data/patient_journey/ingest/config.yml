@@ -37,7 +37,7 @@ pre_ingest:
   - CREATE CONSTRAINT constraint_Allergy_id IF NOT EXISTS FOR (n:Allergy) REQUIRE n.code IS UNIQUE
   - CREATE CONSTRAINT constraint_Address_id IF NOT EXISTS FOR (n:Address) REQUIRE n.address IS UNIQUE
   - CREATE CONSTRAINT constraint_Procedure_id IF NOT EXISTS FOR (n:Procedure) REQUIRE n.code IS UNIQUE
-  - "CREATE VECTOR INDEX adaEmbeddings IF NOT EXISTS FOR (e:Encounter) ON e.adaEmbeddings OPTIONS {indexConfig: {`vector.dimensions`: 1536,`vector.similarity_function`: 'cosine'}}"
+  - "CREATE VECTOR INDEX adaEmbeddings IF NOT EXISTS FOR (e:Encounter) ON e.adaEmbedding OPTIONS {indexConfig: {`vector.dimensions`: 1536,`vector.similarity_function`: 'cosine'}}"
 
 loading_queries:
   nodes:
@@ -332,22 +332,3 @@ embedding_queries:
         CALL genai.vector.encodeBatch(batch, 'OpenAI', { token: $key }) YIELD index, vector
         CALL db.create.setNodeVectorProperty(encounters[batchStart + index], 'adaEmbedding', vector)
     } IN TRANSACTIONS OF 1 ROW
-
-  # # original
-  # - |
-  #   MATCH (v:Verbatim)
-  #     WHERE v.verbatim <> ''
-  #   WITH collect(v) AS verbatimList,
-  #       count(*) AS total,
-  #       100 AS batchSize
-  #   UNWIND range(0, total, batchSize) AS batchStart
-  #   CALL {
-  #     WITH verbatimList,
-  #       batchStart,
-  #       batchSize
-  #     WITH verbatimList,
-  #       batchStart,
-  #       [v IN verbatimList [batchStart .. batchStart + batchSize] |'Vehicle: '|| v.make + ' ' + v.model ||' | Category: '|| [(v)-[:HAS_CATEGORY]->(c:Category) | c.id][0] ||' | Problem: '||[(v)-[:HAS_PROBLEM]->(p:Problem) | p.problem][0] || ' | Question: ' ||[(v)-[:HAS_QUESTION]->(q:Question) | q.question][0] ||' | Survey Verbatim Response: '||v.verbatim] AS batch
-  #     CALL genai.vector.encodeBatch(batch, 'OpenAI', { token: $key }) YIELD index, vector
-  #     CALL db.create.setNodeVectorProperty(verbatimList[batchStart + index], 'adaEmbedding', vector)
-  #   } IN TRANSACTIONS OF 1 ROW
