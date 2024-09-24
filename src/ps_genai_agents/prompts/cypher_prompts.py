@@ -1,6 +1,6 @@
 import warnings
 
-from langchain.prompts import FewShotPromptTemplate, PromptTemplate
+from langchain.prompts import PromptTemplate
 
 from .queries import get_example_queries
 
@@ -8,7 +8,7 @@ from .queries import get_example_queries
 def create_cypher_prompt(
     graph_schema: str,
     examples_yaml_path: str = "queries/queries.yml",
-) -> FewShotPromptTemplate:
+) -> str:
     """
     Construct the prompt template for text2cypher generation.
     This prompt should be used with the GraphCypherQAChain LangChain class.
@@ -65,13 +65,6 @@ def create_cypher_prompt(
     Assistant:
     """
 
-    # return FewShotPromptTemplate(
-    #     examples=examples,
-    #     example_prompt=example_prompt,
-    #     suffix=suffix,
-    #     input_variables=["question"],
-    #     prefix=prefix,
-    # )
     examples_str = ""
     for ex in examples:
         examples_str += example_prompt.format(**ex)

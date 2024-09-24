@@ -37,7 +37,7 @@ def create_neo4j_vector_search_tool(
         The tool.
     """
 
-    @tool("Neo4jVectorSearch", return_direct=False)  # type: ignore[misc]
+    @tool("Neo4jVectorSearch", return_direct=False)  # type: ignore
     def neo4j_vector_search(query: str, top_k: int = 3) -> Dict[str, Any]:
         """
         * Use only for:
