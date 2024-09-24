@@ -7,9 +7,9 @@ from langchain.agents import (
     create_openai_tools_agent,
 )
 from langchain_core.agents import AgentAction
-from langchain_core.runnables.base import Runnable
 from langchain_openai.chat_models import ChatOpenAI
 from langgraph.graph import END, StateGraph
+from langgraph.graph.graph import CompiledGraph
 from langgraph.prebuilt.tool_executor import ToolExecutor, ToolInvocation
 from neo4j import GraphDatabase
 from neo4j_genai.embeddings.openai import OpenAIEmbeddings
@@ -191,7 +191,7 @@ def handle_error(data: Dict[str, Any]) -> Dict[str, Any]:
 # -----------
 
 
-def create_vector_search_graph_agent() -> Runnable:
+def create_vector_search_graph_agent() -> CompiledGraph:
     """
     Create a Hybrid LangGraph agent using the OpenAI GPT-4o LLM.
     Tools include only Neo4jVectorSearch.

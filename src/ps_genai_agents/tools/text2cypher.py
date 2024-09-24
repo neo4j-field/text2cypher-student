@@ -48,7 +48,7 @@ def create_neo4j_text2cypher_tool(
         (schema is not None and examples is not None) or custom_prompt is not None
     ), "Please provide `schema` and `examples` args or `custom_prompt` arg to `create_neo4j_text2cypher_tool` function."
 
-    @tool("Text2Cypher", return_direct=False)  # type: ignore[misc]
+    @tool("Text2Cypher", return_direct=False)  # type: ignore
     def text2cypher(query: str) -> Dict[str, Any]:
         """
         * Use only for:

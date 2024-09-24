@@ -5,9 +5,9 @@ from langchain.agents import (
     create_openai_tools_agent,
 )
 from langchain_core.agents import AgentAction
-from langchain_core.runnables.base import Runnable
 from langchain_openai.chat_models import ChatOpenAI
 from langgraph.graph import END, StateGraph
+from langgraph.graph.graph import CompiledGraph
 from langgraph.prebuilt.tool_executor import ToolExecutor, ToolInvocation
 from neo4j import GraphDatabase, Record
 from neo4j_graphrag.schema import get_schema
@@ -246,7 +246,7 @@ def handle_error(data: Any) -> Dict[str, Response]:
     return {"agent_outcome": Response(**res_temp)}
 
 
-def create_text2cypher_graph_agent() -> Runnable:
+def create_text2cypher_graph_agent() -> CompiledGraph:
     """
     Create a Text2Cypher LangGraph agent using the OpenAI GPT-4o LLM.
 

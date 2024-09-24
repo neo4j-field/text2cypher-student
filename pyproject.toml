@@ -20,7 +20,7 @@ pyneoinstance = "^2.0.2"
 python = "^3.10"
 pyyaml = "^6.0.1"
 neo4j-runway = "^0.9.1"
-neo4j-genai = "^0.4.0"
+neo4j-graphrag = "^0.6.3"
 neo4j = "^5.23.1"
 
 [tool.poetry.group.dev.dependencies]
