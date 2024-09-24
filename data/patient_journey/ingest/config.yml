@@ -311,8 +311,7 @@ post_ingest:
 
 embedding_queries:
   - |
-    MATCH (e:Encounter)
-    OPTIONAL MATCH (e)-->(ev:Event)
+    MATCH (e:Encounter)-->(ev:Event)
     WITH e, [x in labels(ev) where x<>"Event"| x][0] as evType, ev.description as descr
     WITH e, evType, collect(descr) as descrs
     WITH e, evType, descrs, range(1,size(descrs)) as idxs
@@ -329,6 +328,6 @@ embedding_queries:
     CALL {
         WITH encounters, encDescs, batchStart, batchSize
         WITH encounters, batchStart, [x in encDescs[batchStart..batchStart+batchSize] | x] as batch
-        CALL genai.vector.encodeBatch(batch, 'OpenAI', { token: $key }) YIELD index, vector
+        CALL genai.vector.encodeBatch(batch, 'OpenAI', { token: $key, model: 'text-embedding-3-small' }) YIELD index, vector
         CALL db.create.setNodeVectorProperty(encounters[batchStart + index], 'adaEmbedding', vector)
     } IN TRANSACTIONS OF 1 ROW
