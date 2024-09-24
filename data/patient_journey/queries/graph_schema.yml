@@ -22,14 +22,15 @@ schema: |-
   (:Patient)-[:INSURANCE_START]->(:Payer)
   (:Patient)-[:INSURANCE_END]->(:Payer)
   (:Encounter)-[:NEXT]->(:Encounter)
-  (:Encounter)-[:HAS_END]->(:Encounter)
-  (:Encounter)-[:HAS_PROVIDER]->(:Organization)
-  (:Encounter)-[:HAS_CONDITION]->(:Condition)
-  (:Encounter)-[:HAS_PROCEDURE]->(:Procedure)
-  (:Encounter)-[:HAS_OBSERVATION]->(:Observation)
-  (:Encounter)-[:HAS_CARE_PLAN]->(:CarePlan)
-  (:Encounter)-[:HAS_ALLERGY]->(:Allergy)
-  (:Encounter)-[:HAS_DRUG]->(:Drug)
+  (:Encounter)-[:HAS_END]->(:EncounterEnd)
+  (:Encounter)-[:HAS_PROVIDER]->(:Provider)
+  (:Encounter)-[:HAS_ORGANIZATION]->(:Organization)
+  (:Encounter)-[:HAS_CONDITION]->(:Condition:Event)
+  (:Encounter)-[:HAS_PROCEDURE]->(:Procedure:Event)
+  (:Encounter)-[:HAS_OBSERVATION]->(:Observation:Event)
+  (:Encounter)-[:HAS_CARE_PLAN]->(:CarePlan:Event)
+  (:Encounter)-[:HAS_ALLERGY]->(:Allergy:Event)
+  (:Encounter)-[:HAS_DRUG]->(:Drug:Event)
   (:Encounter)-[:HAS_PAYER]->(:Payer)
   (:Provider)-[:BELONGS_TO]->(:Organization)
   (:Provider)-[:HAS_ADDRESS]->(:Address)
@@ -38,5 +39,5 @@ schema: |-
   Notes and context for the data model:
   * Encounters represent each encounter that a Patient has with a Provider. Each encounter is associated with an Event.
   * Events are either Condition, Procedure, Observation, CarePlan, Drug, or Allergy nodes.
-  * If an encounter has a HAS_END relationship to another Encounter, for example "(e1:Encounter)-[:HAS_END]->(e2:Encounter)", Encounter e2 represents the end-date of Encounter e1.
+  * If an encounter has a HAS_END relationship to EncounterEnd, for example "(e:Encounter)-[:HAS_END]->(ee:EncounterEnd)", EncounterEnd ee represents the end-date of Encounter e.
   * In this pattern, (e1:Encounter)-[:NEXT]->(e2:Encounter), e2 represents the next chronological Encounter the related Patient has had. The related Patient is represented by the "(:Patient)-[:HAS_ENCOUNTER]->(:Encounter)" pattern. A Patient Journey is essentially the linked list of Encounter-to-Encounter nodes.

@@ -37,6 +37,7 @@ pre_ingest:
   - CREATE CONSTRAINT constraint_Allergy_id IF NOT EXISTS FOR (n:Allergy) REQUIRE n.code IS UNIQUE
   - CREATE CONSTRAINT constraint_Address_id IF NOT EXISTS FOR (n:Address) REQUIRE n.address IS UNIQUE
   - CREATE CONSTRAINT constraint_Procedure_id IF NOT EXISTS FOR (n:Procedure) REQUIRE n.code IS UNIQUE
+  - "CREATE VECTOR INDEX adaEmbeddings IF NOT EXISTS FOR (e:Encounter) ON e.adaEmbeddings OPTIONS {indexConfig: {`vector.dimensions`: 1536,`vector.similarity_function`: 'cosine'}}"
 
 loading_queries:
   nodes:
@@ -295,13 +296,44 @@ post_ingest:
   # compute age of patient in each encountert
   - |
     CALL apoc.periodic.iterate(
-      'MATCH (:Patient)-[r:HAS_ENCOUNTER]->() return id(r) as id',
-      'MATCH (p)-[r]->(e) where id(r)=id WITH e, duration.inMonths(p.birthDate, e.date).months / 12 AS age
+      'MATCH (:Patient)-[r:HAS_ENCOUNTER]->() return id(r) as idr',
+      'MATCH (p)-[r]->(e) where id(r)=idr WITH e, duration.inMonths(p.birthDate, e.date).months / 12 AS age
        SET e.patientAge=age',
       {}
     )
 
-  # # todo embedding
+  - |
+    CALL apoc.periodic.iterate(
+      'MATCH (:Encounter)-[r:HAS_CONDITION|HAS_PROCEDURE|HAS_OBSERVATION|HAS_CARE_PLAN|HAS_ALLERGY|HAS_DRUG]->(event) RETURN id(r) as idr',
+      'MATCH ()-[r]->(event) where id(r)=idr SET event:Event',
+      {}
+    )
+
+embedding_queries:
+  - |
+    MATCH (e:Encounter)
+    OPTIONAL MATCH (e)-->(ev:Event)
+    WITH e, [x in labels(ev) where x<>"Event"| x][0] as evType, ev.description as descr
+    WITH e, evType, collect(descr) as descrs
+    WITH e, evType, descrs, range(1,size(descrs)) as idxs
+    WITH e, evType, descrs, (CASE idxs WHEN [] then [null] else idxs END) AS idxs
+    UNWIND idxs as i
+    WITH e, evType, collect(evType+i+": "+descrs[i-1]) as pfxDescrs
+    WITH e, evType, apoc.text.join(pfxDescrs, " | ") as descStr
+    WITH e, collect(descStr) as encDescrs
+    WITH e, apoc.text.join(encDescrs, " | ") as encDesc
+    with collect(e) as encounters, collect(encDesc) as encDescs
+    WITH encounters, encDescs, size(encounters) as total, 100 as batchSize
+    UNWIND range(0, total, batchSize) AS batchStart
+    WITH *
+    CALL {
+        WITH encounters, encDescs, batchStart, batchSize
+        WITH encounters, batchStart, [x in encDescs[batchStart..batchStart+batchSize] | x] as batch
+        CALL genai.vector.encodeBatch(batch, 'OpenAI', { token: $key }) YIELD index, vector
+        CALL db.create.setNodeVectorProperty(encounters[batchStart + index], 'adaEmbedding', vector)
+    } IN TRANSACTIONS OF 1 ROW
+
+  # # original
   # - |
   #   MATCH (v:Verbatim)
   #     WHERE v.verbatim <> ''
