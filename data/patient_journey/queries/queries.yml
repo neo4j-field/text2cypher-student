@@ -7,14 +7,22 @@ queries:
       ORDER BY count desc
       RETURN description LIMIT 5
 
-  - question: What are the top 5 most common patient encounters that are not procedures
+  - question: What are the top 5 most common patient encounters that did not involve a procedure
     cql: |-
       MATCH (e:Encounter)
+      WHERE NOT (e)-[:HAS_PROCEDURE]->()
       WITH e.description as description, count(*) as count
       ORDER BY count desc
       WITH description
       WHERE NOT toLower(description) CONTAINS "procedure"
       RETURN description LIMIT 5
+
+  - question: Get the distribution of all patient encounters by age cohort (20s, 30s, 40s, etc).
+    cql: |-
+      MATCH (e:Encounter)
+      WITH e.patientAge/10*10 as ageCohort
+      RETURN ageCohort, count(*) as cnt
+      ORDER BY ageCohort
 
   - question: What are the 10 most commonly prescribed drugs for patients between ages of 30 and 40?
     cql: |-
@@ -30,7 +38,7 @@ queries:
 
   # - question: how effect procedures are
 
-  - question: How often on average to patients in their 20s see the doctor?
+  - question: How often on average do patients in their 20s see the doctor?
     cql: |-
       MATCH (e:Encounter) where e.patientAge >= 20 and e.patientAge < 30
       MATCH (p)-[:HAS_ENCOUNTER]->(e)
@@ -40,10 +48,8 @@ queries:
   - question: What is average age most patients receive their first diagnoses?
     cql: |-
       MATCH (p)-[:HAS_ENCOUNTER]->(e)-[:HAS_CONDITION]->()
-      WITH p, e order by e.date asc
+      WITH p, e order by p.id, e.date asc
       WITH p, collect(e)[0] as firstDiagEnc
-      WITH firstDiagEnc
-      MATCH (firstDiagEnc)-[:HAS_CONDITION]->(c)
       RETURN toInteger(avg(firstDiagEnc.patientAge)) as averageDiagnosisAge
 
   - question: In the cohort of patients above 50, what proportion of total diagnoses do their top 5 diagnoses make up?
@@ -58,27 +64,6 @@ queries:
       WITH sum(cnt) as top5Count, total
       RETURN toFloat(top5Count) / toFloat(total) as percentDiagnosed
 
-
-  # - question: patient has an address
-  #   cql: |-
-
-  # - question: organization has an address, or anything with address
-  #   cql: |-
-
-  # - question:
-  #   cql: |-
-
-  # - question: ""
-  #   cql: |-
-
-  # - question: ""
-  #   cql: |-
-
-  # - question: ""
-  #   cql: |-
-
-
-
   - question: For patient id f9437ac7, get the patient's encounters in order.
     cql: |-
       MATCH (p:Patient {id:"f9437ac7"})-[:HAS_ENCOUNTER]->(e)
@@ -90,21 +75,39 @@ queries:
       unwind encounters as e
       return e.class as encounterType, e.description as encounterDescription, e.date as startDate, e.end as endDate
 
-  - question: For patient id 26ec7fd0, what is the patient's encounter journey and return back all the related events in order.
+  - question: What is the patient journey for patient id 26ec7fd0?
     cql: |-
-      MATCH (p:Patient {id:"26ec7fd0"})-[:HAS_ENCOUNTER]->(e)
-      WHERE apoc.node.degree.in(e, 'NEXT') = 0
-      WITH e
-      MATCH (e)-[:NEXT*]->(e2)-[:HAS_CONDITION|:HAS_DRUG|:HAS_CARE_PLAN|:HAS_ALLERGY|:HAS_PROCEDURE]->(x)
-      OPTIONAL MATCH (e2)-[:HAS_END]->(end)
-      RETURN labels(x)[0] AS eventType, x.description AS name,
-          e2.date AS startDate,coalesce(end.date, 'NA') AS endDate
+      MATCH (p:Patient {id:"26ec7fd0"})-[:HAS_ENCOUNTER]->()-[r]->(ev:Event)
+      WITH r, ev
+      ORDER BY r.date
+      RETURN [x in labels(ev) where x<>'Event' | x][0] AS eventType,
+        ev.description AS event,
+        r.date AS startDate,
+        r.end AS endDate
+
+  - question: For patient id 26ec7fd0, what is the 90-day patient journey after being diagnosed with a condition?
+    cql: |-
+      MATCH (p {id:"26ec7fd0"})-[:HAS_ENCOUNTER]->(e)-[r:HAS_CONDITION]->(c)
+      WITH p, e, r
+      ORDER BY r.date
+      WITH p, e LIMIT 1
+      MATCH (e)-[:NEXT*]->(e2)
+      OPTIONAL MATCH (e2)-[r]->(ev:Event)
+      with *
+      WHERE e2.date <  (e.date + duration('P90D'))
+      WITH p, e, r, ev
+      ORDER BY e.date, r.date
+      RETURN e.description as encounter,
+        [x in labels(ev) where x<>'Event' | x][0] AS eventType,
+        ev.description AS event,
+        r.date AS startDate,
+        r.end AS endDate
 
   - question: What are the encounters in which an Allergy ceased to be present. Get all the related drugs taken by patients prior to the allergy ending.
     cql: |-
-      MATCH (a:Allergy)<-[:HAS_ALLERGY]-(e)-[:HAS_END]->(),
-          (e)<-[:HAS_ENCOUNTER]-(patient)
-      WITH patient, a, e LIMIT 10
+      MATCH (a:Allergy)<-[r:HAS_ALLERGY]-(e)<-[:HAS_ENCOUNTER]-(patient)
+      WHERE r.end IS NOT NULL
+      WITH patient, a, e
       MATCH p=(e0)-[:NEXT*]->(e)
       WITH patient, a, nodes(p) AS nodes
       UNWIND nodes AS tempe

@@ -6,38 +6,49 @@ admin_pass: neo4j123
 # data_directory: /Users/henrylin/dev/patient-journey-model/import/synthea100
 # data_version: v2
 
-# database: synthea1k
-# data_directory: /Users/henrylin/dev/patient-journey-model/import/synthea1k
+# database: synthea100v2
+# data_directory: /Users/henrylin/dev/patient-journey-model/import/synthea100
 # data_version: v2
 
-database: coherent
+# database: coherent
+# data_directory: /Users/henrylin/dev/patient-journey-model/import/coherent20221107/csv
+# data_version: v1
+
+database: coherentv2
 data_directory: /Users/henrylin/dev/patient-journey-model/import/coherent20221107/csv
 data_version: v1
-
-# database: synthea100def
-# data_directory: /Users/henrylin/dev/patient-journey-model/import/synthea100def/csv
-# data_version: v2
 
 # add unique constraint
 pre_ingest:
   - CREATE CONSTRAINT constraint_encounter_id IF NOT EXISTS FOR (n:Encounter) REQUIRE n.id IS UNIQUE
   - CREATE INDEX IF NOT EXISTS FOR (n:Encounter) ON (n.date)
   - CREATE INDEX IF NOT EXISTS FOR (n:Encounter) ON (n.isEnd)
-  - CREATE CONSTRAINT constraint_encounterEnd_id IF NOT EXISTS FOR (n:EncounterEnd) REQUIRE n.id IS UNIQUE
-  - CREATE INDEX IF NOT EXISTS FOR (n:EncounterEnd) ON (n.date)
-  - CREATE INDEX IF NOT EXISTS FOR (n:EncounterEnd) ON (n.isEnd)
   - CREATE CONSTRAINT constraint_Patient_id IF NOT EXISTS FOR (n:Patient) REQUIRE n.id IS UNIQUE
   - CREATE CONSTRAINT constraint_Provider_id IF NOT EXISTS FOR (n:Provider) REQUIRE n.id IS UNIQUE
   - CREATE CONSTRAINT constraint_Payer_id IF NOT EXISTS FOR (n:Payer) REQUIRE n.id IS UNIQUE
   - CREATE CONSTRAINT constraint_Organization_id IF NOT EXISTS FOR (n:Organization) REQUIRE n.id IS UNIQUE
   - CREATE CONSTRAINT constraint_Drug_id IF NOT EXISTS FOR (n:Drug) REQUIRE n.code IS UNIQUE
   - CREATE CONSTRAINT constraint_Condition_id IF NOT EXISTS FOR (n:Condition) REQUIRE n.code IS UNIQUE
-  - CREATE CONSTRAINT constraint_CarePlan_id IF NOT EXISTS FOR (n:CarePlan) REQUIRE n.id IS UNIQUE
+  - CREATE CONSTRAINT constraint_CarePlan_id IF NOT EXISTS FOR (n:CarePlan) REQUIRE (n.code, n.description) IS UNIQUE
+  - CREATE CONSTRAINT constraint_EncounterToCarePlan_id IF NOT EXISTS FOR ()-[r:HAS_CARE_PLAN]-() REQUIRE r.id IS UNIQUE
+  - CREATE CONSTRAINT constraint_Observation_id IF NOT EXISTS FOR (n:Observation) REQUIRE n.code IS UNIQUE
   - CREATE CONSTRAINT constraint_Speciality_id IF NOT EXISTS FOR (n:Speciality) REQUIRE n.name IS UNIQUE
   - CREATE CONSTRAINT constraint_Allergy_id IF NOT EXISTS FOR (n:Allergy) REQUIRE n.code IS UNIQUE
   - CREATE CONSTRAINT constraint_Address_id IF NOT EXISTS FOR (n:Address) REQUIRE n.address IS UNIQUE
   - CREATE CONSTRAINT constraint_Procedure_id IF NOT EXISTS FOR (n:Procedure) REQUIRE n.code IS UNIQUE
-  - "CREATE VECTOR INDEX adaEmbeddings IF NOT EXISTS FOR (e:Encounter) ON e.adaEmbedding OPTIONS {indexConfig: {`vector.dimensions`: 1536,`vector.similarity_function`: 'cosine'}}"
+  - CREATE CONSTRAINT constraint_Immunization_id IF NOT EXISTS FOR (n:Immunization) REQUIRE n.code IS UNIQUE
+  - CREATE CONSTRAINT constraint_ImagingStudy_id IF NOT EXISTS FOR (n:ImagingStudy) REQUIRE n.bodysiteCode IS UNIQUE
+  - CREATE CONSTRAINT constraint_Device_id IF NOT EXISTS FOR (n:Device) REQUIRE n.code IS UNIQUE
+  - CREATE INDEX index_hasallergy_date IF NOT EXISTS FOR ()-[r:HAS_ALLERGY]->() ON (r.date, r.end)
+  - CREATE INDEX index_hascondition_date IF NOT EXISTS FOR ()-[r:HAS_CONDITION]->() ON (r.date, r.end)
+  - CREATE INDEX index_hasdrug_date IF NOT EXISTS FOR ()-[r:HAS_DRUG]->() ON (r.date, r.end)
+  - CREATE INDEX index_hasprocedure_date IF NOT EXISTS FOR ()-[r:HAS_PROCEDURE]->() ON (r.date, r.end)
+  - CREATE INDEX index_hasobservation_date IF NOT EXISTS FOR ()-[r:HAS_OBSERVATION]->() ON (r.date, r.end)
+  - CREATE INDEX index_hascareplan_date IF NOT EXISTS FOR ()-[r:HAS_CARE_PLAN]->() ON (r.date, r.end)
+  - CREATE INDEX index_hasimmunization_date IF NOT EXISTS FOR ()-[r:HAS_IMMUNIZATION]->() ON (r.date, r.end)
+  - CREATE INDEX index_hasimagingstudy_date IF NOT EXISTS FOR ()-[r:HAS_IMAGING_STUDY]->() ON (r.date, r.end)
+  - CREATE INDEX index_hasdevice_date IF NOT EXISTS FOR ()-[r:HAS_DEVICE]->() ON (r.date, r.end)
+  - "CREATE VECTOR INDEX textEmbedding3Small IF NOT EXISTS FOR (e:Encounter) ON e.textEmbedding3Small OPTIONS {indexConfig: {`vector.dimensions`: 1536,`vector.similarity_function`: 'cosine'}}"
 
 loading_queries:
   nodes:
@@ -146,18 +157,15 @@ loading_queries:
         MATCH (p:Patient {id:row.PATIENT})
         MERGE (a:Allergy {code:row.CODE})
         SET a.description=row.DESCRIPTION
-        MERGE (as:Encounter {id:row.ENCOUNTER})
+        MERGE (e:Encounter {id:row.ENCOUNTER})
         ON CREATE
-          SET as.date=datetime(row.START), as.code=row.CODE, as.class='assertfalse'
-        ON MATCH
-          SET as.code=row.CODE
-        MERGE (p)-[:HAS_ENCOUNTER]->(as)
-        MERGE (as)-[:HAS_ALLERGY]->(a)
-        WITH p,a,as,row
-        WHERE row.STOP IS NOT NULL and row.STOP <> ''
-        MERGE (ae:EncounterEnd {id:row.ENCOUNTER})
-          SET ae.date=datetime(row.STOP), ae.code=row.CODE, ae.isEnd=true
-        MERGE (as)-[:HAS_END]->(ae)
+          SET e.class='assertfalse'
+        MERGE (p)-[:HAS_ENCOUNTER]->(e)
+        MERGE (e)-[r:HAS_ALLERGY]->(a)
+          SET r.date=datetime(row.START)
+        FOREACH (ignore in CASE WHEN row.STOP IS NOT NULL AND row.STOP <> '' THEN [1] ELSE [] END |
+          SET r.end=datetime(row.STOP)
+        )
 
     Conditions:
       # skip: true
@@ -169,16 +177,13 @@ loading_queries:
         SET c.description=row.DESCRIPTION
         MERGE (cs:Encounter {id:row.ENCOUNTER})
         ON CREATE
-          SET cs.date=datetime(row.START), cs.code=row.CODE, cs.class='assertfalse'
-        ON MATCH
-          SET cs.code=row.CODE
+          SET cs.class='assertfalse'
         MERGE (p)-[:HAS_ENCOUNTER]->(cs)
-        MERGE (cs)-[:HAS_CONDITION]->(c)
-        WITH p,c,cs,row
-        WHERE row.STOP IS NOT NULL and row.STOP <> ''
-        MERGE (ce:EncounterEnd {id:row.ENCOUNTER})
-          SET ce.date=datetime(row.STOP), ce.code=row.CODE, ce.isEnd=true
-        MERGE (cs)-[:HAS_END]->(ce)
+        MERGE (cs)-[r:HAS_CONDITION]->(c)
+          SET r.date=datetime(row.START)
+        FOREACH (ignore in CASE WHEN row.STOP IS NOT NULL AND row.STOP <> '' THEN [1] ELSE [] END |
+          SET r.end=datetime(row.STOP)
+        )
 
     Medications:
       # skip: true
@@ -187,19 +192,16 @@ loading_queries:
         WITH $rows as rows UNWIND rows as row
         MERGE (p:Patient {id:row.PATIENT})
         MERGE (d:Drug {code:row.CODE})
-        SET d.description=row.DESCRIPTION, d.reasonDescription=row.REASONDESCRIPTION
+        SET d.description=row.DESCRIPTION
         MERGE (ps:Encounter {id:row.ENCOUNTER})
         ON CREATE
-          SET ps.code=row.CODE, ps.date=datetime(row.START), ps.class='assertfalse'
-        ON MATCH
-          SET ps.code=row.CODE
+          SET ps.class='assertfalse'
         MERGE (p)-[:HAS_ENCOUNTER]->(ps)
-        MERGE (ps)-[:HAS_DRUG]->(d)
-        WITH p,d,ps,row
-        WHERE row.STOP IS NOT NULL and row.STOP <> ''
-        MERGE (pe:EncounterEnd {id:row.ENCOUNTER})
-          SET pe.date=datetime(row.STOP), pe.code=row.CODE, pe.isEnd=true
-        MERGE (ps)-[:HAS_END]->(pe)
+        MERGE (ps)-[r:HAS_DRUG]->(d)
+          SET r.date=datetime(row.START), r.reasonDescription=row.REASONDESCRIPTION
+        FOREACH (ignore in CASE WHEN row.STOP IS NOT NULL AND row.STOP <> '' THEN [1] ELSE [] END |
+          SET r.end=datetime(row.STOP)
+        )
 
     Procedures:
       # skip: true
@@ -207,15 +209,14 @@ loading_queries:
       query: |
         WITH $rows as rows UNWIND rows as row
         MERGE (p:Patient {id:row.PATIENT})
-        MERGE (r:Procedure {code:row.CODE})
-        SET r.description=row.DESCRIPTION
+        MERGE (pr:Procedure {code:row.CODE})
+          SET pr.description=row.DESCRIPTION
         MERGE (pe:Encounter {id:row.ENCOUNTER})
         ON CREATE
-          SET pe.date=datetime(row.START), pe.code=row.CODE, pe.class='assertfalse'
-        ON MATCH
-          SET pe.code=row.CODE
+          SET pe.class='assertfalse'
         MERGE (p)-[:HAS_ENCOUNTER]->(pe)
-        MERGE (pe)-[:HAS_PROCEDURE]->(r)
+        MERGE (pe)-[r:HAS_PROCEDURE]->(pr)
+          SET r.date=datetime(row.DATE)
 
     Observations:
       # skip: true
@@ -224,46 +225,92 @@ loading_queries:
         WITH $rows as rows UNWIND rows as row
         WITH row
         WHERE row.ENCOUNTER IS NOT NULL and row.ENCOUNTER <> ''
-        WITH row, row.CODE as code, CASE row.TYPE WHEN 'text' THEN row.VALUE ELSE toFloat(row.VALUE) END as value
-        WITH row, apoc.map.fromPairs([[code, value]]) as attr
-        MATCH (p:Patient {id:row.PATIENT})
-        MATCH (oe:Encounter {id:row.ENCOUNTER})
-        MERGE (oe)-[:HAS_OBSERVATION]->(o:Observation)
-        SET o += attr, o.description=row.DESCRIPTION, o.category=row.CATEGORY
+        MERGE (p:Patient {id:row.PATIENT})
+        MERGE (ob:Observation {code:row.CODE})
+          SET ob.description=row.DESCRIPTION, ob.category=row.CATEGORY
+        MERGE (e:Encounter {id:row.ENCOUNTER})
+        ON CREATE
+          SET e.class='assertfalse'
+        MERGE (p)-[:HAS_ENCOUNTER]->(e)
+        MERGE (e)-[r:HAS_OBSERVATION]->(ob)
+          SET r.date=datetime(row.DATE), r.value=row.VALUE, r.units=row.UNITS, r.type=row.TYPE
 
     CarePlans:
       # skip: true
       file: careplans.csv
       compression: none
-      skip_file: false
       query: |
         WITH $rows as rows UNWIND rows as row
         MATCH (p:Patient {id:row.PATIENT})
-        MERGE (c:CarePlan {code:row.CODE})
-        SET c.description=row.DESCRIPTION, c.reasonDescription=row.REASONDESCRIPTION
+        MERGE (c:CarePlan {code:row.CODE, description:row.DESCRIPTION})
         MERGE (cs:Encounter {id:row.ENCOUNTER})
         ON CREATE
-          SET cs.code=row.CODE, cs.date=datetime(row.START), cs.class='assertfalse'
-        ON MATCH
-          SET cs.code=row.CODE
+          SET cs.class='assertfalse'
         MERGE (p)-[:HAS_ENCOUNTER]->(cs)
-        MERGE (cs)-[:HAS_CARE_PLAN]->(c)
-        WITH p,c,cs,row
-        WHERE row.STOP IS NOT NULL and row.STOP <> ''
-        MERGE (ce:EncounterEnd {id:row.ENCOUNTER})
-        SET ce.date=datetime(row.STOP), ce.code=row.CODE, ce.isEnd=true
-        MERGE (cs)-[:HAS_END]->(ce)
+        MERGE (cs)-[r:HAS_CARE_PLAN {id:row.Id}]->(c)
+          SET r.date=datetime(row.START), r.reasonDescription=row.REASONDESCRIPTION
+        FOREACH (ignore in CASE WHEN row.STOP IS NOT NULL AND row.STOP <> '' THEN [1] ELSE [] END |
+          SET r.end=datetime(row.STOP)
+        )
 
     Organizations:
       # skip: true
       file: organizations.csv
       query: |
         WITH $rows as rows UNWIND rows as row
-        MATCH (o:Organization {id:row.Id})
+        MERGE (o:Organization {id:row.Id})
           SET o.name=row.NAME
         MERGE (a:Address {address: row.ADDRESS})
           SET a.location = point({latitude:toFloat(row.LAT), longitude:toFloat(row.LON)})
         MERGE (o)-[:HAS_ADDRESS]->(a)
+
+    Immunizations:
+      file: immunizations.csv
+      # DATE,PATIENT,ENCOUNTER,CODE,DESCRIPTION,BASE_COST
+      query: |
+        WITH $rows as rows UNWIND rows as row
+        MERGE (p:Patient {id:row.PATIENT})
+        MERGE (a:Immunization {code:row.CODE})
+          SET a.description=row.DESCRIPTION
+        MERGE (e:Encounter {id:row.ENCOUNTER})
+        ON CREATE
+          SET e.class='assertfalse'
+        MERGE (p)-[:HAS_ENCOUNTER]->(e)
+        MERGE (e)-[r:HAS_IMMUNIZATION]->(a)
+          SET r.date=datetime(row.DATE)
+
+    ImagingStudies:
+      file: imaging_studies.csv
+      query: |
+        WITH $rows as rows UNWIND rows as row
+        MERGE (p:Patient {id:row.PATIENT})
+        MERGE (img:ImagingStudy {bodysiteCode:row.BODYSITE_CODE})
+          SET img.description=row.BODYSITE_DESCRIPTION
+        MERGE (e:Encounter {id:row.ENCOUNTER})
+        ON CREATE
+          SET e.class='assertfalse'
+        MERGE (p)-[:HAS_ENCOUNTER]->(e)
+        MERGE (e)-[r:HAS_IMAGING_STUDY]->(img)
+          SET r.date=datetime(row.DATE), r.modalityDescription=row.MODALITY_DESCRIPTION, r.sopDescription=row.SOP_DESCRIPTION
+
+    Devices:
+      file: devices.csv
+      query: |
+        WITH $rows as rows UNWIND rows as row
+        MERGE (p:Patient {id:row.PATIENT})
+        MERGE (d:Device {code:row.CODE})
+          SET d.description=row.DESCRIPTION
+        MERGE (e:Encounter {id:row.ENCOUNTER})
+        ON CREATE
+          SET e.class='assertfalse'
+        MERGE (p)-[:HAS_ENCOUNTER]->(e)
+        MERGE (e)-[r:HAS_DEVICE]->(d)
+          SET r.date=datetime(row.START), r.udi=row.UDI
+        FOREACH (ignore in CASE WHEN row.STOP IS NOT NULL AND row.STOP <> '' THEN [1] ELSE [] END |
+          SET r.end=datetime(row.STOP)
+        )
+
+
 
 post_ingest:
   # Create NEXT relationship between encounters of a patient
@@ -293,7 +340,7 @@ post_ingest:
       SET c.num=NUM', {}
       );
 
-  # compute age of patient in each encountert
+  # compute age of patient in each encounter
   - |
     CALL apoc.periodic.iterate(
       'MATCH (:Patient)-[r:HAS_ENCOUNTER]->() return id(r) as idr',
@@ -302,15 +349,18 @@ post_ingest:
       {}
     )
 
+  # event label
   - |
     CALL apoc.periodic.iterate(
-      'MATCH (:Encounter)-[r:HAS_CONDITION|HAS_PROCEDURE|HAS_OBSERVATION|HAS_CARE_PLAN|HAS_ALLERGY|HAS_DRUG]->(event) RETURN id(r) as idr',
+      'MATCH (:Encounter)-[r:HAS_CONDITION|HAS_PROCEDURE|HAS_OBSERVATION|HAS_CARE_PLAN|HAS_ALLERGY|HAS_DRUG|HAS_IMMUNIZATION|HAS_IMAGING_STUDY|HAS_DEVICE]->(event) RETURN id(r) as idr',
       'MATCH ()-[r]->(event) where id(r)=idr SET event:Event',
       {}
     )
 
 embedding_queries:
+  # text-embedding-3-small
   - |
+    :auto
     MATCH (e:Encounter)-->(ev:Event)
     WITH e, [x in labels(ev) where x<>"Event"| x][0] as evType, ev.description as descr
     WITH e, evType, collect(descr) as descrs
@@ -322,12 +372,12 @@ embedding_queries:
     WITH e, collect(descStr) as encDescrs
     WITH e, apoc.text.join(encDescrs, " | ") as encDesc
     with collect(e) as encounters, collect(encDesc) as encDescs
-    WITH encounters, encDescs, size(encounters) as total, 100 as batchSize
+    WITH encounters, encDescs, size(encounters) as total, 50 as batchSize
     UNWIND range(0, total, batchSize) AS batchStart
     WITH *
     CALL {
         WITH encounters, encDescs, batchStart, batchSize
         WITH encounters, batchStart, [x in encDescs[batchStart..batchStart+batchSize] | x] as batch
         CALL genai.vector.encodeBatch(batch, 'OpenAI', { token: $key, model: 'text-embedding-3-small' }) YIELD index, vector
-        CALL db.create.setNodeVectorProperty(encounters[batchStart + index], 'adaEmbedding', vector)
+        CALL db.create.setNodeVectorProperty(encounters[batchStart + index], 'textEmbedding3Small', vector)
     } IN TRANSACTIONS OF 1 ROW
