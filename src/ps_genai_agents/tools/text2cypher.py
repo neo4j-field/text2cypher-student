@@ -4,6 +4,7 @@ This file contains the Text2Cypher tool used in the Agent architecture.
 
 from typing import Any, Callable, Dict, List, Optional
 
+from langchain.chains.graph_qa.cypher import GraphCypherQAChain
 from langchain.tools import tool
 from neo4j import Driver, Record
 from neo4j_graphrag.llm import LLMInterface
@@ -74,5 +75,37 @@ def create_neo4j_text2cypher_tool(
             "result": [x.content.data() for x in result.items],
             "cypher": [result.metadata.get("cypher")],
         }
+
+    return text2cypher
+
+
+def create_langchain_text2cypher_tool(cypher_chain: GraphCypherQAChain) -> Callable:
+    """
+    Create a Text2Cypher tool with the provided cypher chain.
+
+    Parameters
+    ----------
+    cypher_chain : GraphCypherQAChain
+        The cypher chain to use.
+
+    Returns
+    -------
+    Callable
+        The tool.
+    """
+
+    @tool("Text2Cypher", return_direct=False)
+    def text2cypher(query: str) -> Dict[str, Any]:
+        """
+        * Useful for maths and aggregations:
+            - Answering questions about verbatims around math
+            - Returning vehicles lists
+            - Aggregation like counting, calculating proportion, scores and totals under Categories, Vehicles, Problems, Questions
+        * Use if looking for specific IDs.
+        * Use if searching for the meaning of Problem or contents of a Node.
+        * Use full question as input.
+        """
+
+        return cypher_chain.invoke(query)
 
     return text2cypher
