@@ -14,13 +14,15 @@ test_unit:
 
 init:
 	poetry install --with dev, ui
-	poetry run pip install --upgrade https://github.com/neo4j/neo4j-graphrag-python/tarball/master
 	pre-commit install
 	poetry run python3 -m pip install -U --no-cache-dir  \
             --config-settings="--global-option=build_ext" \
             --config-settings="--global-option=-I$(brew --prefix graphviz)/include/" \
             --config-settings="--global-option=-L$(brew --prefix graphviz)/lib/" \
             pygraphviz
+
+workshop:
+	poetry install --with ui
 
 
 ######################
