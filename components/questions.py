@@ -17,3 +17,6 @@ patient_journey_questions = []
 
 def get_demo_questions(source: Literal["IQS", "Patient Journey"]) -> List[str]:
     return iqs_questions if source == "IQS" else patient_journey_questions
+
+def get_examples_location(source: Literal["IQS", "Patient Journey"]) -> List[str]:
+    return "data/iqs/queries/queries.yml" if source == "IQS" else "data/patient_journey/queries/queries.yml"

@@ -23,7 +23,7 @@ from .types.response import Response
 
 
 def create_text2cypher_graph_agent(
-    chat_llm: Optional[ChatOpenAI] = None, neo4j_graph: Optional[Neo4jGraph] = None
+    chat_llm: Optional[ChatOpenAI] = None, neo4j_graph: Optional[Neo4jGraph] = None, example_queries_location: Optional[str] = None
 ) -> CompiledGraph:
     """
     Create a Text2Cypher graph agent.
@@ -34,6 +34,8 @@ def create_text2cypher_graph_agent(
         The LangChain OpenAI chat LLM to use, by default None
     neo4j_graph : Optional[Neo4jGraph], optional
         The LangChain Neo4jGraph object to use, by default None
+    example_queries_location : Optional[str] = None
+        The location of the yaml file to use containing example queries, by default None
 
     Returns
     -------
@@ -41,10 +43,12 @@ def create_text2cypher_graph_agent(
         The graph agent.
     """
 
+    example_queries_loc = example_queries_location or "data/iqs/queries/queries.yml"
+
     chat_llm = chat_llm or ChatOpenAI(model="gpt-4o")
 
     text2cypher_prompt = create_graphqa_chain_cypher_prompt(
-        examples_yaml_path="data/iqs/queries/queries.yml"
+        examples_yaml_path=example_queries_loc
     )
 
     if neo4j_graph is not None:
@@ -173,7 +177,7 @@ def create_text2cypher_graph_agent(
                 print()
                 params["query"] = f"""
     The following Cypher is not accurate. Fix the errors and return valid Cypher.
-    {str(output.get("cypher", list())[0])}
+    {str(output["intermediate_steps"][-1]["query"])}
 
     Consider the following fixes:
     - instead of matching on a property, use fuzzy matching.
@@ -181,9 +185,8 @@ def create_text2cypher_graph_agent(
 
         return {
             "intermediate_steps": [{"Text2Cypher", str(output)}],
-            # "cypher": output.get("cypher"),
             "cypher": [output["intermediate_steps"][-1]["query"]],
-            "cypher_result": output.get("result"),
+            "cypher_result": [output.get("result")],
         }
 
     # Define logic that will be used to determine which conditional edge to go down
