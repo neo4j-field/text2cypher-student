@@ -162,3 +162,11 @@ queries:
       MATCH ()-[:HAS_IMMUNIZATION]->(im)
       WHERE toLower(im.description) contains toLower("influenza")
       RETURN r.date.year/10*10 as decade, count(*) order by count(*) desc limit 3
+
+  - question: Please summarize the patient journey for patient id 4fdafa07-e5cb-9b2a-55c6-50902c49ccfb
+    cql: |-
+      match (p:Patient {id:"4fdafa07-e5cb-9b2a-55c6-50902c49ccfb"})
+      match (p)-[:HAS_ENCOUNTER]->(e)-[r]->(ev:Event)
+      with e, {date:r.date, evType:[x in labels(ev) where x<>'Event' | x][0], description:ev.description} as event
+      WITH e.date as encounterDate, event.date as eventDate, event.evType+": "+event.description as event
+      return * order by encounterDate
