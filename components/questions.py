@@ -12,7 +12,8 @@ iqs_questions = [
     "What color is the sky?",
 ]
 
-patient_journey_questions = []
+patient_journey_questions = ["Describe the journey for patient 8b0484cd-3dbd-8b8d-1b72-a32f74a5a846",
+                             "What are common drugs for male patients over age 50?"]
 
 
 def get_demo_questions(source: Literal["IQS", "Patient Journey"]) -> List[str]:
