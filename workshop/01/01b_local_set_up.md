@@ -25,9 +25,9 @@ This project uses `Poetry` to manage dependencies.
 
 You can find the install instructions [here](https://python-poetry.org/docs/#installing-with-pipx)
 
-### Graphviz
+### Graphviz [Optional]
 
-`Graphviz` is optional and only required to visualize the graph architecture. If you skip this install, then make sure to skip any notebook cells that handle visualization.
+`Graphviz` is optional and only required to visualize the graph architecture. We won't need it in this workshop, but we use it to visualize agents in the `ps-genai-agents` project.
 
 You can find install instructions [here](https://graphviz.org/download/)
 
