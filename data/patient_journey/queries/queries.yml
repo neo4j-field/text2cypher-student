@@ -127,3 +127,48 @@ queries:
       ORDER by cnt desc
       WITH drug, collect(condition) as conditions
       RETURN drug, conditions[1..5] as top5Conditions
+
+  - question: What is predniSONE usually prescribed for?
+    cql: |-
+      MATCH (:Encounter)-[r:HAS_DRUG]->(d)
+      WHERE toLower(d.description) contains toLower("predniSONE")
+      RETURN d.description, collect(distinct r.reasonDescription) AS reason
+      ORDER BY d.description
+
+  - question: Which age groups is insulin mostly prescribed to?
+    cql: |-
+      MATCH (d:Drug)
+      WHERE toLower(d.description) contains toLower("insulin")
+      MATCH (e)-[r:HAS_DRUG]-(d)
+      RETURN e.patientAge/10*10 as cohort, count(*) as cnt order by cnt desc limit 3
+
+  - question: What are the most common diagnoses prior to Epinephrine prescriptions?
+    cql: |-
+      MATCH (e)-[:HAS_DRUG]->(d)
+      WHERE toLower(d.description) contains toLower("Epinephrine")
+      MATCH (e0)-[:NEXT*]->(e)
+      WITH e0
+      MATCH (e0)-[:HAS_CONDITION]->(c)
+      RETURN c.description as condition, count(*) as cnt
+      ORDER BY cnt desc LIMIT 3
+
+  - question: Which age group is anemia usually diagnosed?
+    cql: |-
+      MATCH (d:Condition)
+      WHERE toLower(d.description) contains toLower("anemia")
+      MATCH (e)-[r:HAS_CONDITION]-(d)
+      RETURN e.patientAge/10*10 as cohort, count(*) as cnt order by cnt desc limit 1
+
+  - question: What decade do we see the most flu shots?
+    cql: |-
+      MATCH ()-[:HAS_IMMUNIZATION]->(im)
+      WHERE toLower(im.description) contains toLower("influenza")
+      RETURN r.date.year/10*10 as decade, count(*) order by count(*) desc limit 3
+
+  - question: Please summarize the patient journey for patient id 4fdafa07-e5cb-9b2a-55c6-50902c49ccfb
+    cql: |-
+      match (p:Patient {id:"4fdafa07-e5cb-9b2a-55c6-50902c49ccfb"})
+      match (p)-[:HAS_ENCOUNTER]->(e)-[r]->(ev:Event)
+      with e, {date:r.date, evType:[x in labels(ev) where x<>'Event' | x][0], description:ev.description} as event
+      WITH e.date as encounterDate, event.date as eventDate, event.evType+": "+event.description as event
+      return * order by encounterDate
