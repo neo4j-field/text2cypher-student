@@ -176,7 +176,7 @@ def create_text2cypher_graph_agent(
                 print(output)
                 print()
                 params["query"] = f"""
-    The following Cypher is not accurate. Fix the errors and return valid Cypher.
+    The following Cypher returned no results. Try again.
     {str(output["intermediate_steps"][-1]["query"])}
 
     Consider the following fixes:

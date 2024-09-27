@@ -38,16 +38,18 @@ queries:
 
   # - question: how effect procedures are
 
-  - question: How often on average do patients in their 20s see the doctor?
+  - question: How often on average do male patients in their 20s see the doctor?
     cql: |-
       MATCH (e:Encounter) where e.patientAge >= 20 and e.patientAge < 30
       MATCH (p)-[:HAS_ENCOUNTER]->(e)
+      WHERE p.gender = "M"
       WITH p, count(e) as numEncounters
       RETURN avg(numEncounters) as averageNumberOfEncounters
 
-  - question: What is average age most patients receive their first diagnoses?
+  - question: What is average age most female patients receive their first diagnoses?
     cql: |-
       MATCH (p)-[:HAS_ENCOUNTER]->(e)-[:HAS_CONDITION]->()
+      WHERE p.gender = "F"
       WITH p, e order by p.id, e.date asc
       WITH p, collect(e)[0] as firstDiagEnc
       RETURN toInteger(avg(firstDiagEnc.patientAge)) as averageDiagnosisAge
