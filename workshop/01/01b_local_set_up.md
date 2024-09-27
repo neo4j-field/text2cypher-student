@@ -61,7 +61,7 @@ OR
 poetry install --with ui
 ```
 
-`ps-genai-agents` uses a `Makefile`  to organize initialization, formatting and testing. Both of the above commands will perform the same function. 
+`ps-genai-agents` uses a `Makefile` to organize initialization, formatting and testing. Both of the above commands will perform the same function. 
 
 If we don't receive any errors then we can continue to the next step.
 
