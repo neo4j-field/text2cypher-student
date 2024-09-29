@@ -21,8 +21,8 @@ init:
             --config-settings="--global-option=-L$(brew --prefix graphviz)/lib/" \
             pygraphviz
 
-workshop:
-	poetry install --with ui
+init_workshop:
+	poetry install --with workshop
 
 
 ######################
