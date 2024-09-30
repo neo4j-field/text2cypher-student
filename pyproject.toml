@@ -38,6 +38,10 @@ ipykernel = "^6.29.5"
 [tool.poetry.group.ui.dependencies]
 streamlit = "^1.37.1"
 
+[tool.poetry.group.workshop.dependencies]
+ipykernel = "^6.29.5"
+streamlit = "^1.37.1"
+
 [tool.mypy]
 strict = true
 ignore_missing_imports = true

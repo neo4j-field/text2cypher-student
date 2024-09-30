@@ -41,13 +41,14 @@ def show_response_information(response: Any) -> None:
         with st.expander("Cypher"):
             if isinstance(response.cypher, str):
                 st.code(response.cypher, language="cypher")
-                st.json(response.cypher_result, expanded=False)
+                if response.cypher_result: st.json(response.cypher_result, expanded=False)
             else:
+                print("LENGTHS: ", len(response.cypher), len(response.cypher_result))
                 [
                     (
                         st.write(response.sub_questions[i]),
                         st.code(response.cypher[i], language="cypher"),
-                        st.json(response.cypher_result[i], expanded=False),
+                        st.json(response.cypher_result[i] if response.cypher_result else "", expanded=False),
                     )
                     for i in range(len(response.cypher))
                 ]

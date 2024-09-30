@@ -24,7 +24,8 @@ def initialize_state() -> None:
             driver_config={"liveness_check_timeout": 0},
         )
         ss["agent"] = create_text2cypher_graph_agent(
-            chat_llm=ss["llm"], neo4j_graph=ss["graph"]
+            chat_llm=ss["llm"], neo4j_graph=ss["graph"],
+            example_queries_location="data/iqs/queries/queries.yml"
         )
         ss["messages"] = list()
         ss["source"] = "IQS"
