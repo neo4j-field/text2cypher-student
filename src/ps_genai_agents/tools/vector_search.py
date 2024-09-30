@@ -7,9 +7,9 @@ from typing import Any, Callable, Dict, List, Optional
 import neo4j
 from langchain.tools import tool
 from neo4j import Driver
-from neo4j_genai.embedder import Embedder
-from neo4j_genai.retrievers import VectorRetriever
-from neo4j_genai.types import RetrieverResultItem
+from neo4j_graphrag.embedder import Embedder
+from neo4j_graphrag.retrievers import VectorRetriever
+from neo4j_graphrag.types import RetrieverResultItem
 
 
 def create_neo4j_vector_search_tool(

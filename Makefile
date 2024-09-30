@@ -22,6 +22,7 @@ init:
             pygraphviz
 
 init_workshop:
+	poetry config virtualenvs.in-project true
 	poetry install --with workshop
 
 
@@ -41,6 +42,7 @@ format:
 help:
 	@echo '----'
 	@echo 'init........................ - initialize the repo for development'
+	@echo 'init_workshop............... - initialize the repo for the workshop'
 	@echo 'format...................... - run code formatters'
 	@echo 'test........................ - run all unit and integration tests'
 	@echo 'test_unit................... - run all free unit tests'
