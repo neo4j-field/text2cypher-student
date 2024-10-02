@@ -177,7 +177,7 @@ def create_text2cypher_graph_agent(
                 print()
                 params["query"] = f"""
     The following Cypher returned no results. Try again.
-    {str(output["intermediate_steps"][-1]["query"])}
+    {str(output.get("intermediate_steps", [{"query": ""}])[-1]["query"])}
 
     Consider the following fixes:
     - instead of matching on a property, use fuzzy matching.
