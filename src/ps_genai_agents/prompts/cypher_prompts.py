@@ -117,18 +117,7 @@ def create_graphqa_chain_cypher_prompt(
     Strictly use this Schema for Cypher generation:
     <schema>
     {schema}
-
-    Vehicle node id is the series and follows the format: "Honda Accord" or "Acura RDX"
-    Question node id must be an integer in range [1, 223]
-    Problem node id must follow this format: 3 or 4 capital letters followed by 2 digits
-    Category node id must be one of the following: ["Climate", "Driving Assistance", "Driving Experience", "Exterior", "Features/Controls/Displays (FCD)", "Infotainment", "Interior", "Powertrain", "Seats"]
     </schema>
-
-    The following are acronyms you may encounter and their meaning:
-    <acronyms>
-    PPHU: Parts Per Hundred Users
-    DTU: Difficult To Use
-    </acronyms>
 
     The samples below follow the instructions and the schema mentioned above. So, please follow the same when you generate the cypher:
     <samples>"""

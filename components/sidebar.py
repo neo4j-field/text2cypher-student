@@ -6,7 +6,7 @@ from streamlit import sidebar as sb
 
 from src.ps_genai_agents.agents.graph import create_text2cypher_graph_agent
 
-from .questions import get_demo_questions
+from .questions import get_demo_questions, get_examples_location
 
 
 def sidebar() -> None:
@@ -34,7 +34,8 @@ def sidebar() -> None:
                 driver_config={"liveness_check_timeout": 0},
             )
         ss["agent"] = create_text2cypher_graph_agent(
-            chat_llm=ss["llm"], neo4j_graph=ss["graph"]
+            chat_llm=ss["llm"], neo4j_graph=ss["graph"],
+            example_queries_location=get_examples_location(source=source)
         )
 
     demo_questions = get_demo_questions(source=ss["source"])

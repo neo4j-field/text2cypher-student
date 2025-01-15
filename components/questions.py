@@ -12,8 +12,20 @@ iqs_questions = [
     "What color is the sky?",
 ]
 
-patient_journey_questions = []
-
+patient_journey_questions = [
+    "Most commonly prescribed drugs for patients in their 20s?",
+    "What is Naproxen usually prescribed for?",
+    "Which age group is predniSONE usually prescribed to?",
+    "What are the most common diagnoses prior to Naproxen prescriptions?",
+    "Which age group is anemia usually diagnosed?",
+    "Which decades have the most hepatitus B immunizations?",
+    "What are the most commonly diagnosed conditions for patients above 60?",
+    "Please summarize the patient journey for patient id 4fdafa07-e5cb-9b2a-55c6-50902c49ccfb",
+    "What are common drugs for male patients over age 50?"
+]
 
 def get_demo_questions(source: Literal["IQS", "Patient Journey"]) -> List[str]:
     return iqs_questions if source == "IQS" else patient_journey_questions
+
+def get_examples_location(source: Literal["IQS", "Patient Journey"]) -> List[str]:
+    return "data/iqs/queries/queries.yml" if source == "IQS" else "data/patient_journey/queries/queries.yml"

@@ -7,9 +7,9 @@ from typing import Any, Callable, Dict, List, Optional
 import neo4j
 from langchain.tools import tool
 from neo4j import Driver
-from neo4j_genai.embedder import Embedder
-from neo4j_genai.retrievers import VectorRetriever
-from neo4j_genai.types import RetrieverResultItem
+from neo4j_graphrag.embedder import Embedder
+from neo4j_graphrag.retrievers import VectorRetriever
+from neo4j_graphrag.types import RetrieverResultItem
 
 
 def create_neo4j_vector_search_tool(
@@ -37,6 +37,14 @@ def create_neo4j_vector_search_tool(
         The tool.
     """
 
+    retriever = VectorRetriever(
+            driver=driver,
+            index_name=index_name,
+            embedder=embedder,
+            return_properties=return_properties,
+            result_formatter=result_formatter,
+        )
+    
     @tool("Neo4jVectorSearch", return_direct=False)  # type: ignore
     def neo4j_vector_search(query: str, top_k: int = 3) -> Dict[str, Any]:
         """
@@ -49,14 +57,6 @@ def create_neo4j_vector_search_tool(
             - Finding lists.
         * Use full question as input.
         """
-
-        retriever = VectorRetriever(
-            driver=driver,
-            index_name=index_name,
-            embedder=embedder,
-            return_properties=return_properties,
-            result_formatter=result_formatter,
-        )
 
         return {"result": retriever.search(query_text=query, top_k=top_k).items}
 

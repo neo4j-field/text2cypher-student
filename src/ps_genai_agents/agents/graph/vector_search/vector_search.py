@@ -12,8 +12,8 @@ from langgraph.graph import END, StateGraph
 from langgraph.graph.graph import CompiledGraph
 from langgraph.prebuilt.tool_executor import ToolExecutor, ToolInvocation
 from neo4j import GraphDatabase
-from neo4j_genai.embeddings.openai import OpenAIEmbeddings
-from neo4j_genai.types import RetrieverResultItem
+from neo4j_graphrag.embeddings.openai import OpenAIEmbeddings
+from neo4j_graphrag.types import RetrieverResultItem
 
 from ....prompts import (
     create_agent_prompt,
