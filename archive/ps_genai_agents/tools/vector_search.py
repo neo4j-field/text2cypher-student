@@ -38,13 +38,13 @@ def create_neo4j_vector_search_tool(
     """
 
     retriever = VectorRetriever(
-            driver=driver,
-            index_name=index_name,
-            embedder=embedder,
-            return_properties=return_properties,
-            result_formatter=result_formatter,
-        )
-    
+        driver=driver,
+        index_name=index_name,
+        embedder=embedder,
+        return_properties=return_properties,
+        result_formatter=result_formatter,
+    )
+
     @tool("Neo4jVectorSearch", return_direct=False)  # type: ignore
     def neo4j_vector_search(query: str, top_k: int = 3) -> Dict[str, Any]:
         """

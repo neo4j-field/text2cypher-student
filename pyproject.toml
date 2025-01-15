@@ -47,7 +47,7 @@ strict = true
 ignore_missing_imports = true
 allow_subclassing_any = true
 disallow_untyped_calls = false
-exclude = ["docs", "tests", "scripts", "components"]
+exclude = ["docs/", "tests/", "scripts/", "components/", "archive/", "app.py"]
 explicit_package_bases = false
 no_namespace_packages = true
 

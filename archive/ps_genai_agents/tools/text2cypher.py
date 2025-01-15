@@ -50,14 +50,14 @@ def create_neo4j_text2cypher_tool(
     ), "Please provide `schema` and `examples` args or `custom_prompt` arg to `create_neo4j_text2cypher_tool` function."
 
     retriever = Text2CypherRetriever(
-            driver=driver,
-            llm=llm,
-            neo4j_schema=schema,
-            examples=examples,
-            custom_prompt=custom_prompt,
-            result_formatter=result_formatter,
-        )
-    
+        driver=driver,
+        llm=llm,
+        neo4j_schema=schema,
+        examples=examples,
+        custom_prompt=custom_prompt,
+        result_formatter=result_formatter,
+    )
+
     @tool("Text2Cypher", return_direct=False)  # type: ignore
     def text2cypher(query: str) -> Dict[str, Any]:
         """
@@ -70,7 +70,6 @@ def create_neo4j_text2cypher_tool(
         * Use full question as input.
         """
 
-        
         result = retriever.search(query_text=query)
         return {
             "result": [x.content.data() for x in result.items],

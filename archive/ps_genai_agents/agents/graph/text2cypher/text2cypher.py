@@ -23,7 +23,9 @@ from .types.response import Response
 
 
 def create_text2cypher_graph_agent(
-    chat_llm: Optional[ChatOpenAI] = None, neo4j_graph: Optional[Neo4jGraph] = None, example_queries_location: Optional[str] = None
+    chat_llm: Optional[ChatOpenAI] = None,
+    neo4j_graph: Optional[Neo4jGraph] = None,
+    example_queries_location: Optional[str] = None,
 ) -> CompiledGraph:
     """
     Create a Text2Cypher graph agent.

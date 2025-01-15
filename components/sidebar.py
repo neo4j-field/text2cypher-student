@@ -34,8 +34,9 @@ def sidebar() -> None:
                 driver_config={"liveness_check_timeout": 0},
             )
         ss["agent"] = create_text2cypher_graph_agent(
-            chat_llm=ss["llm"], neo4j_graph=ss["graph"],
-            example_queries_location=get_examples_location(source=source)
+            chat_llm=ss["llm"],
+            neo4j_graph=ss["graph"],
+            example_queries_location=get_examples_location(source=source),
         )
 
     demo_questions = get_demo_questions(source=ss["source"])

@@ -21,11 +21,17 @@ patient_journey_questions = [
     "Which decades have the most hepatitus B immunizations?",
     "What are the most commonly diagnosed conditions for patients above 60?",
     "Please summarize the patient journey for patient id 4fdafa07-e5cb-9b2a-55c6-50902c49ccfb",
-    "What are common drugs for male patients over age 50?"
+    "What are common drugs for male patients over age 50?",
 ]
+
 
 def get_demo_questions(source: Literal["IQS", "Patient Journey"]) -> List[str]:
     return iqs_questions if source == "IQS" else patient_journey_questions
 
+
 def get_examples_location(source: Literal["IQS", "Patient Journey"]) -> List[str]:
-    return "data/iqs/queries/queries.yml" if source == "IQS" else "data/patient_journey/queries/queries.yml"
+    return (
+        "data/iqs/queries/queries.yml"
+        if source == "IQS"
+        else "data/patient_journey/queries/queries.yml"
+    )
