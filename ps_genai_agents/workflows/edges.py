@@ -1,3 +1,5 @@
+"""LangGraph edges that are used in multiple workflows."""
+
 from typing import List, Literal
 
 from langgraph.types import Send

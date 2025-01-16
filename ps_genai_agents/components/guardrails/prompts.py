@@ -8,7 +8,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_neo4j import Neo4jGraph
 
 guardrails_system = """
-You must decide whether the provided question is likely related to bill of materials or supply chains.
+You must decide whether the provided question is in scope.
 Assume the question might be related.
 If you're absolutely sure it is NOT related, output "end".
 Provide only the specified output: "query_parser" or "end".
