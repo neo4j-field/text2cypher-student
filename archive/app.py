@@ -1,11 +1,11 @@
 import os
 
 import streamlit as st
+from components import chat, display_chat_history, sidebar
 from langchain.graphs import Neo4jGraph
 from langchain_openai.chat_models import ChatOpenAI
 from streamlit import session_state as ss
 
-from components import chat, display_chat_history, sidebar
 from src.ps_genai_agents.agents.graph import create_text2cypher_graph_agent
 
 

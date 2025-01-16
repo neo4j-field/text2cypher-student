@@ -10,7 +10,7 @@ repos:
     hooks:
       - id: mypy
         name: Mypy Type Check
-        exclude: 'tests/.*|docs/.*|scripts/.*|components/.*|archive/.*|app.py'
+        exclude: 'tests/.*|docs/.*|scripts/.*|archive/.*|app.py'
         entry: mypy
         language: python
         types: [ python ]
