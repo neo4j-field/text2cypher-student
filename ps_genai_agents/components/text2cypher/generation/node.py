@@ -8,11 +8,11 @@ from langchain_core.language_models import BaseChatModel
 from langchain_core.output_parsers import StrOutputParser
 from langchain_neo4j import Neo4jGraph
 
-from .....cypher_query_store.yaml_store import get_example_queries_from_yaml
 from ....components.state import CypherState
 from ....components.text2cypher.generation.prompts import (
     create_text2cypher_generation_prompt_template,
 )
+from ....cypher_query_store.yaml_store import get_example_queries_from_yaml
 
 generation_prompt = create_text2cypher_generation_prompt_template()
 
