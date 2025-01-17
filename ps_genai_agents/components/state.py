@@ -12,7 +12,7 @@ class CypherState(TypedDict):
     statement: str
     errors: List[str]
     records: List[Dict[str, Any]]
-    next_action: str
+    next_action_cypher: str
     steps: Annotated[List[str], add]
 
 

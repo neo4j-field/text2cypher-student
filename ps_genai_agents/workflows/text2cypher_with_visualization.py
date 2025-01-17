@@ -8,6 +8,7 @@ from langgraph.graph.state import CompiledStateGraph, StateGraph
 from ..agents import create_text2cypher_agent, create_visualization_agent
 from ..components.final_answer import create_final_answer_node
 from ..components.gather_cypher import create_gather_cypher_node
+from ..components.gather_visualizations import create_gather_visualizations_node
 from ..components.guardrails import create_guardrails_node
 from ..components.query_parser import create_query_parser_node
 from ..components.state import (
@@ -48,6 +49,7 @@ def create_text2cypher_with_visualization_workflow(
         llm=llm, graph=graph, cypher_query_yaml_file_path=cypher_query_yaml_file_path
     )
     gather_cypher = create_gather_cypher_node()
+    gather_visualizations = create_gather_visualizations_node()
     tool_select = create_tool_selection_node(llm=llm)
     visualize = create_visualization_agent(llm=llm)
     summarize = create_summarization_node(llm=llm)
@@ -59,6 +61,7 @@ def create_text2cypher_with_visualization_workflow(
     main_graph_builder.add_node(query_parser)
     main_graph_builder.add_node("text2cypher", text2cypher)
     main_graph_builder.add_node(gather_cypher)
+    main_graph_builder.add_node(gather_visualizations)
     main_graph_builder.add_node(tool_select)
     main_graph_builder.add_node("visualize", visualize)
     main_graph_builder.add_node(summarize)
@@ -76,11 +79,12 @@ def create_text2cypher_with_visualization_workflow(
     main_graph_builder.add_conditional_edges(
         "gather_cypher", viz_mapper_edge, ["visualize", "tool_select"]
     )
+    main_graph_builder.add_edge("visualize", "gather_visualizations")
     main_graph_builder.add_conditional_edges(
         "tool_select", tool_select_conditional_edge
     )
     main_graph_builder.add_edge("summarize", "tool_select")
-    main_graph_builder.add_edge("visualize", "tool_select")
+    main_graph_builder.add_edge("gather_visualizations", "tool_select")
     main_graph_builder.add_edge("final_answer", END)
 
     return main_graph_builder.compile()

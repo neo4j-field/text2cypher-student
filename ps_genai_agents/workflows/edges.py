@@ -66,4 +66,4 @@ def viz_mapper_edge(state: OverallState) -> List[Send]:
         )
         tasks.append(task)
 
-    return tasks or [Send("tool_select", state)]
+    return tasks or [Send("gather_visualizations", state)]

@@ -61,6 +61,7 @@ def create_text2cypher_agent(
 def validate_cypher_conditional_edge(
     state: CypherState,
 ) -> Literal["correct_cypher", "execute_cypher", "__end__"]:
+    print(f"NEXT ACTION: {state.get("next_action_cypher")}")
     match state.get("next_action_cypher"):
         case "correct_cypher":
             return "correct_cypher"
