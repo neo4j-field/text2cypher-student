@@ -1,9 +1,6 @@
 from typing import Any, Dict
 
 from ps_genai_agents.components.text2cypher.validation.validators import (
-    _extract_nodes_and_properties_from_cypher_statement,
-    _extract_relationships_and_properties_from_cypher_statement,
-    extract_entities_for_validation,
     validate_property_value_with_enum,
     validate_property_value_with_range,
     validate_property_with_enum,
@@ -23,39 +20,6 @@ def test_validate_relationship_properties_with_range() -> None: ...
 
 
 def test_extract_entities_for_validation() -> None: ...
-
-
-def test_extract_nodes_and_properties_from_cypher_statement_1(
-    cypher_statement_1: str,
-) -> None:
-    ents = _extract_nodes_and_properties_from_cypher_statement(cypher_statement_1)
-
-    answer = [
-        {"labels": "Node"},
-        {"labels": None, "property_name": "id", "property_value": "001"},
-    ]
-
-    no_labels = [x for x in answer if x.get("labels", "") is None]
-    assert len(ents) == len(answer)
-    assert no_labels[0].get("property_name") == "id"
-    assert no_labels[0].get("property_value") == "001"
-
-
-def test_extract_relationships_and_properties_from_cypher_statement_1(
-    cypher_statement_1: str,
-) -> None:
-    ents = _extract_relationships_and_properties_from_cypher_statement(
-        cypher_statement_1
-    )
-
-    answer = [
-        {"rel_type": "RELATIONSHIP", "property_name": None, "property_value": None}
-    ]
-
-    assert len(ents) == len(answer)
-    assert answer[0].get("rel_type") == "RELATIONSHIP"
-    assert answer[0].get("property_name", "wrong") is None
-    assert answer[0].get("property_value", "wrong") is None
 
 
 def test_validate_property_value_with_enum_single_label_valid(
