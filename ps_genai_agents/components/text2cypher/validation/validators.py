@@ -11,6 +11,7 @@ from neo4j.exceptions import CypherSyntaxError
 
 from ....components.text2cypher.validation.models import ValidateCypherOutput
 from .utils.cypher_extractors import (
+    extract_entities_for_validation,
     parse_labels_or_types,
 )
 from .utils.enums import (
@@ -144,14 +145,32 @@ def validate_cypher_query_with_llm(
     return {"errors": errors, "mapping_errors": mapping_errors}
 
 
-def validate_cypher_query_with_schema() -> Dict[str, List[str]]:
+def validate_cypher_query_with_schema(
+    graph: Neo4jGraph, cypher_statement: str
+) -> Dict[str, List[str]]:
+    schema = graph.get_structured_schema
+    nodes_and_rels = extract_entities_for_validation(cypher_statement=cypher_statement)
+
+    node_tasks = nodes_and_rels.get("nodes", list())
+    rel_tasks = nodes_and_rels.get("relationships", list())
+
+    errors: List[str] = list()
+
+    node_prop_name_enum_tasks = node_tasks
+    node_prop_val_enum_tasks = node_tasks
+    node_prop_val_range_tasks = ...
+
+    rel_prop_name_enum_tasks = ...
+    rel_prop_val_enum_tasks = ...
+    rel_prop_val_range_tasks = ...
+
+    node_errors = validate_node_property_values_with_enum
     return {"errors": [], "mapping_errors": []}
 
 
-def validate_node_properties_with_enum(
+def validate_node_property_values_with_enum(
     structure_graph_schema: Dict[str, Any], tasks: List[Dict[str, str]]
 ) -> List[str]:
-    prop_enum = create_node_properties_enum(structure_graph_schema)
     prop_values_enum = create_node_property_values_enum(structure_graph_schema)
 
     errors = list()
@@ -169,6 +188,19 @@ def validate_node_properties_with_enum(
         if prop_val_validation_error:
             errors.append(prop_val_validation_error)
 
+    return errors
+
+
+def validate_node_property_names_with_enum(
+    structure_graph_schema: Dict[str, Any], tasks: List[Dict[str, str]]
+) -> List[str]:
+    prop_enum = create_node_properties_enum(structure_graph_schema)
+
+    errors = list()
+
+    for t in tasks:
+        labels = parse_labels_or_types(t.get("labels", ""))
+
         prop_validation_error = validate_property_with_enum(
             enum_dict=prop_enum,
             labels_or_types=labels,
@@ -181,10 +213,31 @@ def validate_node_properties_with_enum(
     return errors
 
 
-def validate_relationship_properties_with_enum(
+def validate_relationship_property_names_with_enum(
     structure_graph_schema: Dict[str, Any], tasks: List[Dict[str, str]]
 ) -> List[str]:
     prop_enum = create_relationship_properties_enum(structure_graph_schema)
+
+    errors = list()
+
+    for t in tasks:
+        rel_types = parse_labels_or_types(t.get("rel_types", ""))
+
+        prop_validation_error = validate_property_with_enum(
+            enum_dict=prop_enum,
+            labels_or_types=rel_types,
+            node_or_rel="Relationship",
+            property_name=t.get("property_name", ""),
+        )
+
+        if prop_validation_error:
+            errors.append(prop_validation_error)
+    return errors
+
+
+def validate_relationship_property_values_with_enum(
+    structure_graph_schema: Dict[str, Any], tasks: List[Dict[str, str]]
+) -> List[str]:
     prop_values_enum = create_relationship_property_values_enum(structure_graph_schema)
 
     errors = list()
@@ -201,15 +254,6 @@ def validate_relationship_properties_with_enum(
         if prop_val_validation_error:
             errors.append(prop_val_validation_error)
 
-        prop_validation_error = validate_property_with_enum(
-            enum_dict=prop_enum,
-            labels_or_types=rel_types,
-            node_or_rel="Relationship",
-            property_name=t.get("property_name", ""),
-        )
-
-        if prop_validation_error:
-            errors.append(prop_validation_error)
     return errors
 
 
@@ -277,7 +321,6 @@ def validate_property_value_with_range(
         "Relationship",
     }, f"Invalid `node_or_rel`: {node_or_rel}"
 
-    # return None
     # track labels or types that are invalid
     # compare the number of invalid to the number tested to determine to determine if valid
     invalid_labels_or_types = list()
@@ -328,14 +371,6 @@ def validate_property_with_enum(
         "Relationship",
     }, f"Invalid `node_or_rel`: {node_or_rel}"
 
-    # enum = enum_dict.get(labels_or_types)
-    # if enum is None:
-    #     return None
-
-    # if property_name not in enum:
-    #     return f"{node_or_rel} {labels_or_types} does not have the property {property_name} in the graph database."
-
-    # return None
     if and_or is None and len(labels_or_types) > 1:
         raise ValueError(
             f"Invalid combination of `labels_or_types` and `and_or`: {labels_or_types} | {and_or}"

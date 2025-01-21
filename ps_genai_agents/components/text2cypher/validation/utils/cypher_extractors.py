@@ -156,7 +156,8 @@ def _process_prop_key(prop: str) -> str:
 def _process_prop_val(prop: str) -> str:
     prop = prop.strip()
     prop = prop.strip("}")
-    return prop.replace('"', "")
+    prop = prop.replace('"', "")
+    return prop.replace("'", "")
 
 
 def parse_labels_or_types(labels_str: str) -> List[str]:
