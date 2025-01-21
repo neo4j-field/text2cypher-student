@@ -15,7 +15,7 @@ from ....components.text2cypher.validation.prompts import (
     create_text2cypher_validation_prompt_template,
 )
 from .validators import (
-    validate_cypher_query_relationship_direction,
+    correct_cypher_query_relationship_direction,
     validate_cypher_query_syntax,
     validate_cypher_query_with_llm,
 )
@@ -72,7 +72,7 @@ def create_text2cypher_validation_node(
 
         # Experimental feature for correcting relationship directions
         # corrected_cypher = cypher_query_corrector(state.get("statement"))
-        corrected_cypher = validate_cypher_query_relationship_direction(
+        corrected_cypher = correct_cypher_query_relationship_direction(
             graph=graph, cypher_statement=state.get("statement", "")
         )
 

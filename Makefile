@@ -4,13 +4,13 @@
 all: help
 
 test:
-	poetry run python3 -m pytest tests
+	poetry run pytest tests
 
 test_integration:
-	poetry run pytest python3 -m tests/integration
+	poetry run pytest tests/integration
 
 test_unit:
-	poetry run pytest python3 -m tests/unit
+	poetry run pytest tests/unit
 
 init:
 	poetry install --with dev, ui

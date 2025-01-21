@@ -1735,13 +1735,13 @@ typing-extensions = ">=4.7"
 
 [[package]]
 name = "langchain-neo4j"
-version = "0.2.0"
+version = "0.3.0"
 description = "An integration package connecting Neo4j and LangChain"
 optional = false
 python-versions = "<4.0,>=3.9"
 files = [
-    {file = "langchain_neo4j-0.2.0-py3-none-any.whl", hash = "sha256:83aa0b3f4eb35630e1deef6af2dd55ccb665a97389ad40117a50d707d8356ed9"},
-    {file = "langchain_neo4j-0.2.0.tar.gz", hash = "sha256:97a47c1b99e59b46a7c1516b4468588c9ff0e4801defc9c0ddcc29e9d9197a9c"},
+    {file = "langchain_neo4j-0.3.0-py3-none-any.whl", hash = "sha256:6069eb748fe959d7c97add82ca3de8c0b9018dfdaa05f823aa970606f8e5cdb7"},
+    {file = "langchain_neo4j-0.3.0.tar.gz", hash = "sha256:747542704f39c800bcd5c6b518b5d2b7fe5538b8b914b7772c29a8062617472e"},
 ]
 
 [package.dependencies]
@@ -4573,4 +4573,4 @@ propcache = ">=0.2.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "430d2a8b0f2bcf1cad26be07b7913df2e15cb38ad3c29cda5c0f8597dd54af2f"
+content-hash = "6061f46c254252b55dcaa06661b75a2a12aecfdffbb7e8197411142053a78f50"
