@@ -78,7 +78,24 @@ RETURN males, females, toFloat(males) / (CASE WHEN females = 0 THEN 1 ELSE femal
 
 @pytest.fixture(scope="function")
 def cypher_statement_iqs_invalid() -> str:
-    return ""
+    """
+    tasks
+    * Verbatim.make = 'Ford'
+    * Verbatim.verbatimContent CONTAINS "cup holder"
+    * Verbatim.model = "Odyssey"
+    * Verbatim.gender = 'male'
+    * Verbatim.gender = 'female'
+    Errors
+    * Verbatim.make = 'Ford'
+    * Verbatim.verbatimContent does not exist
+    """
+    return """
+MATCH (v:Verbatim {make: "Ford", model: "Odyssey"})
+WHERE v.verbatimContent CONTAINS "cup holder"
+WITH SUM(COUNT {MATCH (v:Verbatim) WHERE v.gender = "Male" RETURN v}) AS males,
+    SUM(COUNT {MATCH (v:Verbatim) WHERE v.gender = "Female" RETURN v}) AS females
+RETURN males, females, toFloat(males) / (CASE WHEN females = 0 THEN 1 ELSE females END)  AS maleToFemale
+"""
 
 
 @pytest.fixture(scope="function")
