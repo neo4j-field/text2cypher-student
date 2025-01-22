@@ -24,6 +24,7 @@ from .utils.ranges import (
     create_node_property_values_range,
     create_relationship_property_values_range,
 )
+from .utils.utils import update_task_list_with_property_type
 
 
 def validate_cypher_query_syntax(
@@ -119,7 +120,6 @@ def validate_cypher_query_with_llm(
             "cypher": cypher_statement,
         }
     )
-    print(llm_output)
     if llm_output.errors:
         errors.extend(llm_output.errors)
     if llm_output.filters:
@@ -140,7 +140,6 @@ def validate_cypher_query_with_llm(
             )
             if not mapping:
                 mapping_error = f"Missing value mapping for {filter.node_label} on property {filter.property_key} with value {filter.property_value}"
-                print(mapping_error)
                 mapping_errors.append(mapping_error)
     return {"errors": errors, "mapping_errors": mapping_errors}
 
@@ -151,21 +150,59 @@ def validate_cypher_query_with_schema(
     schema = graph.get_structured_schema
     nodes_and_rels = extract_entities_for_validation(cypher_statement=cypher_statement)
 
-    node_tasks = nodes_and_rels.get("nodes", list())
-    rel_tasks = nodes_and_rels.get("relationships", list())
+    node_tasks = update_task_list_with_property_type(
+        nodes_and_rels.get("nodes", list()), schema, "node"
+    )
+    rel_tasks = update_task_list_with_property_type(
+        nodes_and_rels.get("relationships", list()), schema, "rel"
+    )
 
     errors: List[str] = list()
 
+    print("\n\n", node_tasks, "\n\n", rel_tasks, "\n\n")
     node_prop_name_enum_tasks = node_tasks
-    node_prop_val_enum_tasks = node_tasks
-    node_prop_val_range_tasks = ...
+    node_prop_val_enum_tasks = [
+        n for n in node_tasks if n.get("property_type") == "STRING"
+    ]
+    node_prop_val_range_tasks = [
+        n
+        for n in node_tasks
+        if (n.get("property_type") == "INTEGER" or n.get("property_type") == "FLOAT")
+    ]
 
-    rel_prop_name_enum_tasks = ...
-    rel_prop_val_enum_tasks = ...
-    rel_prop_val_range_tasks = ...
+    rel_prop_name_enum_tasks = rel_tasks
+    rel_prop_val_enum_tasks = [
+        n for n in rel_tasks if n.get("property_type") == "STRING"
+    ]
+    rel_prop_val_range_tasks = [
+        n
+        for n in rel_tasks
+        if (n.get("property_type") == "INTEGER" or n.get("property_type") == "FLOAT")
+    ]
 
-    node_errors = validate_node_property_values_with_enum
-    return {"errors": [], "mapping_errors": []}
+    errors.extend(
+        validate_node_property_names_with_enum(schema, node_prop_name_enum_tasks)
+    )
+    errors.extend(
+        validate_node_property_values_with_enum(schema, node_prop_val_enum_tasks)
+    )
+    errors.extend(
+        validate_node_property_values_with_range(schema, node_prop_val_range_tasks)
+    )
+
+    errors.extend(
+        validate_relationship_property_names_with_enum(schema, rel_prop_name_enum_tasks)
+    )
+    errors.extend(
+        validate_relationship_property_values_with_enum(schema, rel_prop_val_enum_tasks)
+    )
+    errors.extend(
+        validate_relationship_property_values_with_range(
+            schema, rel_prop_val_range_tasks
+        )
+    )
+
+    return {"errors": errors, "mapping_errors": []}
 
 
 def validate_node_property_values_with_enum(
@@ -250,6 +287,54 @@ def validate_relationship_property_values_with_enum(
             node_or_rel="Relationship",
             property_name=t.get("property_name", ""),
             property_value=t.get("property_value", ""),
+        )
+        if prop_val_validation_error:
+            errors.append(prop_val_validation_error)
+
+    return errors
+
+
+def validate_node_property_values_with_range(
+    structure_graph_schema: Dict[str, Any],
+    tasks: List[Dict[str, Union[str, int, float]]],
+) -> List[str]:
+    prop_values_range = create_node_property_values_range(structure_graph_schema)
+
+    errors = list()
+
+    for t in tasks:
+        rel_types = parse_labels_or_types(t.get("rel_types", ""))
+        prop_val_validation_error = validate_property_value_with_range(
+            enum_dict=prop_values_range,
+            labels_or_types=rel_types,
+            node_or_rel="Node",
+            property_name=str(t.get("property_name", "")),
+            property_value=float(t.get("property_value", float("inf"))),
+        )
+        if prop_val_validation_error:
+            errors.append(prop_val_validation_error)
+
+    return errors
+
+
+def validate_relationship_property_values_with_range(
+    structure_graph_schema: Dict[str, Any],
+    tasks: List[Dict[str, Union[str, int, float]]],
+) -> List[str]:
+    prop_values_range = create_relationship_property_values_range(
+        structure_graph_schema
+    )
+
+    errors = list()
+
+    for t in tasks:
+        rel_types = parse_labels_or_types(t.get("rel_types", ""))
+        prop_val_validation_error = validate_property_value_with_range(
+            enum_dict=prop_values_range,
+            labels_or_types=rel_types,
+            node_or_rel="Relationship",
+            property_name=str(t.get("property_name", "")),
+            property_value=float(t.get("property_value", float("inf"))),
         )
         if prop_val_validation_error:
             errors.append(prop_val_validation_error)
@@ -401,21 +486,3 @@ def validate_property_with_enum(
 
     else:
         return None
-
-
-def validate_node_properties_with_range(
-    structure_graph_schema: Dict[str, Any],
-    node_label: str,
-    property_name: str,
-    property_value: Union[int, float],
-) -> str:
-    return ""
-
-
-def validate_relationship_properties_with_range(
-    structure_graph_schema: Dict[str, Any],
-    relationship_type: str,
-    property_name: str,
-    property_value: Union[int, float],
-) -> str:
-    return ""

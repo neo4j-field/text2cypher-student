@@ -18,8 +18,9 @@ def update_task_list_with_property_type(
         label_or_type = "rel_types"
 
     for task in tasks:
-        labels_or_types = parse_labels_or_types(task.get(label_or_type, list()))
-
+        print("TASK: ", task)
+        labels_or_types = parse_labels_or_types(task.get(label_or_type, None))
+        print(task.get(label_or_type, "NONE"), labels_or_types)
         found_types = set()
 
         for lt in labels_or_types:
@@ -30,13 +31,14 @@ def update_task_list_with_property_type(
 
         if len(found_types) > 1:
             print(
-                f"More than 1 type was found for {labels_or_types} and property {task.get("property_name")}"
+                f"More than 1 type was found for {task.get(label_or_type, None)} and property {task.get("property_name")}"
             )
         elif not len(found_types):
             print(
-                f"No type was found for {labels_or_types} and property {task.get("property_name")}"
+                f"No type was found for {task.get(label_or_type, None)} and property {task.get("property_name")}"
             )
 
+        print("FOUND TYPES: ", found_types)
         if len(found_types) > 0:
             t = list(found_types)[0]
             task.update({"property_type": t})

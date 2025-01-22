@@ -37,9 +37,9 @@ def _construct_property_values_enum(
     for label_or_type, props in nodes_or_rels_dict.items():
         sub_dict = dict()
         for prop in props:
-            if prop.get("type", "") == "STRING" and len(prop.get("values", "")) == len(
-                prop.get("distinct_count")
-            ):
+            if prop.get("type", "") == "STRING" and len(
+                prop.get("values", "")
+            ) == prop.get("distinct_count"):
                 sub_dict.update({prop.get("property", ""): prop.get("values", list())})
         result.update({label_or_type: sub_dict})
 

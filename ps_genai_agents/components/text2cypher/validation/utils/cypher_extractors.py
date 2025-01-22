@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import regex as re
 
@@ -42,17 +42,19 @@ def _extract_nodes_and_properties_from_cypher_statement(
     result = list()
 
     nodes = re.findall(get_node_pattern(), cypher_statement)
-
+    used_variables = set()
     # find all variable assignments and process match clauses
     for n in nodes:
         variables = re.findall(get_node_variable_pattern(), n)
-        labels = re.findall(get_node_label_pattern(), n)
-        k = variables[0] if len(variables) > 0 else None
-        label = labels[0] if len(labels) > 0 else None
+        labels = _find_all_node_labels(n)
 
+        k = _parse_element_from_regex_result(regex_result=variables)
+        label = labels[0].strip() if len(labels) > 0 else None
+        print("LABEL: ", label)
         match_props = re.findall(get_property_pattern(), n)
-        match_props = match_props[0] if len(match_props) > 0 else None
-
+        print("MATCH PROPS PRE: ", match_props)
+        match_props = _parse_element_from_regex_result(regex_result=match_props)
+        print("MATCH PROPS: ", match_props)
         # process ids in the MATCH clause
         if match_props is not None:
             match_props_parsed: List[Dict[str, Any]] = (
@@ -60,17 +62,18 @@ def _extract_nodes_and_properties_from_cypher_statement(
             )
             [e.update({"labels": label, "operator": "="}) for e in match_props_parsed]
             result.extend(match_props_parsed)
-        else:
-            result.extend([{"labels": label}])
 
         # find and process property filters based on variables
-        if k is not None:
-            filters: List[Dict[str, Any]] = re.findall(
-                get_variable_operator_property_pattern(variable=k), cypher_statement
+        if k is not None and k not in used_variables:
+            filters: List[Dict[str, Any]] = _find_all_filters(
+                variable=k, cypher_statement=cypher_statement
             )
             [e.update({"labels": label}) for e in filters]
             result.extend(filters)
 
+        used_variables.add(k)
+
+    print("RESULT: ", result)
     return result
 
 
@@ -93,38 +96,37 @@ def _extract_relationships_and_properties_from_cypher_statement(
     result = list()
 
     rels = re.findall(get_relationship_pattern(), cypher_statement)
+    used_variables = set()
 
     # find all variable assignments and process match clauses
     for n in rels:
         variables = re.findall(get_relationship_variable_pattern(), n)
-        rel_type = re.findall(get_relationship_type_pattern(), n)
-        rel_type = rel_type[0] if len(rel_type) > 0 else None
-        k = variables[0] if len(variables) > 0 else None
+        rel_types = _find_all_relationship_types(n)
+
+        rel_type = rel_types[0].strip() if len(rel_types) > 0 else None
+        k = _parse_element_from_regex_result(regex_result=variables)
 
         match_props = re.findall(get_property_pattern(), n)
-        match_props = match_props[0] if len(match_props) > 0 else None
-
+        match_props = _parse_element_from_regex_result(regex_result=match_props)
         # process ids in the MATCH clause
         if match_props is not None:
             match_props_parsed: List[Dict[str, Any]] = (
                 process_match_clause_property_ids(match_props)
             )
             [
-                e.update({"rel_type": rel_type, "operator": "="})
+                e.update({"rel_types": rel_type, "operator": "="})
                 for e in match_props_parsed
             ]
             result.extend(match_props_parsed)
-        else:
-            result.extend([{"rel_type": rel_type}])
 
         # find and process property filters based on variables
-        if k is not None:
-            filters: List[Dict[str, Any]] = re.findall(
-                get_variable_operator_property_pattern(variable=k), cypher_statement
+        if k is not None and k not in used_variables:
+            filters: List[Dict[str, Any]] = _find_all_filters(
+                variable=k, cypher_statement=cypher_statement
             )
-            [e.update({"rel_type": rel_type}) for e in filters]
+            [e.update({"rel_types": rel_type}) for e in filters]
             result.extend(filters)
-
+        used_variables.add(k)
     return result
 
 
@@ -160,8 +162,11 @@ def _process_prop_val(prop: str) -> str:
     return prop.replace("'", "")
 
 
-def parse_labels_or_types(labels_str: str) -> List[str]:
+def parse_labels_or_types(labels_str: Optional[str]) -> List[str]:
     """Parse labels or types in cases with & / | and !."""
+
+    if labels_str is None:
+        return list()
 
     if "&" in labels_str:
         labels = [l.strip() for l in labels_str.split("&")]
@@ -175,3 +180,39 @@ def parse_labels_or_types(labels_str: str) -> List[str]:
     labels = [l for l in labels if not l.startswith("!")]
 
     return labels
+
+
+def _find_all_filters(variable: str, cypher_statement: str) -> List[Dict[str, Any]]:
+    res: List[Tuple[str, str, Any]] = re.findall(
+        get_variable_operator_property_pattern(variable=variable), cypher_statement
+    )
+
+    return [
+        {
+            "property_name": _process_prop_key(n[0]),
+            "operator": n[1].strip(),
+            "property_value": _process_prop_val(n[2]),
+        }
+        for n in res
+    ]
+
+
+def _find_all_node_labels(node: str) -> List[str]:
+    return [n.strip() for n in re.findall(get_node_label_pattern(), node)]
+
+
+def _find_all_relationship_types(relationship: str) -> List[str]:
+    return [
+        r.strip() for r in re.findall(get_relationship_type_pattern(), relationship)
+    ]
+
+
+def _parse_element_from_regex_result(regex_result: List[str]) -> Optional[str]:
+    """The `regex_result` should be a single element list."""
+
+    parsed = regex_result[0] if len(regex_result) > 0 else None
+    print("PARSED: ", regex_result, parsed or "NONE")
+    if not parsed:
+        return None
+    else:
+        return parsed

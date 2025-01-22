@@ -90,14 +90,12 @@ def test_extract_nodes_and_properties_from_cypher_statement_1(
     ents = _extract_nodes_and_properties_from_cypher_statement(cypher_statement_1)
 
     answer = [
-        {"labels": "Node"},
         {"labels": None, "property_name": "id", "property_value": "001"},
     ]
 
-    no_labels = [x for x in answer if x.get("labels", "") is None]
     assert len(ents) == len(answer)
-    assert no_labels[0].get("property_name") == "id"
-    assert no_labels[0].get("property_value") == "001"
+    assert ents[0].get("property_name") == "id"
+    assert ents[0].get("property_value") == "001"
 
 
 def test_extract_relationships_and_properties_from_cypher_statement_1(
@@ -108,10 +106,10 @@ def test_extract_relationships_and_properties_from_cypher_statement_1(
     )
 
     answer = [
-        {"rel_type": "RELATIONSHIP", "property_name": None, "property_value": None}
+        {"rel_types": "RELATIONSHIP", "property_name": "id", "property_value": "1"}
     ]
 
     assert len(ents) == len(answer)
-    assert answer[0].get("rel_type") == "RELATIONSHIP"
-    assert answer[0].get("property_name", "wrong") is None
-    assert answer[0].get("property_value", "wrong") is None
+    assert ents[0].get("rel_types") == "RELATIONSHIP"
+    assert ents[0].get("property_name") == "id"
+    assert ents[0].get("property_value") == "1"

@@ -22,12 +22,12 @@ def get_relationship_variable_pattern() -> re.Pattern:
 
 def get_relationship_pattern() -> re.Pattern:
     """Capture a Relationship without direction."""
-    return re.compile(r"-\[(.*)\]-")
+    return re.compile(r"-\[([\w\:\{\s\"\'\}\,\|\&]+)\]-")
 
 
 def get_node_pattern() -> re.Pattern:
     """Capture a Node."""
-    return re.compile(r"\(.+?\)")
+    return re.compile(r"(\([\w\:\{\s\"\'\}\,\|\&]+\))")
 
 
 def get_node_label_pattern() -> re.Pattern:
@@ -68,4 +68,4 @@ def get_node_relationship_node_pattern() -> re.Pattern:
 
 
 def get_relationship_type_pattern() -> re.Pattern:
-    return re.compile(r":(?P<relation_type>.+?)?(\{.+\})?]")
+    return re.compile(r":([\w\|\&\:]+?)[\]\s\{]+")

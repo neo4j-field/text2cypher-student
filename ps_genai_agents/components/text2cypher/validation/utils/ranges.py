@@ -27,9 +27,8 @@ def _construct_property_values_range(
                 sub_dict.update(
                     {
                         prop.get("property", ""): (
-                            prop.get(
-                                "min", float("-inf"), prop.get("max", float("inf"))
-                            )
+                            prop.get("min", float("-inf")),
+                            prop.get("max", float("inf")),
                         )
                     }
                 )

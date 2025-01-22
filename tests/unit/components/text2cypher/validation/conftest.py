@@ -5,7 +5,7 @@ import pytest
 
 @pytest.fixture(scope="function")
 def cypher_statement_1() -> str:
-    return "match (n:Node)-[r:RELATIONSHIP]->(m {id:'001'}) return n, r, m limit 5"
+    return "match (n:Node)-[r:RELATIONSHIP {id:'1'}]->(m {id:'001'}) return n, r, m limit 5"
 
 
 @pytest.fixture(scope="function")
