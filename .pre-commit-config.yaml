@@ -13,6 +13,10 @@ repos:
         exclude: 'tests/.*|docs/.*|scripts/.*|archive/.*|app.py'
         entry: mypy
         language: python
+        language_versions:
+        - python3.10
+        - python3.11
+        - python3.12
         types: [ python ]
         stages: [ commit, push ]
         args: [--strict, --ignore-missing-imports, --allow-subclassing-any, --allow-untyped-calls]
