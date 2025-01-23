@@ -14,13 +14,12 @@ repos:
         language: python
         types: [python]
         stages: [commit]
-        args: [--strict, --ignore-missing-imports, --allow-subclassing-any, --allow-untyped-calls]
+        args: [--strict, --ignore-missing-imports, --allow-subclassing-any, --allow-untyped-calls, --python-version 3.10]
         additional_dependencies:
           - pytest
           - pydantic
           - types-PyYAML
         require_serial: true
-        python_version: python3.10
 
       - id: mypy
         name: Mypy Python 3.11
@@ -28,13 +27,12 @@ repos:
         language: python
         types: [python]
         stages: [commit]
-        args: [--strict, --ignore-missing-imports, --allow-subclassing-any, --allow-untyped-calls]
+        args: [--strict, --ignore-missing-imports, --allow-subclassing-any, --allow-untyped-calls, --python-version 3.11]
         additional_dependencies:
           - pytest
           - pydantic
           - types-PyYAML
         require_serial: true
-        python_version: python3.11
 
       - id: mypy
         name: Mypy Python 3.12
@@ -42,13 +40,12 @@ repos:
         language: python
         types: [python]
         stages: [commit]
-        args: [--strict, --ignore-missing-imports, --allow-subclassing-any, --allow-untyped-calls]
+        args: [--strict, --ignore-missing-imports, --allow-subclassing-any, --allow-untyped-calls, --python-version 3.12]
         additional_dependencies:
           - pytest
           - pydantic
           - types-PyYAML
         require_serial: true
-        python_version: python3.12
   - repo: local
     hooks:
       - id: ruff-lint-isort
