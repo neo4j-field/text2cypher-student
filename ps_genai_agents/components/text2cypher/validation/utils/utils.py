@@ -29,11 +29,11 @@ def update_task_list_with_property_type(
 
         if len(found_types) > 1:
             print(
-                f"More than 1 type was found for {task.get(label_or_type, None)} and property {task.get("property_name")}"
+                f"More than 1 type was found for {task.get(label_or_type, None)} and property {task.get('property_name')}"
             )
         elif not len(found_types):
             print(
-                f"No type was found for {task.get(label_or_type, None)} and property {task.get("property_name")}"
+                f"No type was found for {task.get(label_or_type, None)} and property {task.get('property_name')}"
             )
 
         if len(found_types) > 0:

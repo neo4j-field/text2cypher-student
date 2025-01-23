@@ -165,15 +165,15 @@ def parse_labels_or_types(labels_str: Optional[str]) -> List[str]:
         return list()
 
     if "&" in labels_str:
-        labels = [l.strip() for l in labels_str.split("&")]
+        labels = [lbl.strip() for lbl in labels_str.split("&")]
     elif "|" in labels_str:
-        labels = [l.strip() for l in labels_str.split("|")]
+        labels = [lbl.strip() for lbl in labels_str.split("|")]
     elif ":" in labels_str:
-        labels = [l.strip() for l in labels_str.split(":")]
+        labels = [lbl.strip() for lbl in labels_str.split(":")]
     else:
         labels = [labels_str]
 
-    labels = [l for l in labels if not l.startswith("!")]
+    labels = [lbl for lbl in labels if not lbl.startswith("!")]
 
     return labels
 
