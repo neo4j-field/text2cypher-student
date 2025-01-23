@@ -2,7 +2,7 @@ from typing import Any, Callable, Dict
 
 import pandas as pd
 
-from ....components.state import OverallState, VisualizationState
+from ....components.state import VisualizationState
 from ....components.visualize.generate_chart.charts import (
     create_bar_plot,
     create_line_plot,

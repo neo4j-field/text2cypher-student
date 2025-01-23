@@ -5,7 +5,7 @@ from langchain_core.language_models import BaseChatModel
 from ...components.models import SubQuestion
 from ...components.query_parser.models import QueryParserOutput
 from ...components.query_parser.prompts import create_query_parser_prompt_template
-from ...components.state import InputState, OverallState
+from ...components.state import InputState
 
 query_parser_prompt = create_query_parser_prompt_template()
 

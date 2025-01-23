@@ -9,7 +9,7 @@ from langchain_neo4j import Neo4jGraph
 
 from ...components.guardrails.models import GuardrailsOutput
 from ...components.guardrails.prompts import create_guardrails_prompt_template
-from ...components.state import InputState, OverallState
+from ...components.state import InputState
 
 
 def create_guardrails_node(

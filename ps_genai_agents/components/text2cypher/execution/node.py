@@ -6,7 +6,7 @@ from typing import Any, Callable, Dict
 
 from langchain_neo4j import Neo4jGraph
 
-from ....components.state import CypherState, OverallState
+from ....components.state import CypherState
 
 
 def create_text2cypher_execution_node(
