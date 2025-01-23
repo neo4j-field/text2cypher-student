@@ -99,6 +99,26 @@ RETURN males, females, toFloat(males) / (CASE WHEN females = 0 THEN 1 ELSE femal
 
 
 @pytest.fixture(scope="function")
+def cypher_statement_patient_journey_valid() -> str:
+    """
+    tasks
+    * Patient.id exists
+    ignored
+
+    """
+    return """
+MATCH (p:Patient {id:"f9437ac7"})-[:HAS_ENCOUNTER]->(e)
+WHERE apoc.node.degree.in(e,'NEXT') = 0
+WITH e
+MATCH (e)-[:NEXT*]->(e2)
+with e as e1, collect(e2) as erest
+with e1 + erest as encounters
+unwind encounters as e
+return e.class as encounterType, e.description as encounterDescription, e.date as startDate, e.end as endDate
+"""
+
+
+@pytest.fixture(scope="function")
 def structured_schema_1() -> Dict[str, Dict[str, List[Dict[str, Any]]]]:
     return {
         "node_props": {

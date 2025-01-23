@@ -44,7 +44,6 @@ def test_extract_nodes_and_properties_from_cypher_statement_iqs_valid(
     res = _extract_nodes_and_properties_from_cypher_statement(
         cypher_statement_iqs_valid
     )
-    print(res)
     assert len(res) == 5
 
 
@@ -53,5 +52,23 @@ def test_extract_relationships_and_properties_from_cypher_statement_iqs_valid(
 ) -> None:
     res = _extract_relationships_and_properties_from_cypher_statement(
         cypher_statement_iqs_valid
+    )
+    assert len(res) == 0
+
+
+def test_extract_nodes_and_properties_from_cypher_statement_patient_journey_valid(
+    cypher_statement_patient_journey_valid: str,
+) -> None:
+    res = _extract_nodes_and_properties_from_cypher_statement(
+        cypher_statement_patient_journey_valid
+    )
+    assert len(res) == 1
+
+
+def test_extract_relationships_and_properties_from_cypher_statement_patient_journey_valid(
+    cypher_statement_patient_journey_valid: str,
+) -> None:
+    res = _extract_relationships_and_properties_from_cypher_statement(
+        cypher_statement_patient_journey_valid
     )
     assert len(res) == 0

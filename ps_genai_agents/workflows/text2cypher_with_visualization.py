@@ -31,9 +31,30 @@ def create_text2cypher_with_visualization_workflow(
     graph: Neo4jGraph,
     scope_description: Optional[str] = None,
     cypher_query_yaml_file_path: str = "./",
+    llm_cypher_validation: bool = True,
+    max_cypher_generation_attempts: int = 3,
+    attempt_cypher_execution_on_final_attempt: bool = False,
 ) -> CompiledStateGraph:
     """
     Create a Text2Cypher workflow with visualization capabilities using LangGraph.
+
+    Parameters
+    ----------
+    llm : BaseChatModel
+        The LLM to use for processing
+    graph : Neo4jGraph
+        The Neo4j graph wrapper.
+    scope_description: Optional[str], optional
+        A short description of the application scope, by default None
+    cypher_query_yaml_path: str, optional
+        The file path to the yaml file containing question & query pairs, by default './'
+    llm_validation : bool, optional
+        Whether to perform LLM validation with the provided LLM, by default True
+    max_cypher_generation_attempts: int, optional
+        The max number of allowed attempts to generate valid Cypher, by default 3
+    attempt_cypher_execution_on_final_attempt, bool, optional
+        THIS MAY BE DANGEROUS.
+        Whether to attempt Cypher execution on the last attempt, regardless of if the Cypher contains errors, by default False
 
     Returns
     -------
@@ -46,7 +67,12 @@ def create_text2cypher_with_visualization_workflow(
     )
     query_parser = create_query_parser_node(llm=llm)
     text2cypher = create_text2cypher_agent(
-        llm=llm, graph=graph, cypher_query_yaml_file_path=cypher_query_yaml_file_path
+        llm=llm,
+        graph=graph,
+        cypher_query_yaml_file_path=cypher_query_yaml_file_path,
+        llm_validation=llm_cypher_validation,
+        max_attempts=max_cypher_generation_attempts,
+        attempt_cypher_execution_on_final_attempt=attempt_cypher_execution_on_final_attempt,
     )
     gather_cypher = create_gather_cypher_node()
     gather_visualizations = create_gather_visualizations_node()

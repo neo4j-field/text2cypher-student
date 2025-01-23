@@ -13,6 +13,7 @@ class CypherState(TypedDict):
     errors: List[str]
     records: List[Dict[str, Any]]
     next_action_cypher: str
+    attempts: int
     steps: Annotated[List[str], add]
 
 

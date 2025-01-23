@@ -50,11 +50,8 @@ def _extract_nodes_and_properties_from_cypher_statement(
 
         k = _parse_element_from_regex_result(regex_result=variables)
         label = labels[0].strip() if len(labels) > 0 else None
-        print("LABEL: ", label)
         match_props = re.findall(get_property_pattern(), n)
-        print("MATCH PROPS PRE: ", match_props)
         match_props = _parse_element_from_regex_result(regex_result=match_props)
-        print("MATCH PROPS: ", match_props)
         # process ids in the MATCH clause
         if match_props is not None:
             match_props_parsed: List[Dict[str, Any]] = (
@@ -73,7 +70,6 @@ def _extract_nodes_and_properties_from_cypher_statement(
 
         used_variables.add(k)
 
-    print("RESULT: ", result)
     return result
 
 
@@ -211,7 +207,6 @@ def _parse_element_from_regex_result(regex_result: List[str]) -> Optional[str]:
     """The `regex_result` should be a single element list."""
 
     parsed = regex_result[0] if len(regex_result) > 0 else None
-    print("PARSED: ", regex_result, parsed or "NONE")
     if not parsed:
         return None
     else:
