@@ -1,6 +1,7 @@
 from typing import Any, Callable, Dict
 
 from langchain_core.language_models import BaseChatModel
+from langchain_core.runnables.base import Runnable
 
 from ...components.models import SubQuestion
 from ...components.query_parser.models import QueryParserOutput
@@ -29,8 +30,8 @@ def create_query_parser_node(
         The LangGraph node.
     """
 
-    query_parser_chain = query_parser_prompt | llm.with_structured_output(
-        QueryParserOutput
+    query_parser_chain: Runnable[Dict[str, Any], Any] = (
+        query_parser_prompt | llm.with_structured_output(QueryParserOutput)
     )
 
     def query_parser(state: InputState) -> Dict[str, Any]:
@@ -39,7 +40,7 @@ def create_query_parser_node(
         """
 
         if not ignore_node:
-            query_parser_output = query_parser_chain.invoke(
+            query_parser_output: QueryParserOutput = query_parser_chain.invoke(
                 {"question": state.get("question")}
             )
         else:

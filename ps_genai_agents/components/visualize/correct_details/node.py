@@ -1,6 +1,7 @@
 from typing import Any, Callable, Dict
 
 from langchain_core.language_models import BaseChatModel
+from langchain_core.runnables.base import Runnable
 
 from ....components.state import VisualizationState
 from ....components.visualize.correct_details.prompts import (
@@ -28,8 +29,8 @@ def create_correct_chart_details_node(
         The LangGraph node.
     """
 
-    chart_details_chain = correct_chart_details_prompt | llm.with_structured_output(
-        ChartDetailsOutput
+    chart_details_chain: Runnable[Dict[str, Any], Any] = (
+        correct_chart_details_prompt | llm.with_structured_output(ChartDetailsOutput)
     )
 
     def correct_chart_details(state: VisualizationState) -> Dict[str, Any]:

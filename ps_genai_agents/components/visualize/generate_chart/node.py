@@ -5,6 +5,7 @@ import pandas as pd
 from ....components.state import VisualizationState
 from ....components.visualize.generate_chart.charts import (
     create_bar_plot,
+    create_empty_plot,
     create_line_plot,
     create_scatter_plot,
 )
@@ -39,7 +40,7 @@ def create_chart_generation_node() -> Callable[[VisualizationState], Dict[str, A
             case "bar":
                 chart = create_bar_plot(**viz_args)
             case _:
-                chart = None
+                chart = create_empty_plot()
 
         steps = state.get("steps", list())
         steps.append("generate_chart")

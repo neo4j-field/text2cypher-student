@@ -5,6 +5,7 @@ This code is based on content found in the LangGraph documentation: https://pyth
 from typing import Any, Callable, Dict, Optional
 
 from langchain_core.language_models import BaseChatModel
+from langchain_core.runnables.base import Runnable
 from langchain_neo4j import Neo4jGraph
 
 from ...components.guardrails.models import GuardrailsOutput
@@ -39,14 +40,18 @@ def create_guardrails_node(
         graph=graph, scope_description=scope_description
     )
 
-    guardrails_chain = guardrails_prompt | llm.with_structured_output(GuardrailsOutput)
+    guardrails_chain: Runnable[Dict[str, Any], Any] = (
+        guardrails_prompt | llm.with_structured_output(GuardrailsOutput)
+    )
 
     def guardrails(state: InputState) -> Dict[str, Any]:
         """
         Decides if the question is in scope.
         """
 
-        guardrails_output = guardrails_chain.invoke({"question": state.get("question")})
+        guardrails_output: GuardrailsOutput = guardrails_chain.invoke(
+            {"question": state.get("question")}
+        )
         summary = None
         if guardrails_output.decision == "end":
             summary = "This question is out of scope. Therefore I cannot answer this question."

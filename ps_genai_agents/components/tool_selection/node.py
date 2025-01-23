@@ -1,6 +1,7 @@
 from typing import Any, Callable, Dict
 
 from langchain_core.language_models import BaseChatModel
+from langchain_core.runnables.base import Runnable
 
 from ...components.state import OverallState
 from ...components.tool_selection.models import ToolSelectionOutput
@@ -28,8 +29,8 @@ def create_tool_selection_node(
         The LangGraph node.
     """
 
-    generate_tool_select = generate_tool_select_prompt | llm.with_structured_output(
-        ToolSelectionOutput
+    generate_tool_select: Runnable[Dict[str, Any], Any] = (
+        generate_tool_select_prompt | llm.with_structured_output(ToolSelectionOutput)
     )
 
     def tool_select(state: OverallState) -> Dict[str, Any]:
@@ -37,7 +38,7 @@ def create_tool_selection_node(
         Select an appropriate tool to perform requested task.
         """
 
-        response = generate_tool_select.invoke(
+        response: ToolSelectionOutput = generate_tool_select.invoke(
             {
                 "question": state.get("question"),
                 "does_summary_exist": state.get("summary") is not None,

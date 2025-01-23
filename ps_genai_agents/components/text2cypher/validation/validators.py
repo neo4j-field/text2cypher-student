@@ -4,7 +4,7 @@ This file contains Cypher validators that may be used in the Text2Cypher validat
 
 from typing import Any, Dict, List, Literal, Optional, Set, Tuple, Union
 
-from langchain_core.runnables.base import RunnableSerializable
+from langchain_core.runnables.base import Runnable
 from langchain_neo4j import Neo4jGraph
 from langchain_neo4j.chains.graph_qa.cypher_utils import CypherQueryCorrector, Schema
 from neo4j.exceptions import CypherSyntaxError
@@ -73,7 +73,7 @@ def correct_cypher_query_relationship_direction(
     # Cypher query corrector is experimental
     corrector_schema = [
         Schema(el["start"], el["type"], el["end"])
-        for el in graph.structured_schema.get("relationships")
+        for el in graph.structured_schema.get("relationships", list())
     ]
     cypher_query_corrector = CypherQueryCorrector(corrector_schema)
 
@@ -83,7 +83,7 @@ def correct_cypher_query_relationship_direction(
 
 
 def validate_cypher_query_with_llm(
-    validate_cypher_chain: RunnableSerializable,
+    validate_cypher_chain: Runnable[Dict[str, Any], Any],
     question: str,
     graph: Neo4jGraph,
     cypher_statement: str,

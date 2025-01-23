@@ -33,7 +33,7 @@ def create_text2cypher_execution_node(
         Executes the given Cypher statement.
         """
 
-        records = graph.query(state.get("statement"))
+        records = graph.query(state.get("statement", ""))
         return {
             "cyphers": [
                 {

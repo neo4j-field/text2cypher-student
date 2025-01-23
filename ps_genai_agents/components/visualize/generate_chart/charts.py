@@ -36,3 +36,8 @@ def create_line_plot(
     plt.xticks(rotation=90)
 
     return fig
+
+
+def create_empty_plot() -> Figure:
+    fig, ax = plt.subplots()
+    return fig

@@ -37,6 +37,14 @@ format:
 
 
 ######################
+# MYPY CHECK
+######################
+
+mypy:
+	poetry run mypy --strict --ignore-missing-imports --allow-subclassing-any --allow-untyped-calls .
+
+
+######################
 # HELP
 ######################
 
