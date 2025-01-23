@@ -54,6 +54,7 @@ no_namespace_packages = true
 [tool.ruff]
 target-version = "py310"
 show-fixes = true
+exclude = ["archive/"]
 
 [tool.coverage.paths]
 source = ["ps_genai_agents"]
