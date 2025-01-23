@@ -50,7 +50,7 @@ def create_text2cypher_correction_node(
                 "schema": graph.schema,
             }
         )
-        print("CORRECTED CYPHER: \n", corrected_cypher, "\n\n")
+        # print("CORRECTED CYPHER: \n", corrected_cypher, "\n\n")
         return {
             "next_action_cypher": "validate_cypher",
             "statement": corrected_cypher,

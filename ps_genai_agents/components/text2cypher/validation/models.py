@@ -17,7 +17,8 @@ class Property(BaseModel):
     )
     property_key: str = Field(description="The key of the property being filtered.")
     property_value: str = Field(
-        description="The value that the property is being matched against."
+        description="The value that the property is being matched against.",
+        coerce_numbers_to_str=True,
     )
 
 
