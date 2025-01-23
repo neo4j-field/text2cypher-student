@@ -159,7 +159,7 @@ def validate_cypher_query_with_schema(
 
     errors: List[str] = list()
 
-    print("\n\n", node_tasks, "\n\n", rel_tasks, "\n\n")
+    # print("\n\n", node_tasks, "\n\n", rel_tasks, "\n\n")
     node_prop_name_enum_tasks = node_tasks
     node_prop_val_enum_tasks = [
         n for n in node_tasks if n.get("property_type") == "STRING"

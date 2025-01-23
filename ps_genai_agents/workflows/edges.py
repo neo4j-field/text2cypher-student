@@ -54,9 +54,11 @@ def viz_mapper_edge(state: OverallState) -> List[Send]:
         if subquestion.requires_visualization
     ]
     tasks = list()
-
     for idx in indexes:
-        cypher_state: CypherState = state.get("cyphers", list())[idx]
+        try:
+            cypher_state: CypherState = state.get("cyphers", list())[idx]
+        except Exception as e:
+            continue
         task = Send(
             "visualize",
             {
