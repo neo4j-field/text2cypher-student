@@ -9,21 +9,46 @@ repos:
     rev: v1.10.0
     hooks:
       - id: mypy
-        name: Mypy Type Check
-        exclude: 'tests/.*|docs/.*|scripts/.*|archive/.*|app.py'
+        name: Mypy Python 3.10
         entry: mypy
         language: python
-        language_versions:
-        - python3.10
-        - python3.11
-        - python3.12
-        types: [ python ]
-        stages: [ commit, push ]
+        types: [python]
+        stages: [commit]
         args: [--strict, --ignore-missing-imports, --allow-subclassing-any, --allow-untyped-calls]
         additional_dependencies:
           - pytest
           - pydantic
           - types-PyYAML
+        require_serial: true
+        python_version: python3.10
+
+      - id: mypy
+        name: Mypy Python 3.11
+        entry: mypy
+        language: python
+        types: [python]
+        stages: [commit]
+        args: [--strict, --ignore-missing-imports, --allow-subclassing-any, --allow-untyped-calls]
+        additional_dependencies:
+          - pytest
+          - pydantic
+          - types-PyYAML
+        require_serial: true
+        python_version: python3.11
+
+      - id: mypy
+        name: Mypy Python 3.12
+        entry: mypy
+        language: python
+        types: [python]
+        stages: [commit]
+        args: [--strict, --ignore-missing-imports, --allow-subclassing-any, --allow-untyped-calls]
+        additional_dependencies:
+          - pytest
+          - pydantic
+          - types-PyYAML
+        require_serial: true
+        python_version: python3.12
   - repo: local
     hooks:
       - id: ruff-lint-isort
