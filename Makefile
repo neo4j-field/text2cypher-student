@@ -4,13 +4,13 @@
 all: help
 
 test:
-	poetry run python3 -m pytest tests
+	poetry run pytest tests
 
 test_integration:
-	poetry run pytest python3 -m tests/integration
+	poetry run pytest tests/integration
 
 test_unit:
-	poetry run pytest python3 -m tests/unit
+	poetry run pytest tests/unit
 
 init:
 	poetry install --with dev, ui
@@ -33,6 +33,15 @@ init_workshop:
 format:
 	poetry run ruff format
 	poetry run ruff check --select I . --fix
+	poetry run ruff check .
+
+
+######################
+# MYPY CHECK
+######################
+
+mypy:
+	poetry run mypy --strict --ignore-missing-imports --allow-subclassing-any --allow-untyped-calls .
 
 
 ######################

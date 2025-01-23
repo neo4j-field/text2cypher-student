@@ -96,7 +96,7 @@ def main() -> None:
             for qry in cf["post_ingest"]:
                 print(f"\nRunning: {qry}")
                 graph.execute_write_query(qry, database=dbname)
-        except Exception as e:
+        except Exception:
             print_("ERROR")
             traceback.print_exc()
         duration_sec = time.time() - start
