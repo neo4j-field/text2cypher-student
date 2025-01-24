@@ -58,6 +58,7 @@ def viz_mapper_edge(state: OverallState) -> List[Send]:
         try:
             cypher_state: CypherState = state.get("cyphers", list())[idx]
         except Exception as e:
+            print(f"Viz mapper edge error: {e}")
             continue
         task = Send(
             "visualize",
