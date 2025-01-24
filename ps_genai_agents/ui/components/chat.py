@@ -84,7 +84,7 @@ def prepare_csv(cypher_result: List[Dict[str, Any]]) -> Any:
     return pd.DataFrame(data=cypher_result).to_csv(index=index).encode("utf-8")
 
 
-@st.experimental_fragment()  # type: ignore[misc]
+@st.fragment()  # type: ignore
 def download_csv_button(cypher_results: List[List[Dict[str, Any]]]) -> None:
     try:
         if len(cypher_results) > 1:
