@@ -6,6 +6,6 @@
        "What are the most common apple types?",
        "What are the suppliers of TLA 86447~6814?",
        "What are the suppliers of TLA 86447~6814 and what are all child items of finished good uid 97756?",
-       "What are the suppliers who operate outside the US and what are their TLA counts? visualize the result."
+       "How many suppliers operate outside the US and what are the TLA counts of each country? visualize the result."
     ]
 }
