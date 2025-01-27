@@ -1,0 +1,11 @@
+{
+    "title": "Discrete Manufacturing GenAI Demo",
+    "scope_description": "This application may answer questions related to Manufacturing Bill of Materials, discrete manufacturing and supply chain management.",
+    "cypher_query_yaml_file_path": "data/discrete_manufacturing/queries/queries.yml",
+    "example_questions": [
+       "What are the most common apple types?",
+       "What are the suppliers of TLA 86447~6814?",
+       "What are the suppliers of TLA 86447~6814 and what are all child items of finished good uid 97756?",
+       "What are the suppliers who operate outside the US and what are their TLA counts? visualize the result."
+    ]
+}
