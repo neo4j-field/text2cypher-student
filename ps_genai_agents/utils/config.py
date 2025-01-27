@@ -1,5 +1,6 @@
-from typing import Any, Dict
 import json
+from typing import Any, Dict
+
 
 def load_config(config_file_path: str) -> Dict[str, Any]:
     """
@@ -15,7 +16,7 @@ def load_config(config_file_path: str) -> Dict[str, Any]:
     Dict[str, Any]
         A Python dictionary containing the configuration.
     """
-    
+
     assert config_file_path.lower().endswith(
         ".json"
     ), f"provided file is not JSON | {config_file_path}"
