@@ -25,6 +25,25 @@ def create_final_answer_node() -> Callable[[OverallState], Dict[str, Any]]:
 
         ERROR = "Unable to answer the question."
 
-        return {"answer": state.get("summary", ERROR), "steps": ["final_answer"]}
+        answer = state.get("summary", ERROR)
+
+        history_record = {
+            "question": state.get("question", ""),
+            "answer": answer,
+            "cyphers": [
+                {
+                    "subquestion": c.get("subquestion", ""),
+                    "statement": c.get("statement", ""),
+                    "records": c.get("records", list()),
+                }
+                for c in state.get("cyphers", list())
+            ],
+        }
+
+        return {
+            "answer": answer,
+            "steps": ["final_answer"],
+            "history": [history_record],
+        }
 
     return final_answer
