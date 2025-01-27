@@ -1,0 +1,75 @@
+queries:
+  - question: What are the cost types associated with TLA 97756~37830?
+    cql: |-
+      MATCH (:TLA {tla_item_uid: "97756~37830"})--(:Model)--(c:Cost)
+      RETURN DISTINCT COLLECT(c.cost_type) as cost_type
+  - question: What are the top 10 items shared between the TLAs?
+    cql: |-
+      MATCH (a:Item)<-[r:HAS_CHILD]-()
+      WITH a, collect(distinct r.tla_uid) AS tla_uids
+      RETURN a.item_uid,a.description,tla_uids, size(tla_uids) AS no_of_tlas_used 
+      ORDER BY no_of_tlas_used DESC
+      LIMIT 10
+  - question: What are buy items used in the most TLAs?
+    cql: |-
+      MATCH (a:Item)<-[r:HAS_CHILD]-()
+      WHERE a.planning_make_buy_code_description="Buy"
+      WITH a, collect(distinct r.tla_uid) AS tla_uids
+      RETURN a.item_uid,a.description,tla_uids, size(tla_uids) AS no_of_tlas_used 
+      ORDER BY no_of_tlas_used DESC
+      LIMIT 10
+  - question: What are make items that are used in the most TLAs?
+    cql: |-
+      MATCH (a:Item)<-[r:HAS_CHILD]-()
+      WHERE a.planning_make_buy_code_description="Make"
+      WITH a, collect(distinct r.tla_uid) AS tla_uids
+      RETURN a.item_uid,a.description,tla_uids, size(tla_uids) AS no_of_tlas_used 
+      ORDER BY no_of_tlas_used DESC
+      LIMIT 10
+  - question: 'What are the shared items between these TLAs: 41938, 64911'
+    cql: |-
+      WITH ["41938","64911"] AS req_tla_uids
+      MATCH (a:Item)<-[r:HAS_CHILD]-()
+      WITH a, collect(distinct r.tla_uid) AS tla_uids,req_tla_uids
+      WITH a, tla_uids, req_tla_uids
+      WHERE size(apoc.coll.subtract(req_tla_uids,tla_uids))=0
+      RETURN collect(a.item_uid) AS shared_items
+  - question: What are the top 5 parts suppliers?
+    cql: |-
+      MATCH (s:Supplier)<-[:HAS_SUPPLIER]-(i)
+      WITH s, count(distinct i) AS items_count_supplied
+      RETURN s.supplier_name AS supplier_name, s.vendor_site_code AS vendor_site_code, s.country AS country, items_count_supplied 
+      ORDER BY items_count_supplied DESC
+      LIMIT 10
+  - question: What are the top 5 suppliers in terms of TLA count?
+    cql: |-
+      MATCH (s:Supplier)<-[:HAS_SUPPLIER]-(i)<-[r:HAS_CHILD]-()
+      WITH s, count(distinct r.tla_uid) AS tlas_count_using_current_supplier
+      RETURN s.supplier_name AS supplier_name, s.vendor_site_code AS vendor_site_code, s.country AS country, tlas_count_using_current_supplier 
+      ORDER BY tlas_count_using_current_supplier DESC
+      LIMIT 10
+  - question: What are the top 5 TLAs that have parts sourced within USA?
+    cql: |-
+      MATCH (s:Supplier)<-[:HAS_SUPPLIER]-(i)<-[r:HAS_CHILD]-()
+      WITH s, r.tla_uid AS tla_uid
+      WHERE s.country="US"
+      RETURN tla_uid,count(distinct s) AS no_of_suppliers  
+      ORDER BY no_of_suppliers DESC
+      LIMIT 5
+  - question: What are the top 5 TLAs that have parts sourced outside USA?
+    cql: |-
+      MATCH (s:Supplier)<-[:HAS_SUPPLIER]-(i)<-[r:HAS_CHILD]-()
+      WITH s, r.tla_uid AS tla_uid
+      WHERE s.country<>"US"
+      RETURN tla_uid,count(distinct s) AS no_of_suppliers  
+      ORDER BY no_of_suppliers DESC
+      LIMIT 5
+  - question: What are the buy vs make item counts for each TLA?
+    cql: |-
+      MATCH (i:Item)<-[r:HAS_CHILD]-()
+      WITH DISTINCT i, r.tla_uid AS tla_uid
+      WITH tla_uid,i.planning_make_buy_code_description AS indicator
+      WITH tla_uid, CASE WHEN indicator="Make" THEN 1 ELSE 0 END AS make_indicator,CASE WHEN indicator="Buy" THEN 1 ELSE 0 END AS buy_indicator
+      RETURN tla_uid, sum(make_indicator) AS no_of_make_parts,sum(buy_indicator) AS no_of_buy_parts;
+
+
