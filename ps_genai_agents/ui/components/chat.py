@@ -29,14 +29,15 @@ def append_llm_response(question: str) -> None:
 
             message_placeholder.markdown(response.get("answer", ""))
 
-            show_response_information(response=response)
+            show_visualizations(response=response)
+            show_cypher_response_information(response=response)
 
     st.session_state.get("messages", []).append(
         {"role": "assistant", "content": response}
     )
 
 
-def show_response_information(response: OutputState) -> None:
+def show_cypher_response_information(response: OutputState) -> None:
     if response.get("cyphers") and len(response.get("cyphers", list())) > 0:
         # a list of record lists
         records_lists: List[List[Dict[str, Any]]] = [
@@ -61,6 +62,22 @@ def show_response_information(response: OutputState) -> None:
             ]
 
 
+def show_visualizations(response: OutputState) -> None:
+    if (
+        response.get("visualizations")
+        and len(response.get("visualizations", list())) > 0
+    ):
+        with st.expander("Visuals", expanded=True):
+            [
+                (
+                    st.write(c.get("subquestion", "")),
+                    st.write(c.get("chart_description", "")),
+                    st.pyplot(c.get("chart"), clear_figure=False),
+                )
+                for c in response.get("visualizations", list())
+            ]
+
+
 def chat(question: str) -> None:
     try:
         append_user_question(question=question)
@@ -76,7 +93,8 @@ def display_chat_history() -> None:
                 st.markdown(message.get("content"))
             else:
                 st.markdown(message.get("content", dict()).get("answer"))
-                show_response_information(response=message["content"])
+                show_visualizations(response=message["content"])
+                show_cypher_response_information(response=message["content"])
 
 
 def prepare_csv(cypher_result: List[Dict[str, Any]]) -> Any:

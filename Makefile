@@ -25,6 +25,8 @@ init_workshop:
 	poetry config virtualenvs.in-project true
 	poetry install --with workshop
 
+make streamlit:
+	poetry run streamlit run streamlit_app.py $(file_path)
 
 ######################
 # LINTING AND FORMATTING

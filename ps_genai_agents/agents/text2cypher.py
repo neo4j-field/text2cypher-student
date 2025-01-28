@@ -15,12 +15,13 @@ from ..components.text2cypher import (
     create_text2cypher_generation_node,
     create_text2cypher_validation_node,
 )
+from ..retrievers.cypher_examples.base import BaseCypherExampleRetriever
 
 
 def create_text2cypher_agent(
     llm: BaseChatModel,
     graph: Neo4jGraph,
-    cypher_query_yaml_file_path: str = "./",
+    cypher_example_retriever: BaseCypherExampleRetriever,
     llm_validation: bool = True,
     max_attempts: int = 3,
     attempt_cypher_execution_on_final_attempt: bool = False,
@@ -35,9 +36,9 @@ def create_text2cypher_agent(
     graph : Neo4jGraph
         The Neo4j graph wrapper.
     llm : BaseChatModel
-        The LLM to use for processing
-    cypher_query_yaml_path: str, optional
-        The file path to the yaml file containing question & query pairs, by default './'
+        The LLM to use for processing.
+    cypher_example_retriever: BaseCypherExampleRetriever
+        The retriever used to collect Cypher examples for few shot prompting.
     llm_validation : bool, optional
         Whether to perform LLM validation with the provided LLM, by default True
     max_attempts: int, optional
@@ -53,7 +54,7 @@ def create_text2cypher_agent(
     """
 
     generate_cypher = create_text2cypher_generation_node(
-        llm=llm, graph=graph, cypher_query_yaml_file_path=cypher_query_yaml_file_path
+        llm=llm, graph=graph, cypher_example_retriever=cypher_example_retriever
     )
     validate_cypher = create_text2cypher_validation_node(
         llm=llm,
