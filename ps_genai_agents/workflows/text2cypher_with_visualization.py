@@ -18,6 +18,7 @@ from ..components.state import (
 )
 from ..components.summarize import create_summarization_node
 from ..components.tool_selection import create_tool_selection_node
+from ..retrievers.cypher_examples.base import BaseCypherExampleRetriever
 from .edges import (
     guardrails_conditional_edge,
     query_mapper_edge,
@@ -29,8 +30,8 @@ from .edges import (
 def create_text2cypher_with_visualization_workflow(
     llm: BaseChatModel,
     graph: Neo4jGraph,
+    cypher_example_retriever: BaseCypherExampleRetriever,
     scope_description: Optional[str] = None,
-    cypher_query_yaml_file_path: str = "./",
     llm_cypher_validation: bool = True,
     max_cypher_generation_attempts: int = 3,
     attempt_cypher_execution_on_final_attempt: bool = False,
@@ -46,8 +47,8 @@ def create_text2cypher_with_visualization_workflow(
         The Neo4j graph wrapper.
     scope_description: Optional[str], optional
         A short description of the application scope, by default None
-    cypher_query_yaml_path: str, optional
-        The file path to the yaml file containing question & query pairs, by default './'
+    cypher_example_retriever: BaseCypherExampleRetriever
+        The retriever used to collect Cypher examples for few shot prompting.
     llm_validation : bool, optional
         Whether to perform LLM validation with the provided LLM, by default True
     max_cypher_generation_attempts: int, optional
@@ -69,7 +70,7 @@ def create_text2cypher_with_visualization_workflow(
     text2cypher = create_text2cypher_agent(
         llm=llm,
         graph=graph,
-        cypher_query_yaml_file_path=cypher_query_yaml_file_path,
+        cypher_example_retriever=cypher_example_retriever,
         llm_validation=llm_cypher_validation,
         max_attempts=max_cypher_generation_attempts,
         attempt_cypher_execution_on_final_attempt=attempt_cypher_execution_on_final_attempt,

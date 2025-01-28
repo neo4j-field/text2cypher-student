@@ -7,6 +7,7 @@ import streamlit as st
 from langchain_neo4j import Neo4jGraph
 from langchain_openai import ChatOpenAI
 
+from ps_genai_agents.retrievers.cypher_examples import YAMLCypherExampleRetriever
 from ps_genai_agents.ui.components import chat, display_chat_history, sidebar
 from ps_genai_agents.workflows import create_text2cypher_with_visualization_workflow
 
@@ -38,6 +39,9 @@ def initialize_state(
     """
 
     if "agent" not in st.session_state:
+        cypher_example_retriever = YAMLCypherExampleRetriever(
+            cypher_query_yaml_file_path=cypher_query_yaml_file_path
+        )
         st.session_state["llm"] = ChatOpenAI(model="gpt-4o", temperature=0.0)
         st.session_state["graph"] = Neo4jGraph(
             url=os.environ.get("NEO4J_URI"),
@@ -49,7 +53,7 @@ def initialize_state(
         st.session_state["agent"] = create_text2cypher_with_visualization_workflow(
             llm=st.session_state["llm"],
             graph=st.session_state["graph"],
-            cypher_query_yaml_file_path=cypher_query_yaml_file_path,
+            cypher_example_retriever=cypher_example_retriever,
             scope_description=scope_description,
             max_cypher_generation_attempts=3,
             attempt_cypher_execution_on_final_attempt=True,

@@ -12,13 +12,17 @@ from ....components.state import CypherState
 from ....components.text2cypher.generation.prompts import (
     create_text2cypher_generation_prompt_template,
 )
-from ....cypher_query_store.yaml_store import get_example_queries_from_yaml
+
+# from ....cypher_query_store.yaml_store import get_example_queries_from_yaml
+from ....retrievers.cypher_examples.base import BaseCypherExampleRetriever
 
 generation_prompt = create_text2cypher_generation_prompt_template()
 
 
 def create_text2cypher_generation_node(
-    llm: BaseChatModel, graph: Neo4jGraph, cypher_query_yaml_file_path: str = "./"
+    llm: BaseChatModel,
+    graph: Neo4jGraph,
+    cypher_example_retriever: BaseCypherExampleRetriever,
 ) -> Callable[[CypherState], Dict[str, Any]]:
     text2cypher_chain = generation_prompt | llm | StrOutputParser()
 
@@ -27,17 +31,19 @@ def create_text2cypher_generation_node(
         Generates a cypher statement based on the provided schema and user input
         """
 
-        NL = "\n"
-        fewshot_examples = (NL * 2).join(
-            [
-                f"Question: {el['human']}{NL}Cypher:{el['assistant']}"
-                for el in get_example_queries_from_yaml(cypher_query_yaml_file_path)
-            ]
-        )
+        # NL = "\n"
+        # fewshot_examples = (NL * 2).join(
+        #     [
+        #         f"Question: {el['human']}{NL}Cypher:{el['assistant']}"
+        #         for el in get_example_queries_from_yaml(cypher_query_yaml_file_path)
+        #     ]
+        # )
+        examples: str = cypher_example_retriever.get_examples()
+
         generated_cypher = text2cypher_chain.invoke(
             {
                 "question": state.get("subquestion"),
-                "fewshot_examples": fewshot_examples,
+                "fewshot_examples": examples,
                 "schema": graph.schema,
             }
         )
