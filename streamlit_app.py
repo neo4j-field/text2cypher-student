@@ -11,7 +11,12 @@ from ps_genai_agents.retrievers.cypher_examples import YAMLCypherExampleRetrieve
 from ps_genai_agents.ui.components import chat, display_chat_history, sidebar
 from ps_genai_agents.workflows import create_text2cypher_with_visualization_workflow
 
+from dotenv import load_dotenv
 
+if load_dotenv():
+    print("Env Loaded Successfully!")
+else:
+    print("Unable to Load Environment.")
 def get_args() -> Dict[str, Any]:
     """Parse the command line arguments to configure the application."""
 

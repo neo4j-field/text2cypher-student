@@ -28,6 +28,9 @@ init_workshop:
 make streamlit:
 	poetry run streamlit run streamlit_app.py $(file_path)
 
+make streamlit_dm:
+	poetry run streamlit run streamlit_app.py data/discrete_manufacturing/config.json
+
 ######################
 # LINTING AND FORMATTING
 ######################
