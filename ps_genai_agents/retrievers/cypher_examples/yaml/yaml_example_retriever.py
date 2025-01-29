@@ -19,7 +19,7 @@ class YAMLCypherExampleRetriever(BaseCypherExampleRetriever):
     def _format_examples_list(self, unformatted_examples: List[Dict[str, str]]) -> str:
         return ("\n" * 2).join(
             [
-                f"Question: {el['human']}\nCypher:{el['assistant']}"
+                f"Question: {el['question']}\nCypher:{el['cql']}"
                 for el in unformatted_examples
             ]
         )
@@ -36,8 +36,8 @@ class YAMLCypherExampleRetriever(BaseCypherExampleRetriever):
                 print(exc)
         return [
             {
-                "human": q["question"],
-                "assistant": self._format_cypher_for_example(q["cql"]),
+                "question": q["question"],
+                "cql": self._format_cypher_for_example(q["cql"]),
             }
             for q in queries
         ]

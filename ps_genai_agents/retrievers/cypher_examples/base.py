@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List
+from typing import Any
 
 from pydantic import BaseModel
 
@@ -11,7 +11,7 @@ class BaseCypherExampleRetriever(BaseModel, ABC):
     """
 
     @abstractmethod
-    def get_examples(self) -> str:
+    def get_examples(self, *args: Any, **kwargs: Any) -> str:
         """
         Retrieve relevant examples in string format that are ready to be injected into a prompt for few shot prompting.
 
