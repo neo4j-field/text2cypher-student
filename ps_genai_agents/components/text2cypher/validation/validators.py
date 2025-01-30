@@ -303,7 +303,7 @@ def validate_node_property_values_with_range(
     errors = list()
 
     for t in tasks:
-        rel_types = parse_labels_or_types(t.get("rel_types", ""))
+        rel_types = parse_labels_or_types(str(t.get("rel_types", "")))
         prop_val_validation_error = validate_property_value_with_range(
             enum_dict=prop_values_range,
             labels_or_types=rel_types,
@@ -328,7 +328,7 @@ def validate_relationship_property_values_with_range(
     errors = list()
 
     for t in tasks:
-        rel_types = parse_labels_or_types(t.get("rel_types", ""))
+        rel_types = parse_labels_or_types(str(t.get("rel_types", "")))
         prop_val_validation_error = validate_property_value_with_range(
             enum_dict=prop_values_range,
             labels_or_types=rel_types,
@@ -393,7 +393,7 @@ def validate_property_value_with_enum(
 
 def validate_property_value_with_range(
     enum_dict: Dict[str, Dict[str, Tuple[Union[int, float], Union[int, float]]]],
-    labels_or_types: str,
+    labels_or_types: List[str],
     property_name: str,
     node_or_rel: Literal["Node", "Relationship"],
     property_value: Union[int, float],
@@ -444,7 +444,7 @@ def validate_property_value_with_range(
 
 
 def validate_property_with_enum(
-    enum_dict: Dict[str, Dict[str, Set[str]]],
+    enum_dict: Dict[str, Set[str]],
     labels_or_types: List[str],
     property_name: str,
     node_or_rel: Literal["Node", "Relationship"],

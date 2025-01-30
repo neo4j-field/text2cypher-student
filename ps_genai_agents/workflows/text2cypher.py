@@ -95,7 +95,9 @@ def create_text2cypher_workflow(
         guardrails_conditional_edge,
     )
     main_graph_builder.add_conditional_edges(
-        "query_parser", query_mapper_edge, ["text2cypher"]
+        "query_parser",
+        query_mapper_edge,  # type: ignore[arg-type, unused-ignore]
+        ["text2cypher"],
     )
     main_graph_builder.add_edge("text2cypher", "gather_cypher")
     main_graph_builder.add_edge("gather_cypher", "tool_select")

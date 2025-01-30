@@ -119,7 +119,7 @@ return e.class as encounterType, e.description as encounterDescription, e.date a
 
 
 @pytest.fixture(scope="function")
-def structured_schema_1() -> Dict[str, Dict[str, List[Dict[str, Any]]]]:
+def structured_schema_1() -> Dict[str, Any]:
     return {
         "node_props": {
             "NodeA": [
@@ -199,7 +199,7 @@ def mock_graph_1(
 
 
 @pytest.fixture(scope="function")
-def structured_schema_iqs() -> Dict[str, Dict[str, List[Dict[str, Any]]]]:
+def structured_schema_iqs() -> Dict[str, Any]:
     return {
         "node_props": {
             "Customer": [

@@ -20,11 +20,20 @@ RETURN males, females, toFloat(males) / (CASE WHEN females = 0 THEN 1 ELSE femal
 
 
 @pytest.fixture(scope="function")
-def cypher_statement_3() -> str: ...
+def cypher_statement_3() -> str:
+    return ""
+
+
 @pytest.fixture(scope="function")
-def cypher_statement_4() -> str: ...
+def cypher_statement_4() -> str:
+    return ""
+
+
 @pytest.fixture(scope="function")
-def cypher_statement_5() -> str: ...
+def cypher_statement_5() -> str:
+    return ""
+
+
 @pytest.fixture(scope="function")
 def cypher_statements(cypher_statement_1: str, cypher_statement_2: str) -> List[str]:
     return [cypher_statement_1, cypher_statement_2]

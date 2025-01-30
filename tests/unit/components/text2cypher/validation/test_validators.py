@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any, Dict, Literal
 
 from ps_genai_agents.components.text2cypher.validation.validators import (
     validate_property_value_with_enum,
@@ -27,7 +27,7 @@ def test_validate_property_value_with_enum_single_label_valid(
 ) -> None:
     labels_or_types = ["NodeA"]
     property_name = "prop_1"
-    node_or_rel = "Node"
+    node_or_rel: Literal["Node", "Relationship"] = "Node"
     property_value = "a"
 
     res = validate_property_value_with_enum(
@@ -46,7 +46,7 @@ def test_validate_property_value_with_enum_single_label_invalid(
 ) -> None:
     labels_or_types = ["NodeA"]
     property_name = "prop_1"
-    node_or_rel = "Node"
+    node_or_rel: Literal["Node", "Relationship"] = "Node"
     property_value = "f"
 
     res = validate_property_value_with_enum(
@@ -69,9 +69,9 @@ def test_validate_property_value_with_enum_multi_and_label_valid(
 ) -> None:
     labels_or_types = ["NodeA", "NodeB"]
     property_name = "prop_1"
-    node_or_rel = "Node"
+    node_or_rel: Literal["Node", "Relationship"] = "Node"
     property_value = "a"
-    and_or = "and"
+    and_or: Literal["and", "or"] = "and"
 
     res = validate_property_value_with_enum(
         enum_dict=node_property_values_enum_dict,
@@ -90,9 +90,9 @@ def test_validate_property_value_with_enum_multi_and_label_invalid(
 ) -> None:
     labels_or_types = ["NodeA", "NodeB"]
     property_name = "prop_1"
-    node_or_rel = "Node"
+    node_or_rel: Literal["Node", "Relationship"] = "Node"
     property_value = "d"
-    and_or = "and"
+    and_or: Literal["and", "or"] = "and"
 
     res = validate_property_value_with_enum(
         enum_dict=node_property_values_enum_dict,
@@ -115,9 +115,9 @@ def test_validate_property_value_with_enum_multi_or_label_valid(
 ) -> None:
     labels_or_types = ["NodeA", "NodeB"]
     property_name = "prop_1"
-    node_or_rel = "Node"
+    node_or_rel: Literal["Node", "Relationship"] = "Node"
     property_value = "d"
-    and_or = "or"
+    and_or: Literal["and", "or"] = "or"
 
     res = validate_property_value_with_enum(
         enum_dict=node_property_values_enum_dict,
@@ -136,9 +136,9 @@ def test_validate_property_value_with_enum_multi_or_label_invalid(
 ) -> None:
     labels_or_types = ["NodeA", "NodeB"]
     property_name = "prop_1"
-    node_or_rel = "Node"
+    node_or_rel: Literal["Node", "Relationship"] = "Node"
     property_value = "g"
-    and_or = "or"
+    and_or: Literal["and", "or"] = "or"
 
     res = validate_property_value_with_enum(
         enum_dict=node_property_values_enum_dict,
@@ -161,7 +161,7 @@ def test_validate_property_name_with_enum_single_label_valid(
 ) -> None:
     labels_or_types = ["NodeA"]
     property_name = "prop_1"
-    node_or_rel = "Node"
+    node_or_rel: Literal["Node", "Relationship"] = "Node"
 
     res = validate_property_with_enum(
         enum_dict=node_property_values_enum_dict,
@@ -178,7 +178,7 @@ def test_validate_property_name_with_enum_single_label_invalid(
 ) -> None:
     labels_or_types = ["NodeA"]
     property_name = "prop_3"
-    node_or_rel = "Node"
+    node_or_rel: Literal["Node", "Relationship"] = "Node"
 
     res = validate_property_with_enum(
         enum_dict=node_property_values_enum_dict,
@@ -199,8 +199,8 @@ def test_validate_property_name_with_enum_multi_and_label_valid(
 ) -> None:
     labels_or_types = ["NodeA", "NodeB"]
     property_name = "prop_1"
-    node_or_rel = "Node"
-    and_or = "and"
+    node_or_rel: Literal["Node", "Relationship"] = "Node"
+    and_or: Literal["and", "or"] = "and"
 
     res = validate_property_with_enum(
         enum_dict=node_property_values_enum_dict,
@@ -218,8 +218,8 @@ def test_validate_property_name_with_enum_multi_and_label_invalid(
 ) -> None:
     labels_or_types = ["NodeA", "NodeB"]
     property_name = "prop_2"
-    node_or_rel = "Node"
-    and_or = "and"
+    node_or_rel: Literal["Node", "Relationship"] = "Node"
+    and_or: Literal["and", "or"] = "and"
 
     res = validate_property_with_enum(
         enum_dict=node_property_values_enum_dict,
@@ -241,8 +241,8 @@ def test_validate_property_name_with_enum_multi_or_label_valid(
 ) -> None:
     labels_or_types = ["NodeA", "NodeB"]
     property_name = "prop_2"
-    node_or_rel = "Node"
-    and_or = "or"
+    node_or_rel: Literal["Node", "Relationship"] = "Node"
+    and_or: Literal["and", "or"] = "or"
 
     res = validate_property_with_enum(
         enum_dict=node_property_values_enum_dict,
@@ -260,8 +260,8 @@ def test_validate_property_name_with_enum_multi_or_label_invalid(
 ) -> None:
     labels_or_types = ["NodeA", "NodeB"]
     property_name = "prop_3"
-    node_or_rel = "Node"
-    and_or = "or"
+    node_or_rel: Literal["Node", "Relationship"] = "Node"
+    and_or: Literal["and", "or"] = "or"
 
     res = validate_property_with_enum(
         enum_dict=node_property_names_enum_dict,
@@ -283,7 +283,7 @@ def test_validate_property_value_with_range_single_label_valid(
 ) -> None:
     labels_or_types = ["NodeA"]
     property_name = "prop_1"
-    node_or_rel = "Node"
+    node_or_rel: Literal["Node", "Relationship"] = "Node"
 
     res = validate_property_value_with_range(
         enum_dict=node_property_values_range_dict,
@@ -301,7 +301,7 @@ def test_validate_property_value_with_range_single_label_invalid(
 ) -> None:
     labels_or_types = ["NodeA"]
     property_name = "prop_1"
-    node_or_rel = "Node"
+    node_or_rel: Literal["Node", "Relationship"] = "Node"
     property_value = 15
 
     res = validate_property_value_with_range(
@@ -324,8 +324,8 @@ def test_validate_property_value_with_range_multi_and_label_valid(
 ) -> None:
     labels_or_types = ["NodeA", "NodeB"]
     property_name = "prop_1"
-    node_or_rel = "Node"
-    and_or = "and"
+    node_or_rel: Literal["Node", "Relationship"] = "Node"
+    and_or: Literal["and", "or"] = "and"
     property_value = 9
 
     res = validate_property_value_with_range(
@@ -345,8 +345,8 @@ def test_validate_property_value_with_range_multi_and_label_invalid(
 ) -> None:
     labels_or_types = ["NodeA", "NodeB"]
     property_name = "prop_1"
-    node_or_rel = "Node"
-    and_or = "and"
+    node_or_rel: Literal["Node", "Relationship"] = "Node"
+    and_or: Literal["and", "or"] = "and"
     property_value = 14
 
     res = validate_property_value_with_range(
@@ -372,8 +372,8 @@ def test_validate_property_value_with_range_multi_or_label_valid(
 ) -> None:
     labels_or_types = ["NodeA", "NodeB"]
     property_name = "prop_1"
-    node_or_rel = "Node"
-    and_or = "or"
+    node_or_rel: Literal["Node", "Relationship"] = "Node"
+    and_or: Literal["and", "or"] = "or"
     property_value = 13
 
     res = validate_property_value_with_range(
@@ -393,8 +393,8 @@ def test_validate_property_value_with_range_multi_or_label_invalid(
 ) -> None:
     labels_or_types = ["NodeA", "NodeB"]
     property_name = "prop_1"
-    node_or_rel = "Node"
-    and_or = "or"
+    node_or_rel: Literal["Node", "Relationship"] = "Node"
+    and_or: Literal["and", "or"] = "or"
     property_value = 20
 
     res = validate_property_value_with_range(
