@@ -16,6 +16,9 @@ test_integration_local:
 	poetry run pytest tests/integration -s
 	docker compose -f tests/integration/docker-compose.yml stop
 
+test_integration:
+	poetry run pytest tests/integration
+
 test_unit:
 	poetry run pytest tests/unit
 
