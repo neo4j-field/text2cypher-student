@@ -22,7 +22,7 @@ def append_llm_response(question: str) -> None:
         message_placeholder.status("thinking...")
         print("question: ", question)
 
-        agent: CompiledStateGraph = st.session_state.get("agent")
+        agent = st.session_state.get("agent")
 
         if agent is not None:
             response: OutputState = agent.invoke({"question": question})

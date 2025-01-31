@@ -100,11 +100,15 @@ def create_text2cypher_with_visualization_workflow(
         guardrails_conditional_edge,
     )
     main_graph_builder.add_conditional_edges(
-        "query_parser", query_mapper_edge, ["text2cypher"]
+        "query_parser",
+        query_mapper_edge,  # type: ignore[arg-type, unused-ignore]
+        ["text2cypher"],
     )
     main_graph_builder.add_edge("text2cypher", "gather_cypher")
     main_graph_builder.add_conditional_edges(
-        "gather_cypher", viz_mapper_edge, ["visualize", "tool_select"]
+        "gather_cypher",
+        viz_mapper_edge,  # type: ignore[arg-type, unused-ignore]
+        ["visualize", "tool_select"],
     )
     main_graph_builder.add_edge("visualize", "gather_visualizations")
     main_graph_builder.add_conditional_edges(

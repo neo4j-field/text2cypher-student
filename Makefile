@@ -6,6 +6,16 @@ all: help
 test:
 	poetry run pytest tests
 
+test_local:
+	docker compose -f tests/integration/docker-compose.yml up -d
+	poetry run pytest tests
+	docker compose -f tests/integration/docker-compose.yml stop
+
+test_integration_local:
+	docker compose -f tests/integration/docker-compose.yml up -d
+	poetry run pytest tests/integration -s
+	docker compose -f tests/integration/docker-compose.yml stop
+
 test_integration:
 	poetry run pytest tests/integration
 
