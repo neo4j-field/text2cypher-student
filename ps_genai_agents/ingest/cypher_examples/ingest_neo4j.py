@@ -1,4 +1,4 @@
-from typing import Dict, List, Set
+from typing import Dict, List, Optional, Set
 
 import neo4j
 
@@ -9,12 +9,22 @@ from .utils import batch_data
 
 
 def embed_cypher_query_nodes(
-    embedder: EmbedderProtocol, nodes_to_embed: List[Dict[str, str]]
+    embedder: EmbedderProtocol,
+    nodes_to_embed: List[Dict[str, str]],
+    embedding_model_name: Optional[str] = None,
 ) -> EmbedderResult:
     result = list()
     errored = list()
 
-    for idx, batch in enumerate(batch_data(nodes_to_embed, 10)):
+    if embedding_model_name is None:
+        try:
+            model = embedder.model  # type: ignore[attr-defined]
+        except Exception as _:
+            model = None
+    else:
+        model = embedding_model_name
+
+    for batch in batch_data(nodes_to_embed, 10):
         for task in batch:
             q = task.get("question")
             cql = task.get("cql")
@@ -22,7 +32,10 @@ def embed_cypher_query_nodes(
                 vector = embedder.embed_query(q)
                 result.append(
                     CypherIngestRecord(
-                        cypher_statement=cql, question=q, question_embedding=vector
+                        cypher_statement=cql,
+                        question=q,
+                        question_embedding=vector,
+                        embedding_model=model,
                     )
                 )
             else:
@@ -37,20 +50,22 @@ def load_cypher_query_nodes(
     query = """
 UNWIND $tasks as task
 MERGE (n:CypherQuery {question: task.question})
-SET n.cypherStatement = task.cypher_statement
+SET
+    n.cypherStatement = task.cypher_statement,
+    n.embeddingModel = task.embedding_model
 WITH task, n
 CALL db.create.setNodeVectorProperty(n, 'questionEmbedding', task.question_embedding)
 """
 
     with driver.session(database=database) as session:
         for idx, batch in enumerate(batch_data(nodes, 10)):
-            print("batch: ", batch)
+            # print("batch: ", batch)
             session.run(
                 query=query, parameters={"tasks": [node.model_dump() for node in batch]}
             )
 
 
-def get_existing_cypher_query_node_ids(
+def get_existing_questions(
     driver: neo4j.Driver,
     node_label: str = "CypherQuery",
     embedding_property_name: str = "cypherStatement",

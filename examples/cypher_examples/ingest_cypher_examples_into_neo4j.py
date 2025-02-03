@@ -5,7 +5,7 @@ from neo4j_graphrag.embeddings import OpenAIEmbeddings
 
 from ps_genai_agents.ingest.cypher_examples.ingest_neo4j import (
     embed_cypher_query_nodes,
-    get_existing_cypher_query_node_ids,
+    get_existing_questions,
     load_cypher_query_nodes,
 )
 from ps_genai_agents.ingest.cypher_examples.utils import (
@@ -26,7 +26,7 @@ unembedded_tasks = read_cypher_examples_from_yaml_file(file_path=file_path)
 
 # we optionally get the preexisting node ids (question property) as a set
 # we can remove these from the tasks
-preexisting_nodes = get_existing_cypher_query_node_ids(driver)
+preexisting_nodes = get_existing_questions(driver)
 
 # remove any questions we already have in the database
 cleaned_tasks = remove_preexisting_nodes_from_ingest_tasks(

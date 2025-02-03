@@ -36,6 +36,7 @@ def embedded_cypher_examples(
             cypher_statement=node.get("cypher_statement", ""),
             question=node.get("question", ""),
             question_embedding=[0.1, 0.2, 0.3],
+            embedding_model="test-model",
         )
         for node in unembedded_cypher_examples
     ]

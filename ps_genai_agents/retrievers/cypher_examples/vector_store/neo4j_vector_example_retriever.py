@@ -16,9 +16,6 @@ from ..base import BaseCypherExampleRetriever
 
 
 class Neo4jVectorSearchCypherExampleRetriever(BaseCypherExampleRetriever):
-    class Config:
-        arbitrary_types_allowed = True
-
     neo4j_driver: Driver = Field(
         description="The Neo4j Python Driver to perform database operations with.",
     )
@@ -48,8 +45,11 @@ class Neo4jVectorSearchCypherExampleRetriever(BaseCypherExampleRetriever):
         """
 
         examples = self._retrieve_examples(query, k)
-
-        return self._format_examples_list(examples)
+        print("\n\nEXAMPLES: ", examples, "\n\n")
+        if len(examples) > 0:
+            return self._format_examples_list(examples)
+        else:
+            return ""
 
     def _retrieve_examples(self, query: str, k: int) -> List[Dict[str, Any]]:
         try:
@@ -60,6 +60,7 @@ class Neo4jVectorSearchCypherExampleRetriever(BaseCypherExampleRetriever):
                 index_name=self.vector_index_name,
                 neo4j_database=self.neo4j_database,
                 result_formatter=self._result_formatter,
+                return_properties=["question", "cypherStatement"],
             )
 
             result = retriever.search(query_vector=embedding, top_k=k)
@@ -77,13 +78,17 @@ class Neo4jVectorSearchCypherExampleRetriever(BaseCypherExampleRetriever):
         """Format the returned result from the vector search."""
 
         return RetrieverResultItem(
-            content=record.data(), metadata=record.get("metadata")
+            content=record.data().get("node", dict()), metadata=record.get("metadata")
         )
 
     def _format_examples_list(self, unformatted_examples: List[Dict[str, str]]) -> str:
-        return ("\n" * 2).join(
-            [
-                f"Question: {el['question']}\nCypher:{el['cql']}"
-                for el in unformatted_examples
-            ]
-        )
+        print("\n\nunformatted examples: ", unformatted_examples, "\n\n")
+        if len(unformatted_examples) > 0:
+            return ("\n" * 2).join(
+                [
+                    f"Question: {el['question']}\nCypher:{el['cypherStatement']}"
+                    for el in unformatted_examples
+                ]
+            )
+        else:
+            return ""
