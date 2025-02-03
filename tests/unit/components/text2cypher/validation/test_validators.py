@@ -1,5 +1,8 @@
 from typing import Any, Dict, Literal
 
+from ps_genai_agents.components.text2cypher.validation.models import (
+    Neo4jStructuredSchemaPropertyNumber,
+)
 from ps_genai_agents.components.text2cypher.validation.validators import (
     validate_property_value_with_enum,
     validate_property_value_with_range,
@@ -315,12 +318,14 @@ def test_validate_property_value_with_range_single_label_invalid(
     assert res is not None
     assert (
         res
-        == f"{node_or_rel} {labels_or_types} has property {property_name} = {property_value} which is out of range {0} to {10} in graph database."
+        == f"{node_or_rel} {labels_or_types[0]} has property {property_name} = {property_value} which is out of range 0.0 to 10.0 in graph database."
     )
 
 
 def test_validate_property_value_with_range_multi_and_label_valid(
-    node_property_values_range_dict: Dict[str, Any],
+    node_property_values_range_dict: Dict[
+        str, Dict[str, Neo4jStructuredSchemaPropertyNumber]
+    ],
 ) -> None:
     labels_or_types = ["NodeA", "NodeB"]
     property_name = "prop_1"
@@ -341,7 +346,9 @@ def test_validate_property_value_with_range_multi_and_label_valid(
 
 
 def test_validate_property_value_with_range_multi_and_label_invalid(
-    node_property_values_range_dict: Dict[str, Any],
+    node_property_values_range_dict: Dict[
+        str, Dict[str, Neo4jStructuredSchemaPropertyNumber]
+    ],
 ) -> None:
     labels_or_types = ["NodeA", "NodeB"]
     property_name = "prop_1"
@@ -357,8 +364,7 @@ def test_validate_property_value_with_range_multi_and_label_invalid(
         and_or=and_or,
         property_value=property_value,
     )
-
-    invalid_labels_or_types = ["NodeA with range 0 to 10"]
+    invalid_labels_or_types = ["NodeA with property prop_1 range 0.0 to 10.0"]
 
     assert res is not None
     assert (
@@ -368,7 +374,9 @@ def test_validate_property_value_with_range_multi_and_label_invalid(
 
 
 def test_validate_property_value_with_range_multi_or_label_valid(
-    node_property_values_range_dict: Dict[str, Any],
+    node_property_values_range_dict: Dict[
+        str, Dict[str, Neo4jStructuredSchemaPropertyNumber]
+    ],
 ) -> None:
     labels_or_types = ["NodeA", "NodeB"]
     property_name = "prop_1"
@@ -389,7 +397,9 @@ def test_validate_property_value_with_range_multi_or_label_valid(
 
 
 def test_validate_property_value_with_range_multi_or_label_invalid(
-    node_property_values_range_dict: Dict[str, Any],
+    node_property_values_range_dict: Dict[
+        str, Dict[str, Neo4jStructuredSchemaPropertyNumber]
+    ],
 ) -> None:
     labels_or_types = ["NodeA", "NodeB"]
     property_name = "prop_1"
@@ -406,7 +416,10 @@ def test_validate_property_value_with_range_multi_or_label_invalid(
         property_value=property_value,
     )
 
-    invalid_labels_or_types = ["NodeA with range 0 to 10", "NodeB with range 0 to 15"]
+    invalid_labels_or_types = [
+        "NodeA with property prop_1 range 0.0 to 10.0",
+        "NodeB with property prop_1 range 0.0 to 15.0",
+    ]
 
     assert res is not None
     assert (

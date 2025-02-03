@@ -424,6 +424,7 @@ def structured_schema_iqs() -> Dict[str, Any]:
                 {"property": "maxAge", "type": "INTEGER", "min": "20", "max": "80"},
             ],
         },
+        "rel_props": {},
         "relationships": [
             {"start": "Customer", "type": "SUBMITTED", "end": "Verbatim"},
             {"start": "Problem", "type": "HAS_CATEGORY", "end": "Category"},

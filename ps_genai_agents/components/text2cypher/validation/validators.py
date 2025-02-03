@@ -10,20 +10,22 @@ from langchain_neo4j.chains.graph_qa.cypher_utils import CypherQueryCorrector, S
 from neo4j.exceptions import CypherSyntaxError
 
 from ....components.text2cypher.validation.models import ValidateCypherOutput
+from .models import Neo4jStructuredSchema, Neo4jStructuredSchemaPropertyNumber
 from .utils.cypher_extractors import (
     extract_entities_for_validation,
     parse_labels_or_types,
 )
-from .utils.enums import (
-    create_node_properties_enum,
-    create_node_property_values_enum,
-    create_relationship_properties_enum,
-    create_relationship_property_values_enum,
-)
-from .utils.ranges import (
-    create_node_property_values_range,
-    create_relationship_property_values_range,
-)
+
+# from .utils.enums import (
+#     create_node_properties_enum,
+#     create_node_property_values_enum,
+#     create_relationship_properties_enum,
+#     create_relationship_property_values_enum,
+# )
+# from .utils.ranges import (
+#     create_node_property_values_range,
+#     create_relationship_property_values_range,
+# )
 from .utils.utils import update_task_list_with_property_type
 
 
@@ -147,7 +149,9 @@ def validate_cypher_query_with_llm(
 def validate_cypher_query_with_schema(
     graph: Neo4jGraph, cypher_statement: str
 ) -> Dict[str, List[str]]:
-    schema = graph.get_structured_schema
+    schema: Neo4jStructuredSchema = Neo4jStructuredSchema.model_validate(
+        graph.get_structured_schema
+    )
     nodes_and_rels = extract_entities_for_validation(cypher_statement=cypher_statement)
 
     node_tasks = update_task_list_with_property_type(
@@ -159,7 +163,6 @@ def validate_cypher_query_with_schema(
 
     errors: List[str] = list()
 
-    # print("\n\n", node_tasks, "\n\n", rel_tasks, "\n\n")
     node_prop_name_enum_tasks = node_tasks
     node_prop_val_enum_tasks = [
         n for n in node_tasks if n.get("property_type") == "STRING"
@@ -180,6 +183,7 @@ def validate_cypher_query_with_schema(
         if (n.get("property_type") == "INTEGER" or n.get("property_type") == "FLOAT")
     ]
 
+    print("SCHEMA: ", schema)
     errors.extend(
         validate_node_property_names_with_enum(schema, node_prop_name_enum_tasks)
     )
@@ -206,9 +210,10 @@ def validate_cypher_query_with_schema(
 
 
 def validate_node_property_values_with_enum(
-    structure_graph_schema: Dict[str, Any], tasks: List[Dict[str, str]]
+    structure_graph_schema: Neo4jStructuredSchema, tasks: List[Dict[str, str]]
 ) -> List[str]:
-    prop_values_enum = create_node_property_values_enum(structure_graph_schema)
+    # prop_values_enum = create_node_property_values_enum(structure_graph_schema)
+    prop_values_enum = structure_graph_schema.get_node_property_values_enum()
 
     errors = list()
 
@@ -229,9 +234,10 @@ def validate_node_property_values_with_enum(
 
 
 def validate_node_property_names_with_enum(
-    structure_graph_schema: Dict[str, Any], tasks: List[Dict[str, str]]
+    structure_graph_schema: Neo4jStructuredSchema, tasks: List[Dict[str, str]]
 ) -> List[str]:
-    prop_enum = create_node_properties_enum(structure_graph_schema)
+    # prop_enum = create_node_properties_enum(structure_graph_schema)
+    prop_enum = structure_graph_schema.get_node_properties_enum()
 
     errors = list()
 
@@ -251,9 +257,10 @@ def validate_node_property_names_with_enum(
 
 
 def validate_relationship_property_names_with_enum(
-    structure_graph_schema: Dict[str, Any], tasks: List[Dict[str, str]]
+    structure_graph_schema: Neo4jStructuredSchema, tasks: List[Dict[str, str]]
 ) -> List[str]:
-    prop_enum = create_relationship_properties_enum(structure_graph_schema)
+    # prop_enum = create_relationship_properties_enum(structure_graph_schema)
+    prop_enum = structure_graph_schema.get_relationship_properties_enum()
 
     errors = list()
 
@@ -273,9 +280,10 @@ def validate_relationship_property_names_with_enum(
 
 
 def validate_relationship_property_values_with_enum(
-    structure_graph_schema: Dict[str, Any], tasks: List[Dict[str, str]]
+    structure_graph_schema: Neo4jStructuredSchema, tasks: List[Dict[str, str]]
 ) -> List[str]:
-    prop_values_enum = create_relationship_property_values_enum(structure_graph_schema)
+    # prop_values_enum = create_relationship_property_values_enum(structure_graph_schema)
+    prop_values_enum = structure_graph_schema.get_relationship_property_values_enum()
 
     errors = list()
 
@@ -295,10 +303,11 @@ def validate_relationship_property_values_with_enum(
 
 
 def validate_node_property_values_with_range(
-    structure_graph_schema: Dict[str, Any],
+    structure_graph_schema: Neo4jStructuredSchema,
     tasks: List[Dict[str, Union[str, int, float]]],
 ) -> List[str]:
-    prop_values_range = create_node_property_values_range(structure_graph_schema)
+    # prop_values_range = create_node_property_values_range(structure_graph_schema)
+    prop_values_range = structure_graph_schema.get_node_property_values_range()
 
     errors = list()
 
@@ -318,12 +327,13 @@ def validate_node_property_values_with_range(
 
 
 def validate_relationship_property_values_with_range(
-    structure_graph_schema: Dict[str, Any],
+    structure_graph_schema: Neo4jStructuredSchema,
     tasks: List[Dict[str, Union[str, int, float]]],
 ) -> List[str]:
-    prop_values_range = create_relationship_property_values_range(
-        structure_graph_schema
-    )
+    # prop_values_range = create_relationship_property_values_range(
+    #     structure_graph_schema
+    # )
+    prop_values_range = structure_graph_schema.get_relationship_property_values_range()
 
     errors = list()
 
@@ -363,16 +373,18 @@ def validate_property_value_with_enum(
         )
 
     # track labels or types that are invalid
-    # compare the number of invalid to the number tested to determine to determine if valid
+    # compare the number of invalid to the number tested to determine if valid
     invalid_labels_or_types = list()
 
     for lt in labels_or_types:
         props = enum_dict.get(lt)
         if props is None:
-            return None
+            # return None
+            continue
         enum = props.get(property_name)
         if enum is None:
-            return None
+            # return None
+            continue
         if property_value not in enum:
             invalid_labels_or_types.append(lt)
 
@@ -392,7 +404,8 @@ def validate_property_value_with_enum(
 
 
 def validate_property_value_with_range(
-    enum_dict: Dict[str, Dict[str, Tuple[Union[int, float], Union[int, float]]]],
+    # enum_dict: Dict[str, Dict[str, Tuple[Union[int, float], Union[int, float]]]],
+    enum_dict: Dict[str, Dict[str, Neo4jStructuredSchemaPropertyNumber]],
     labels_or_types: List[str],
     property_name: str,
     node_or_rel: Literal["Node", "Relationship"],
@@ -408,28 +421,35 @@ def validate_property_value_with_range(
 
     # track labels or types that are invalid
     # compare the number of invalid to the number tested to determine to determine if valid
-    invalid_labels_or_types = list()
+    invalid_labels_or_types: List[Tuple[str, Neo4jStructuredSchemaPropertyNumber]] = (
+        list()
+    )
+    error_message_invalid_labels_or_types: List[str] = list()
 
     for lt in labels_or_types:
         props = enum_dict.get(lt)
         if props is None:
-            return None
-        r: Tuple[Union[int, float], Union[int, float]] = props.get(
-            property_name, (float("-inf"), float("inf"))
-        )
-        if r is None or len(r) != 2:
-            return None
-        if len(r) == 2 and (property_value <= r[0] or property_value >= r[1]):
+            # return None
+            continue
+        r = props.get(property_name)
+
+        if r is None:
+            # return None
+            continue
+        if property_value < r.min or property_value > r.max:
             invalid_labels_or_types.append((lt, r))
 
-    error_message_invalid_labels_or_types = list()
     for e in invalid_labels_or_types:
-        error_message_invalid_labels_or_types.append(
-            f"{e[0]} with range {e[1][0]} to {e[1][1]}"
-        )
+        if len(e) == 2:
+            e_lt: str = e[0]  # the label or type
+            e_prop: Neo4jStructuredSchemaPropertyNumber = e[1]
+            error_message_invalid_labels_or_types.append(
+                f"{e_lt} with property {e_prop.property} range {e_prop.min} to {e_prop.max}"
+            )
 
     if and_or is None and len(invalid_labels_or_types) > 0:  # single label or type
-        return f"{node_or_rel} {labels_or_types} has property {property_name} = {property_value} which is out of range {r[0]} to {r[1]} in graph database."
+        example_lt, example_prop = invalid_labels_or_types[0]
+        return f"{node_or_rel} {example_lt} has property {property_name} = {property_value} which is out of range {example_prop.min} to {example_prop.max} in graph database."
     elif (
         and_or == "and"
         and 0 < len(invalid_labels_or_types)
@@ -469,7 +489,8 @@ def validate_property_with_enum(
         enum = enum_dict.get(lt)
 
         if enum is None:
-            return None
+            # return None
+            continue
         if property_name not in enum:
             invalid_labels_or_types.append(lt)
 

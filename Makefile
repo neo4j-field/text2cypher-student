@@ -20,7 +20,7 @@ test_integration:
 	poetry run pytest tests/integration
 
 test_unit:
-	poetry run pytest tests/unit
+	poetry run pytest tests/unit -s
 
 init:
 	poetry install --with dev, ui
