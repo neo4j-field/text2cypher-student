@@ -1,6 +1,7 @@
 from typing import Any, Dict, Generator, List, Set
 
 import yaml
+from tqdm import tqdm
 
 
 def read_cypher_examples_from_yaml_file(
@@ -31,7 +32,7 @@ def remove_preexisting_nodes_from_ingest_tasks(
 
 def batch_data(data: List[Any], batch_size: int = 10) -> Generator[Any, Any, Any]:
     """Yield successive batches of size `batch_size` from the input list."""
-    for i in range(0, len(data), batch_size):
+    for i in tqdm(range(0, len(data), batch_size)):
         if i + batch_size < len(data):
             yield data[i : i + batch_size]
         else:

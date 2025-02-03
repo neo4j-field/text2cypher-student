@@ -5,7 +5,7 @@ from neo4j import Driver
 
 from ps_genai_agents.ingest.cypher_examples.ingest_neo4j import (
     embed_cypher_query_nodes,
-    get_existing_cypher_query_node_ids,
+    get_existing_questions,
     load_cypher_query_nodes,
 )
 from ps_genai_agents.ingest.cypher_examples.models import CypherIngestRecord
@@ -35,7 +35,7 @@ def test_ingest_workflow_with_fresh_database(
 
     load_cypher_query_nodes(driver=neo4j_driver, nodes=tasks, database="neo4j")
 
-    nodes_from_database = get_existing_cypher_query_node_ids(driver=neo4j_driver)
+    nodes_from_database = get_existing_questions(driver=neo4j_driver)
 
     assert len(nodes_from_database) == len(tasks)
 
@@ -64,7 +64,7 @@ def test_ingest_workflow_with_preexisting_nodes(
     load_cypher_query_nodes(driver=neo4j_driver, nodes=init_tasks, database="neo4j")
 
     # test
-    nodes_from_database = set(get_existing_cypher_query_node_ids(driver=neo4j_driver))
+    nodes_from_database = set(get_existing_questions(driver=neo4j_driver))
 
     assert len(nodes_from_database) == len(init_tasks)
 
