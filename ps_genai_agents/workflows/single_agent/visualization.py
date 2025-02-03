@@ -4,11 +4,11 @@ from langchain_core.language_models import BaseChatModel
 from langgraph.constants import END, START
 from langgraph.graph.state import CompiledStateGraph, StateGraph
 
-from ..components.state import (
+from ...components.state import (
     OverallState,
     VisualizationState,
 )
-from ..components.visualize import (
+from ...components.visualize import (
     create_chart_details_node,
     create_chart_generation_node,
     create_correct_chart_details_node,
