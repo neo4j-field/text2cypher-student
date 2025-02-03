@@ -21,7 +21,11 @@ Multi-agent workflows may be found in `ps_genai_agents.workflows.multi_agent`
 An agentic workflow that extends the functionality of the single agent Text2Cypher workflow with scope validation, query parsing and summarization.
 
 ### Advanced Text2Cypher with Data Visualization
-An agentic workflow that extends the functionality of the advanced Text2Cypher workflow with chart generation. The architecture of the workflow is shown below.
+An agentic workflow that extends the functionality of the advanced Text2Cypher workflow with chart generation. This workflow is demonstrated in the `demo_notebook.ipynb` and `demo_notebook_non_llm_val.ipynb` notebooks.
+
+`demo_notebook_non_llm_val.ipynb` contains Text2Cypher validation without the use of an LLM.
+
+The architecture of the workflow is shown below.
 
 ![t2c-v](./docs/assets/images/text2cypher-with-visualization-workflow.png)
 
