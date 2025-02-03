@@ -5,17 +5,17 @@ from langchain_neo4j import Neo4jGraph
 from langgraph.constants import END, START
 from langgraph.graph.state import CompiledStateGraph, StateGraph
 
-from ..components.state import (
+from ...components.state import (
     CypherState,
     OverallState,
 )
-from ..components.text2cypher import (
+from ...components.text2cypher import (
     create_text2cypher_correction_node,
     create_text2cypher_execution_node,
     create_text2cypher_generation_node,
     create_text2cypher_validation_node,
 )
-from ..retrievers.cypher_examples.base import BaseCypherExampleRetriever
+from ...retrievers.cypher_examples.base import BaseCypherExampleRetriever
 
 
 def create_text2cypher_agent(
