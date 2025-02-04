@@ -4,22 +4,24 @@ import pytest
 
 
 @pytest.fixture(scope="function")
-def utils_structured_graph_schema() -> Dict[str, Dict[str, List[Dict[str, Any]]]]:
+def utils_structured_graph_schema() -> Dict[str, Any]:
     return {
         "node_props": {
             "NodeA": [
-                {"property": "prop_1", "type": "STRING"},
-                {"property": "prop_2", "type": "INTEGER"},
+                {"property": "prop_1", "type": "STRING", "values": ["a", "b"]},
+                {"property": "prop_2", "type": "INTEGER", "min": 0, "max": 10},
             ],
             "NodeB": [
-                {"property": "prop_1", "type": "STRING"},
+                {"property": "prop_1", "type": "STRING", "values": ["a", "b"]},
             ],
         },
         "rel_props": {
             "REL_A": [
-                {"property": "prop_1", "type": "STRING"},
+                {"property": "prop_1", "type": "STRING", "values": ["a", "b"]},
             ]
         },
+        "relationships": [{"start": "NodeA", "type": "REL_A", "end": "NodeB"}],
+        "metadata": {},
     }
 
 

@@ -1,5 +1,8 @@
 from typing import Any, Dict, List
 
+from ps_genai_agents.components.text2cypher.validation.models import (
+    Neo4jStructuredSchema,
+)
 from ps_genai_agents.components.text2cypher.validation.utils.utils import (
     update_task_list_with_property_type,
 )
@@ -11,7 +14,9 @@ def test_update_task_list_with_property_type_nodes(
 ) -> None:
     result = update_task_list_with_property_type(
         tasks=utils_node_tasks,
-        structure_graph_schema=utils_structured_graph_schema,
+        structure_graph_schema=Neo4jStructuredSchema.model_validate(
+            utils_structured_graph_schema
+        ),
         node_or_rel="node",
     )
 
@@ -29,7 +34,9 @@ def test_update_task_list_with_property_type_rels(
 ) -> None:
     result = update_task_list_with_property_type(
         tasks=utils_rel_tasks,
-        structure_graph_schema=utils_structured_graph_schema,
+        structure_graph_schema=Neo4jStructuredSchema.model_validate(
+            utils_structured_graph_schema
+        ),
         node_or_rel="rel",
     )
 

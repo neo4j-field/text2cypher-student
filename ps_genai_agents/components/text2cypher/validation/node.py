@@ -17,6 +17,7 @@ from .validators import (
     validate_cypher_query_syntax,
     validate_cypher_query_with_llm,
     validate_cypher_query_with_schema,
+    validate_no_writes_in_cypher_query,
 )
 
 validation_prompt_template = create_text2cypher_validation_prompt_template()
@@ -72,18 +73,17 @@ def create_text2cypher_validation_node(
         syntax_error = validate_cypher_query_syntax(
             graph=graph, cypher_statement=state.get("statement", "")
         )
-        if syntax_error is not None:
-            errors.append(syntax_error)
+
+        errors.extend(syntax_error)
+
+        # check for write clauses
+        write_errors = validate_no_writes_in_cypher_query(state.get("statement", ""))
+        errors.extend(write_errors)
 
         # Experimental feature for correcting relationship directions
         corrected_cypher = correct_cypher_query_relationship_direction(
             graph=graph, cypher_statement=state.get("statement", "")
         )
-
-        # if not corrected_cypher:
-        #     errors.append("The generated Cypher statement doesn't fit the graph schema")
-        # if not corrected_cypher == state.get("statement"):
-        #     print("Relationship direction was corrected")
 
         # Use LLM to find additional potential errors and get the mapping for values
         if llm is not None and llm_validation:
@@ -100,7 +100,7 @@ def create_text2cypher_validation_node(
             cypher_errors = validate_cypher_query_with_schema(
                 graph=graph, cypher_statement=state.get("statement", "")
             )
-            errors.extend(cypher_errors.get("errors", []))
+            errors.extend(cypher_errors)
 
         # determine next node in workflow
         if (errors or mapping_errors) and GENERATION_ATTEMPT < max_attempts:
