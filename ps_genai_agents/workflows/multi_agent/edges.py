@@ -36,6 +36,18 @@ def tool_select_conditional_edge(
             return "final_answer"
 
 
+def validate_final_answer_router(
+    state: OverallState,
+) -> Literal["final_answer", "text2cypher"]:
+    match state.get("next_action"):
+        case "final_answer":
+            return "final_answer"
+        case "text2cypher":
+            return "text2cypher"
+        case _:
+            return "final_answer"
+
+
 def query_mapper_edge(state: OverallState) -> List[Send]:
     """Map each sub question to a Text2Cypher subgraph."""
 

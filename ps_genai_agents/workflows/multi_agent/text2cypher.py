@@ -16,12 +16,13 @@ from ...components.state import (
 )
 from ...components.summarize import create_summarization_node
 from ...components.tool_selection import create_tool_selection_node
+from ...components.validate_final_answer import create_validate_final_answer_node
 from ...retrievers.cypher_examples.base import BaseCypherExampleRetriever
 from ..single_agent import create_text2cypher_agent
 from .edges import (
     guardrails_conditional_edge,
     query_mapper_edge,
-    tool_select_conditional_edge,
+    validate_final_answer_router,
 )
 
 
@@ -30,7 +31,7 @@ def create_text2cypher_workflow(
     graph: Neo4jGraph,
     cypher_example_retriever: BaseCypherExampleRetriever,
     scope_description: Optional[str] = None,
-    llm_validation: bool = True,
+    llm_cypher_validation: bool = True,
     max_attempts: int = 3,
     attempt_cypher_execution_on_final_attempt: bool = False,
 ) -> CompiledStateGraph:
@@ -48,7 +49,7 @@ def create_text2cypher_workflow(
         A short description of the application scope, by default None
     cypher_example_retriever: BaseCypherExampleRetriever
         The retriever used to collect Cypher examples for few shot prompting.
-    llm_validation : bool, optional
+    llm_cypher_validation : bool, optional
         Whether to perform LLM validation with the provided LLM, by default True
     max_attempts: int, optional
         The max number of allowed attempts to generate valid Cypher, by default 3
@@ -70,13 +71,13 @@ def create_text2cypher_workflow(
         llm=llm,
         graph=graph,
         cypher_example_retriever=cypher_example_retriever,
-        llm_validation=llm_validation,
+        llm_cypher_validation=llm_cypher_validation,
         max_attempts=max_attempts,
         attempt_cypher_execution_on_final_attempt=attempt_cypher_execution_on_final_attempt,
     )
     gather_cypher = create_gather_cypher_node()
-    tool_select = create_tool_selection_node(llm=llm)
     summarize = create_summarization_node(llm=llm)
+    validate_final_answer = create_validate_final_answer_node(llm=llm, graph=graph)
     final_answer = create_final_answer_node()
 
     main_graph_builder = StateGraph(OverallState, input=InputState, output=OutputState)
@@ -85,8 +86,8 @@ def create_text2cypher_workflow(
     main_graph_builder.add_node(query_parser)
     main_graph_builder.add_node("text2cypher", text2cypher)
     main_graph_builder.add_node(gather_cypher)
-    main_graph_builder.add_node(tool_select)
     main_graph_builder.add_node(summarize)
+    main_graph_builder.add_node(validate_final_answer)
     main_graph_builder.add_node(final_answer)
 
     main_graph_builder.add_edge(START, "guardrails")
@@ -100,11 +101,11 @@ def create_text2cypher_workflow(
         ["text2cypher"],
     )
     main_graph_builder.add_edge("text2cypher", "gather_cypher")
-    main_graph_builder.add_edge("gather_cypher", "tool_select")
+    main_graph_builder.add_edge("gather_cypher", "summarize")
+    main_graph_builder.add_edge("summarize", "validate_final_answer")
     main_graph_builder.add_conditional_edges(
-        "tool_select", tool_select_conditional_edge
+        "validate_final_answer", validate_final_answer_router
     )
-    main_graph_builder.add_edge("summarize", "tool_select")
     main_graph_builder.add_edge("final_answer", END)
 
     return main_graph_builder.compile()

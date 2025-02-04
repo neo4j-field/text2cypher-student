@@ -22,7 +22,7 @@ def create_text2cypher_agent(
     llm: BaseChatModel,
     graph: Neo4jGraph,
     cypher_example_retriever: BaseCypherExampleRetriever,
-    llm_validation: bool = True,
+    llm_cypher_validation: bool = True,
     max_attempts: int = 3,
     attempt_cypher_execution_on_final_attempt: bool = False,
 ) -> CompiledStateGraph:
@@ -39,7 +39,7 @@ def create_text2cypher_agent(
         The LLM to use for processing.
     cypher_example_retriever: BaseCypherExampleRetriever
         The retriever used to collect Cypher examples for few shot prompting.
-    llm_validation : bool, optional
+    llm_cypher_validation : bool, optional
         Whether to perform LLM validation with the provided LLM, by default True
     max_attempts: int, optional
         The max number of allowed attempts to generate valid Cypher, by default 3
@@ -59,7 +59,7 @@ def create_text2cypher_agent(
     validate_cypher = create_text2cypher_validation_node(
         llm=llm,
         graph=graph,
-        llm_validation=llm_validation,
+        llm_validation=llm_cypher_validation,
         max_attempts=max_attempts,
         attempt_cypher_execution_on_final_attempt=attempt_cypher_execution_on_final_attempt,
     )

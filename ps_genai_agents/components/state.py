@@ -84,7 +84,7 @@ class InputState(TypedDict):
 
 class OverallState(TypedDict):
     question: str
-    subquestions: List[SubQuestion]
+    subquestions: Annotated[List[SubQuestion], add]
     next_action: str
     cyphers: Annotated[List[CypherState], add]
     summary: str

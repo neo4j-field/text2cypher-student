@@ -71,7 +71,7 @@ def create_text2cypher_with_visualization_workflow(
         llm=llm,
         graph=graph,
         cypher_example_retriever=cypher_example_retriever,
-        llm_validation=llm_cypher_validation,
+        llm_cypher_validation=llm_cypher_validation,
         max_attempts=max_cypher_generation_attempts,
         attempt_cypher_execution_on_final_attempt=attempt_cypher_execution_on_final_attempt,
     )
