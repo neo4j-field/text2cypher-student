@@ -53,6 +53,7 @@ class Neo4jStructuredSchemaPropertyString(BaseNeo4jStructuredSchemaProperty):
 
     @property
     def is_enum(self) -> bool:
+        """Whether the object contains a valid enum."""
         if len(self.values) > 0 and self.distinct_count is not None:
             return len(self.values) == self.distinct_count
         else:
@@ -96,6 +97,7 @@ class Neo4jStructuredSchemaPropertyNumber(BaseNeo4jStructuredSchemaProperty):
 
     @property
     def is_enum(self) -> bool:
+        """Whether the object contains a valid enum."""
         return False
 
 
@@ -110,6 +112,7 @@ class Neo4jStructuredSchemaPropertyList(BaseNeo4jStructuredSchemaProperty):
 
     @property
     def is_enum(self) -> bool:
+        """Whether the object contains a valid enum."""
         return False
 
 
@@ -122,7 +125,7 @@ class Neo4jStructuredSchemaRelationship(BaseModel):
 class Neo4jStructuredSchema(BaseModel):
     """
     The Structured Schema of a Neo4j Graph.
-    This is the expected output from `Neo4jGraph(enhanced_schema=True).structured_schema` found in the `langchain_neo4j` Python library.
+    The output from `Neo4jGraph(enhanced_schema=True).structured_schema` found in the `langchain_neo4j` Python library should map to this object.
     """
 
     node_props: Dict[
@@ -205,6 +208,21 @@ class Neo4jStructuredSchema(BaseModel):
         }
 
     def get_node_property_values_enum(self) -> Dict[str, Dict[str, Set[str]]]:
+        """
+        A Python dictionary with node labels as parent keys, property names as child keys and a set of possible property values as the values.
+
+        Returns
+        -------
+        Dict[str, Dict[str, Set[str]]]
+            A dictionary like:
+            {
+            node_label_1: {
+                prop_1: {val_1, val_2, val_3},
+                ...
+                },
+            ...
+            }
+        """
         return {
             label: {
                 p.property: p.get_property_values_enum()
@@ -215,6 +233,22 @@ class Neo4jStructuredSchema(BaseModel):
         }
 
     def get_relationship_property_values_enum(self) -> Dict[str, Dict[str, Set[str]]]:
+        """
+        A Python dictionary with relationship types as parent keys, property names as child keys and a set of possible property values as the values.
+
+        Returns
+        -------
+        Dict[str, Dict[str, Set[str]]]
+            A dictionary like:
+            {
+            rel_type_1: {
+                prop_1: {val_1, val_2, val_3},
+                ...
+                },
+            ...
+            }
+        """
+
         return {
             rel_type: {
                 p.property: p.get_property_values_enum()
@@ -227,6 +261,21 @@ class Neo4jStructuredSchema(BaseModel):
     def get_node_property_values_range(
         self,
     ) -> Dict[str, Dict[str, Neo4jStructuredSchemaPropertyNumber]]:
+        """
+        A Python dictionary with node labels as parent keys, property names as child keys and `Neo4jStructuredSchemaPropertyNumber` objects as the values.
+
+        Returns
+        -------
+        Dict[str, Dict[str, Neo4jStructuredSchemaPropertyNumber]]
+            A dictionary like:
+            {
+            node_label_1: {
+                prop_1: Neo4jStructuredSchemaPropertyNumber(...),
+                ...
+                },
+            ...
+            }
+        """
         return {
             label: {
                 p.property: p
@@ -239,6 +288,21 @@ class Neo4jStructuredSchema(BaseModel):
     def get_relationship_property_values_range(
         self,
     ) -> Dict[str, Dict[str, Neo4jStructuredSchemaPropertyNumber]]:
+        """
+        A Python dictionary with relationship types as parent keys, property names as child keys and `Neo4jStructuredSchemaPropertyNumber` objects as the values.
+
+        Returns
+        -------
+        Dict[str, Dict[str, Neo4jStructuredSchemaPropertyNumber]]
+            A dictionary like:
+            {
+            rel_type_1: {
+                prop_1: Neo4jStructuredSchemaPropertyNumber(...),
+                ...
+                },
+            ...
+            }
+        """
         return {
             rel_type: {
                 p.property: p
