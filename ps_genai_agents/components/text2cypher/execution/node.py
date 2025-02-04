@@ -22,7 +22,7 @@ def create_text2cypher_execution_node(
 
     Returns
     -------
-    Callable[[CypherState], CypherState]
+    Callable[[CypherState], Dict[str, List[CypherOutputState] | List[str]]]
         The LangGraph node.
     """
 

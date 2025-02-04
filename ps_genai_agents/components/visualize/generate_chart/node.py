@@ -21,7 +21,7 @@ def create_chart_generation_node() -> (
 
     Returns
     -------
-    Callable[[VisualizationState], OverallState]
+    Callable[[VisualizationState], Dict[str, List[VisualizationOutputState] | List[str]]]
         The LangGraph node.
     """
 
