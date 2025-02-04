@@ -1,20 +1,11 @@
 from operator import add
-from typing import Annotated, Any, Dict, List, Optional
+from typing import Annotated, Any, Dict, List
 
-from pydantic_core import ErrorDetails
 from typing_extensions import TypedDict
 
 from ..components.models import SubQuestion
-
-
-class CypherState(TypedDict):
-    subquestion: str
-    statement: str
-    errors: List[str]
-    records: List[Dict[str, Any]]
-    next_action_cypher: str
-    attempts: int
-    steps: Annotated[List[str], add]
+from .text2cypher.state import CypherOutputState
+from .visualize.state import VisualizationOutputState
 
 
 class CypherHistoryRecord(TypedDict):
@@ -56,27 +47,6 @@ def update_history(
     return history[-SIZE:]
 
 
-class VisualizationState(TypedDict):
-    subquestion: str
-    records: List[Dict[str, Any]]
-    title: str
-    x_axis_key: str
-    y_axis_key: str
-    hue_key: Optional[str]
-    chart_type: str
-    chart_description: str
-    errors: List[ErrorDetails]
-    next_action_visualization: str
-    steps: Annotated[List[str], add]
-
-
-class VisualizationOutputState(TypedDict):
-    subquestion: str
-    chart: Any
-    chart_description: str
-    steps: List[str]
-
-
 class InputState(TypedDict):
     question: str
     history: Annotated[List[HistoryRecord], update_history]
@@ -86,7 +56,7 @@ class OverallState(TypedDict):
     question: str
     subquestions: Annotated[List[SubQuestion], add]
     next_action: str
-    cyphers: Annotated[List[CypherState], add]
+    cyphers: Annotated[List[CypherOutputState], add]
     summary: str
     visualizations: Annotated[List[VisualizationOutputState], add]
     steps: Annotated[List[str], add]
@@ -99,6 +69,6 @@ class OutputState(TypedDict):
     answer: str
     question: str
     steps: List[str]
-    cyphers: List[CypherState]
+    cyphers: List[CypherOutputState]
     visualizations: List[VisualizationOutputState]
     history: Annotated[List[HistoryRecord], update_history]

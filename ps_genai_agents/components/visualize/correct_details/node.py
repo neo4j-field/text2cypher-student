@@ -3,11 +3,11 @@ from typing import Any, Callable, Dict
 from langchain_core.language_models import BaseChatModel
 from langchain_core.runnables.base import Runnable
 
-from ....components.state import VisualizationState
 from ....components.visualize.correct_details.prompts import (
     create_correct_chart_details_prompt_template,
 )
 from ....components.visualize.generate_details.models import ChartDetailsOutput
+from ..state import VisualizationState
 
 correct_chart_details_prompt = create_correct_chart_details_prompt_template()
 

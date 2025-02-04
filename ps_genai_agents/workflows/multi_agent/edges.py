@@ -5,9 +5,9 @@ from typing import List, Literal
 from langgraph.types import Send
 
 from ...components.state import (
-    CypherState,
     OverallState,
 )
+from ...components.text2cypher.state import CypherOutputState
 
 
 def guardrails_conditional_edge(
@@ -68,7 +68,7 @@ def viz_mapper_edge(state: OverallState) -> List[Send]:
     tasks = list()
     for idx in indexes:
         try:
-            cypher_state: CypherState = state.get("cyphers", list())[idx]
+            cypher_state: CypherOutputState = state.get("cyphers", list())[idx]
         except Exception as e:
             print(f"Viz mapper edge error: {e}")
             continue

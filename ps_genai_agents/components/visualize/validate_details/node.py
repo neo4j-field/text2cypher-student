@@ -2,8 +2,8 @@ from typing import Any, Callable, Dict
 
 from pydantic import ValidationError
 
-from ....components.state import VisualizationState
 from ....components.visualize.generate_details.models import ChartDetailsOutput
+from ..state import VisualizationState
 
 
 def create_validate_chart_details_node() -> (
