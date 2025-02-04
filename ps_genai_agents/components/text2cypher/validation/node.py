@@ -100,7 +100,7 @@ def create_text2cypher_validation_node(
             cypher_errors = validate_cypher_query_with_schema(
                 graph=graph, cypher_statement=state.get("statement", "")
             )
-            errors.extend(cypher_errors.get("errors", []))
+            errors.extend(cypher_errors)
 
         # determine next node in workflow
         if (errors or mapping_errors) and GENERATION_ATTEMPT < max_attempts:

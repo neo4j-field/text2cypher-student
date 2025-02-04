@@ -39,6 +39,27 @@ def cypher_statement_5() -> str:
 
 
 @pytest.fixture(scope="function")
+def cypher_statement_writes_1() -> str:
+    """contains 1 write clause"""
+    return """
+merge (n)
+where n.id = 123
+return n
+limit 3
+"""
+
+
+@pytest.fixture(scope="function")
+def cypher_statement_writes_2() -> str:
+    """contains 3 write clauses"""
+    return """
+MERGE (n {id: event.id})
+ON CREATE
+set n.createDate = today
+"""
+
+
+@pytest.fixture(scope="function")
 def cypher_statements(cypher_statement_1: str, cypher_statement_2: str) -> List[str]:
     return [cypher_statement_1, cypher_statement_2]
 

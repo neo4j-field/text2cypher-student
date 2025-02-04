@@ -4,9 +4,10 @@ from ps_genai_agents.components.text2cypher.validation.models import (
     Neo4jStructuredSchemaPropertyNumber,
 )
 from ps_genai_agents.components.text2cypher.validation.validators import (
-    validate_property_value_with_enum,
-    validate_property_value_with_range,
-    validate_property_with_enum,
+    _validate_property_value_with_enum,
+    _validate_property_value_with_range,
+    _validate_property_with_enum,
+    validate_no_writes_in_cypher_query,
 )
 
 
@@ -33,7 +34,7 @@ def test_validate_property_value_with_enum_single_label_valid(
     node_or_rel: Literal["Node", "Relationship"] = "Node"
     property_value = "a"
 
-    res = validate_property_value_with_enum(
+    res = _validate_property_value_with_enum(
         enum_dict=node_property_values_enum_dict,
         labels_or_types=labels_or_types,
         property_name=property_name,
@@ -52,7 +53,7 @@ def test_validate_property_value_with_enum_single_label_invalid(
     node_or_rel: Literal["Node", "Relationship"] = "Node"
     property_value = "f"
 
-    res = validate_property_value_with_enum(
+    res = _validate_property_value_with_enum(
         enum_dict=node_property_values_enum_dict,
         labels_or_types=labels_or_types,
         property_name=property_name,
@@ -76,7 +77,7 @@ def test_validate_property_value_with_enum_multi_and_label_valid(
     property_value = "a"
     and_or: Literal["and", "or"] = "and"
 
-    res = validate_property_value_with_enum(
+    res = _validate_property_value_with_enum(
         enum_dict=node_property_values_enum_dict,
         labels_or_types=labels_or_types,
         property_name=property_name,
@@ -97,7 +98,7 @@ def test_validate_property_value_with_enum_multi_and_label_invalid(
     property_value = "d"
     and_or: Literal["and", "or"] = "and"
 
-    res = validate_property_value_with_enum(
+    res = _validate_property_value_with_enum(
         enum_dict=node_property_values_enum_dict,
         labels_or_types=labels_or_types,
         property_name=property_name,
@@ -122,7 +123,7 @@ def test_validate_property_value_with_enum_multi_or_label_valid(
     property_value = "d"
     and_or: Literal["and", "or"] = "or"
 
-    res = validate_property_value_with_enum(
+    res = _validate_property_value_with_enum(
         enum_dict=node_property_values_enum_dict,
         labels_or_types=labels_or_types,
         property_name=property_name,
@@ -143,7 +144,7 @@ def test_validate_property_value_with_enum_multi_or_label_invalid(
     property_value = "g"
     and_or: Literal["and", "or"] = "or"
 
-    res = validate_property_value_with_enum(
+    res = _validate_property_value_with_enum(
         enum_dict=node_property_values_enum_dict,
         labels_or_types=labels_or_types,
         property_name=property_name,
@@ -166,7 +167,7 @@ def test_validate_property_name_with_enum_single_label_valid(
     property_name = "prop_1"
     node_or_rel: Literal["Node", "Relationship"] = "Node"
 
-    res = validate_property_with_enum(
+    res = _validate_property_with_enum(
         enum_dict=node_property_values_enum_dict,
         labels_or_types=labels_or_types,
         property_name=property_name,
@@ -183,7 +184,7 @@ def test_validate_property_name_with_enum_single_label_invalid(
     property_name = "prop_3"
     node_or_rel: Literal["Node", "Relationship"] = "Node"
 
-    res = validate_property_with_enum(
+    res = _validate_property_with_enum(
         enum_dict=node_property_values_enum_dict,
         labels_or_types=labels_or_types,
         property_name=property_name,
@@ -205,7 +206,7 @@ def test_validate_property_name_with_enum_multi_and_label_valid(
     node_or_rel: Literal["Node", "Relationship"] = "Node"
     and_or: Literal["and", "or"] = "and"
 
-    res = validate_property_with_enum(
+    res = _validate_property_with_enum(
         enum_dict=node_property_values_enum_dict,
         labels_or_types=labels_or_types,
         property_name=property_name,
@@ -224,7 +225,7 @@ def test_validate_property_name_with_enum_multi_and_label_invalid(
     node_or_rel: Literal["Node", "Relationship"] = "Node"
     and_or: Literal["and", "or"] = "and"
 
-    res = validate_property_with_enum(
+    res = _validate_property_with_enum(
         enum_dict=node_property_values_enum_dict,
         labels_or_types=labels_or_types,
         property_name=property_name,
@@ -247,7 +248,7 @@ def test_validate_property_name_with_enum_multi_or_label_valid(
     node_or_rel: Literal["Node", "Relationship"] = "Node"
     and_or: Literal["and", "or"] = "or"
 
-    res = validate_property_with_enum(
+    res = _validate_property_with_enum(
         enum_dict=node_property_values_enum_dict,
         labels_or_types=labels_or_types,
         property_name=property_name,
@@ -266,7 +267,7 @@ def test_validate_property_name_with_enum_multi_or_label_invalid(
     node_or_rel: Literal["Node", "Relationship"] = "Node"
     and_or: Literal["and", "or"] = "or"
 
-    res = validate_property_with_enum(
+    res = _validate_property_with_enum(
         enum_dict=node_property_names_enum_dict,
         labels_or_types=labels_or_types,
         property_name=property_name,
@@ -288,7 +289,7 @@ def test_validate_property_value_with_range_single_label_valid(
     property_name = "prop_1"
     node_or_rel: Literal["Node", "Relationship"] = "Node"
 
-    res = validate_property_value_with_range(
+    res = _validate_property_value_with_range(
         enum_dict=node_property_values_range_dict,
         labels_or_types=labels_or_types,
         property_name=property_name,
@@ -307,7 +308,7 @@ def test_validate_property_value_with_range_single_label_invalid(
     node_or_rel: Literal["Node", "Relationship"] = "Node"
     property_value = 15
 
-    res = validate_property_value_with_range(
+    res = _validate_property_value_with_range(
         enum_dict=node_property_values_range_dict,
         labels_or_types=labels_or_types,
         property_name=property_name,
@@ -333,7 +334,7 @@ def test_validate_property_value_with_range_multi_and_label_valid(
     and_or: Literal["and", "or"] = "and"
     property_value = 9
 
-    res = validate_property_value_with_range(
+    res = _validate_property_value_with_range(
         enum_dict=node_property_values_range_dict,
         labels_or_types=labels_or_types,
         property_name=property_name,
@@ -356,7 +357,7 @@ def test_validate_property_value_with_range_multi_and_label_invalid(
     and_or: Literal["and", "or"] = "and"
     property_value = 14
 
-    res = validate_property_value_with_range(
+    res = _validate_property_value_with_range(
         enum_dict=node_property_values_range_dict,
         labels_or_types=labels_or_types,
         property_name=property_name,
@@ -384,7 +385,7 @@ def test_validate_property_value_with_range_multi_or_label_valid(
     and_or: Literal["and", "or"] = "or"
     property_value = 13
 
-    res = validate_property_value_with_range(
+    res = _validate_property_value_with_range(
         enum_dict=node_property_values_range_dict,
         labels_or_types=labels_or_types,
         property_name=property_name,
@@ -407,7 +408,7 @@ def test_validate_property_value_with_range_multi_or_label_invalid(
     and_or: Literal["and", "or"] = "or"
     property_value = 20
 
-    res = validate_property_value_with_range(
+    res = _validate_property_value_with_range(
         enum_dict=node_property_values_range_dict,
         labels_or_types=labels_or_types,
         property_name=property_name,
@@ -426,3 +427,26 @@ def test_validate_property_value_with_range_multi_or_label_invalid(
         res
         == f"All of {node_or_rel}s {', '.join(invalid_labels_or_types)} have property {property_name} = {property_value} which is out of range in graph database."
     )
+
+
+def test_validate_no_writes_in_cypher_query_valid(cypher_statement_1: str) -> None:
+    res = validate_no_writes_in_cypher_query(cypher_statement_1)
+
+    assert len(res) == 0
+
+
+def test_validate_no_writes_in_cypher_query_invalid_one_error(
+    cypher_statement_writes_1: str,
+) -> None:
+    res = validate_no_writes_in_cypher_query(cypher_statement_writes_1)
+
+    assert len(res) == 1
+    assert res[0] == "Cypher contains write clause: MERGE"
+
+
+def test_validate_no_writes_in_cypher_query_invalid_two_error(
+    cypher_statement_writes_2: str,
+) -> None:
+    res = validate_no_writes_in_cypher_query(cypher_statement_writes_2)
+
+    assert len(res) == 3
