@@ -7,6 +7,8 @@ from typing import Optional
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_neo4j import Neo4jGraph
 
+from ..utils.utils import retrieve_and_parse_schema_from_graph_for_prompts
+
 guardrails_system = """
 You must decide whether the provided question is in scope.
 Assume the question might be related.
@@ -39,7 +41,7 @@ def create_guardrails_prompt_template(
         else ""
     )
     graph_context = (
-        f"\nUse the graph schema to inform your answer:\n{graph.get_schema}"
+        f"\nUse the graph schema to inform your answer:\n{retrieve_and_parse_schema_from_graph_for_prompts(graph)}"
         if graph is not None
         else ""
     )

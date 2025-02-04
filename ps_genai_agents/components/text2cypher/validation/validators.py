@@ -11,6 +11,7 @@ from neo4j.exceptions import CypherSyntaxError
 
 from ....components.text2cypher.validation.models import ValidateCypherOutput
 from ....constants import WRITE_CLAUSES
+from ...utils.utils import retrieve_and_parse_schema_from_graph_for_prompts
 from .models import Neo4jStructuredSchema, Neo4jStructuredSchemaPropertyNumber
 from .utils.cypher_extractors import (
     extract_entities_for_validation,
@@ -19,9 +20,7 @@ from .utils.cypher_extractors import (
 from .utils.utils import update_task_list_with_property_type
 
 
-def validate_cypher_query_syntax(
-    graph: Neo4jGraph, cypher_statement: str
-) -> Optional[str]:
+def validate_cypher_query_syntax(graph: Neo4jGraph, cypher_statement: str) -> List[str]:
     """
     Validate the Cypher statement syntax by running an EXPLAIN query.
 
@@ -34,14 +33,15 @@ def validate_cypher_query_syntax(
 
     Returns
     -------
-    Optional[str]
-        If the statement contains invalid syntax, return an error message, else return None
+    List[str]
+        If the statement contains invalid syntax, return an error message in a list
     """
+    errors = list()
     try:
         graph.query(f"EXPLAIN {cypher_statement}")
     except CypherSyntaxError as e:
-        return str(e.message)
-    return None
+        errors.append(str(e.message))
+    return errors
 
 
 def correct_cypher_query_relationship_direction(
@@ -108,7 +108,7 @@ def validate_cypher_query_with_llm(
     llm_output: ValidateCypherOutput = validate_cypher_chain.invoke(
         {
             "question": question,
-            "schema": graph.schema,
+            "schema": retrieve_and_parse_schema_from_graph_for_prompts(graph),
             "cypher": cypher_statement,
         }
     )
