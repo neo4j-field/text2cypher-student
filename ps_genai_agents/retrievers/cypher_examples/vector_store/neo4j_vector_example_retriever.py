@@ -27,7 +27,7 @@ class Neo4jVectorSearchCypherExampleRetriever(BaseCypherExampleRetriever):
         description="The embedder to generate an embedding from an input query."
     )
 
-    def get_examples(self, query: str, k: int = 5) -> str:
+    def get_examples(self, query: str, k: int = 5, *args: Any, **kwargs: Any) -> str:
         """
         Perform vector similarity search between the provided query and queries that exist in the Neo4j database.
         Returns Cypher queries associated with the top K most similar query results.
@@ -45,7 +45,6 @@ class Neo4jVectorSearchCypherExampleRetriever(BaseCypherExampleRetriever):
         """
 
         examples = self._retrieve_examples(query, k)
-        print("\n\nEXAMPLES: ", examples, "\n\n")
         if len(examples) > 0:
             return self._format_examples_list(examples)
         else:
@@ -82,7 +81,6 @@ class Neo4jVectorSearchCypherExampleRetriever(BaseCypherExampleRetriever):
         )
 
     def _format_examples_list(self, unformatted_examples: List[Dict[str, str]]) -> str:
-        print("\n\nunformatted examples: ", unformatted_examples, "\n\n")
         if len(unformatted_examples) > 0:
             return ("\n" * 2).join(
                 [

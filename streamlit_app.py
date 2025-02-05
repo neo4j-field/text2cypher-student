@@ -1,9 +1,11 @@
+import asyncio
 import json
 import os
 import sys
 from typing import Any, Dict, List
 
 import streamlit as st
+from dotenv import load_dotenv
 from langchain_neo4j import Neo4jGraph
 from langchain_openai import ChatOpenAI
 
@@ -13,12 +15,12 @@ from ps_genai_agents.workflows.multi_agent import (
     create_text2cypher_with_visualization_workflow,
 )
 
-from dotenv import load_dotenv
-
 if load_dotenv():
     print("Env Loaded Successfully!")
 else:
     print("Unable to Load Environment.")
+
+
 def get_args() -> Dict[str, Any]:
     """Parse the command line arguments to configure the application."""
 
@@ -70,7 +72,7 @@ def initialize_state(
         st.session_state["example_questions"] = example_questions
 
 
-def run_app(title: str = "Neo4j GenAI Demo") -> None:
+async def run_app(title: str = "Neo4j GenAI Demo") -> None:
     """
     Run the Streamlit application.
     """
@@ -83,7 +85,7 @@ def run_app(title: str = "Neo4j GenAI Demo") -> None:
         st.session_state["current_question"] = question
 
     if "current_question" in st.session_state:
-        chat(str(st.session_state.get("current_question", "")))
+        await chat(str(st.session_state.get("current_question", "")))
 
 
 if __name__ == "__main__":
@@ -93,4 +95,4 @@ if __name__ == "__main__":
         scope_description=args.get("scope_description", ""),
         example_questions=args.get("example_questions", list()),
     )
-    run_app(title=args.get("title", ""))
+    asyncio.run(run_app(title=args.get("title", "")))

@@ -116,6 +116,21 @@ class Neo4jStructuredSchemaPropertyList(BaseNeo4jStructuredSchemaProperty):
         return False
 
 
+class Neo4jStructuredSchemaPropertyDateTime(BaseNeo4jStructuredSchemaProperty):
+    min: str = Field(description="The earliest date.")
+    max: str = Field(description="The most recent date.")
+
+    @field_validator("type")
+    def validate_prop_type(cls, v: str) -> str:
+        assert v == "DATE_TIME", "Property type must be 'DATE_TIME'."
+        return v
+
+    @property
+    def is_enum(self) -> bool:
+        """Whether the object contains a valid enum."""
+        return False
+
+
 class Neo4jStructuredSchemaRelationship(BaseModel):
     start: str = Field(description="The start node label.")
     type: str = Field(description="The relationship type.")
@@ -134,6 +149,7 @@ class Neo4jStructuredSchema(BaseModel):
             Neo4jStructuredSchemaPropertyString
             | Neo4jStructuredSchemaPropertyNumber
             | Neo4jStructuredSchemaPropertyList
+            | Neo4jStructuredSchemaPropertyDateTime
         ],
     ] = Field(
         description="A Python Dictionary with node labels as keys and a list of properties as values."
@@ -144,6 +160,7 @@ class Neo4jStructuredSchema(BaseModel):
             Neo4jStructuredSchemaPropertyString
             | Neo4jStructuredSchemaPropertyNumber
             | Neo4jStructuredSchemaPropertyList
+            | Neo4jStructuredSchemaPropertyDateTime
         ],
     ] = Field(
         description="A Python Dictionary with relationship types as keys and a list of properties as values."

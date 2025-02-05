@@ -29,8 +29,11 @@ def create_text2cypher_generation_node(
         Generates a cypher statement based on the provided schema and user input
         """
 
-        examples: str = cypher_example_retriever.get_examples()
+        examples: str = cypher_example_retriever.get_examples(
+            **{"query": state.get("subquestion", ""), "k": 8}
+        )
 
+        # print("\n\nExamples: ", examples, "\n\n")
         generated_cypher = await text2cypher_chain.ainvoke(
             {
                 "question": state.get("subquestion"),
@@ -38,6 +41,7 @@ def create_text2cypher_generation_node(
                 "schema": graph.schema,
             }
         )
+        # print("GENERATED CYPHER: 'n", generated_cypher, "\n\n")
         return {"statement": generated_cypher, "steps": ["generate_cypher"]}
 
     return generate_cypher
