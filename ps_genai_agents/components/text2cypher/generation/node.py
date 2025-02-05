@@ -2,7 +2,7 @@
 This code is based on content found in the LangGraph documentation: https://python.langchain.com/docs/tutorials/graph/#advanced-implementation-with-langgraph
 """
 
-from typing import Any, Callable, Dict
+from typing import Any, Callable, Coroutine, Dict
 
 from langchain_core.language_models import BaseChatModel
 from langchain_core.output_parsers import StrOutputParser
@@ -21,17 +21,17 @@ def create_text2cypher_generation_node(
     llm: BaseChatModel,
     graph: Neo4jGraph,
     cypher_example_retriever: BaseCypherExampleRetriever,
-) -> Callable[[CypherInputState], Dict[str, Any]]:
+) -> Callable[[CypherInputState], Coroutine[Any, Any, dict[str, Any]]]:
     text2cypher_chain = generation_prompt | llm | StrOutputParser()
 
-    def generate_cypher(state: CypherInputState) -> Dict[str, Any]:
+    async def generate_cypher(state: CypherInputState) -> Dict[str, Any]:
         """
         Generates a cypher statement based on the provided schema and user input
         """
 
         examples: str = cypher_example_retriever.get_examples()
 
-        generated_cypher = text2cypher_chain.invoke(
+        generated_cypher = await text2cypher_chain.ainvoke(
             {
                 "question": state.get("subquestion"),
                 "fewshot_examples": examples,

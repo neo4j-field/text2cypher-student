@@ -74,7 +74,7 @@ def correct_cypher_query_relationship_direction(
     return corrected_cypher
 
 
-def validate_cypher_query_with_llm(
+async def validate_cypher_query_with_llm(
     validate_cypher_chain: Runnable[Dict[str, Any], Any],
     question: str,
     graph: Neo4jGraph,
@@ -105,7 +105,7 @@ def validate_cypher_query_with_llm(
     errors: List[str] = []
     mapping_errors: List[str] = []
 
-    llm_output: ValidateCypherOutput = validate_cypher_chain.invoke(
+    llm_output: ValidateCypherOutput = await validate_cypher_chain.ainvoke(
         {
             "question": question,
             "schema": retrieve_and_parse_schema_from_graph_for_prompts(graph),

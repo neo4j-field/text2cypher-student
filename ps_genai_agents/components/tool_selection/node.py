@@ -1,4 +1,4 @@
-from typing import Any, Callable, Dict
+from typing import Any, Callable, Coroutine, Dict
 
 from langchain_core.language_models import BaseChatModel
 from langchain_core.runnables.base import Runnable
@@ -14,7 +14,7 @@ generate_tool_select_prompt = create_tool_selection_prompt_template()
 
 def create_tool_selection_node(
     llm: BaseChatModel,
-) -> Callable[[OverallState], Dict[str, Any]]:
+) -> Callable[[OverallState], Coroutine[Any, Any, dict[str, Any]]]:
     """
     Create a tool_select node for a LangGraph workflow.
 
@@ -33,12 +33,12 @@ def create_tool_selection_node(
         generate_tool_select_prompt | llm.with_structured_output(ToolSelectionOutput)
     )
 
-    def tool_select(state: OverallState) -> Dict[str, Any]:
+    async def tool_select(state: OverallState) -> Dict[str, Any]:
         """
         Select an appropriate tool to perform requested task.
         """
 
-        response: ToolSelectionOutput = generate_tool_select.invoke(
+        response: ToolSelectionOutput = await generate_tool_select.ainvoke(
             {
                 "question": state.get("question"),
                 "does_summary_exist": state.get("summary") is not None,

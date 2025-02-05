@@ -1,4 +1,4 @@
-from typing import Any, Callable, Dict
+from typing import Any, Callable, Coroutine, Dict
 
 from langchain_core.language_models import BaseChatModel
 from langchain_core.runnables.base import Runnable
@@ -13,7 +13,7 @@ from .prompts import create_validate_final_answer_prompt_template
 
 def create_validate_final_answer_node(
     llm: BaseChatModel, graph: Neo4jGraph, loop_back_node: str = "text2cypher"
-) -> Callable[[OverallState], Dict[str, Any]]:
+) -> Callable[[OverallState], Coroutine[Any, Any, dict[str, Any]]]:
     """
     Create a Validate Final Answer node for a LangGraph workflow.
 
@@ -37,7 +37,7 @@ def create_validate_final_answer_node(
         | llm.with_structured_output(ValidateFinalAnswerResponse)
     )
 
-    def validate_final_answer(state: OverallState) -> Dict[str, Any]:
+    async def validate_final_answer(state: OverallState) -> Dict[str, Any]:
         """
         Validate that the final answer sufficiently answers the initial question before returning to the user.
 
@@ -54,15 +54,17 @@ def create_validate_final_answer_node(
             Updates to the state.
         """
 
-        response: ValidateFinalAnswerResponse = validate_final_answer_chain.invoke(
-            {
-                "question": state.get("question"),
-                "answer": state.get("summary"),
-                "schema": retrieve_and_parse_schema_from_graph_for_prompts(graph),
-                "data": [
-                    cypher.get("records") for cypher in state.get("cyphers", list())
-                ],
-            }
+        response: ValidateFinalAnswerResponse = (
+            await validate_final_answer_chain.ainvoke(
+                {
+                    "question": state.get("question"),
+                    "answer": state.get("summary"),
+                    "schema": retrieve_and_parse_schema_from_graph_for_prompts(graph),
+                    "data": [
+                        cypher.get("records") for cypher in state.get("cyphers", list())
+                    ],
+                }
+            )
         )
 
         to_return: Dict[str, Any] = {"steps": ["validate_final_answer"]}

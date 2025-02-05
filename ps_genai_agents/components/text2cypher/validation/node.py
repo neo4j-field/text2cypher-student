@@ -2,7 +2,7 @@
 This code is based on content found in the LangGraph documentation: https://python.langchain.com/docs/tutorials/graph/#advanced-implementation-with-langgraph
 """
 
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Coroutine, Dict, Optional
 
 from langchain_core.language_models import BaseChatModel
 from langchain_neo4j import Neo4jGraph
@@ -29,7 +29,7 @@ def create_text2cypher_validation_node(
     llm_validation: bool = True,
     max_attempts: int = 3,
     attempt_cypher_execution_on_final_attempt: bool = False,
-) -> Callable[[CypherState], Dict[str, Any]]:
+) -> Callable[[CypherState], Coroutine[Any, Any, dict[str, Any]]]:
     """
     Create a Text2Cypher query validation node for a LangGraph workflow.
     This is the last node in the workflow before Cypher execution may be attempted.
@@ -60,7 +60,7 @@ def create_text2cypher_validation_node(
             ValidateCypherOutput
         )
 
-    def validate_cypher(state: CypherState) -> Dict[str, Any]:
+    async def validate_cypher(state: CypherState) -> Dict[str, Any]:
         """
         Validates the Cypher statements and maps any property values to the database.
         """
@@ -87,7 +87,7 @@ def create_text2cypher_validation_node(
 
         # Use LLM to find additional potential errors and get the mapping for values
         if llm is not None and llm_validation:
-            llm_errors = validate_cypher_query_with_llm(
+            llm_errors = await validate_cypher_query_with_llm(
                 validate_cypher_chain=validate_cypher_chain,
                 question=state.get("subquestion", ""),
                 graph=graph,
