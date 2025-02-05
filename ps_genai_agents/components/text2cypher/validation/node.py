@@ -7,11 +7,11 @@ from typing import Any, Callable, Dict, Optional
 from langchain_core.language_models import BaseChatModel
 from langchain_neo4j import Neo4jGraph
 
-from ....components.state import CypherState
 from ....components.text2cypher.validation.models import ValidateCypherOutput
 from ....components.text2cypher.validation.prompts import (
     create_text2cypher_validation_prompt_template,
 )
+from ..state import CypherState
 from .validators import (
     correct_cypher_query_relationship_direction,
     validate_cypher_query_syntax,

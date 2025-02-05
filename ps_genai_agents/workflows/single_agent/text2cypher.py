@@ -6,7 +6,6 @@ from langgraph.constants import END, START
 from langgraph.graph.state import CompiledStateGraph, StateGraph
 
 from ...components.state import (
-    CypherState,
     OverallState,
 )
 from ...components.text2cypher import (
@@ -15,6 +14,7 @@ from ...components.text2cypher import (
     create_text2cypher_generation_node,
     create_text2cypher_validation_node,
 )
+from ...components.text2cypher.state import CypherInputState, CypherState
 from ...retrievers.cypher_examples.base import BaseCypherExampleRetriever
 
 
@@ -67,7 +67,7 @@ def create_text2cypher_agent(
     execute_cypher = create_text2cypher_execution_node(graph=graph)
 
     text2cypher_graph_builder = StateGraph(
-        CypherState, input=CypherState, output=OverallState
+        CypherState, input=CypherInputState, output=OverallState
     )
     text2cypher_graph_builder.add_node(generate_cypher)
     text2cypher_graph_builder.add_node(validate_cypher)

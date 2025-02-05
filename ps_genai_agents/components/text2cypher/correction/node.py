@@ -8,10 +8,10 @@ from langchain_core.language_models import BaseChatModel
 from langchain_core.output_parsers import StrOutputParser
 from langchain_neo4j import Neo4jGraph
 
-from ....components.state import CypherState
 from ....components.text2cypher.correction.prompts import (
     create_text2cypher_correction_prompt_template,
 )
+from ..state import CypherState
 
 correction_cypher_prompt = create_text2cypher_correction_prompt_template()
 
