@@ -2,7 +2,7 @@
 This code is based on content found in the LangGraph documentation: https://python.langchain.com/docs/tutorials/graph/#advanced-implementation-with-langgraph
 """
 
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Coroutine, Dict, Optional
 
 from langchain_core.language_models import BaseChatModel
 from langchain_core.runnables.base import Runnable
@@ -17,7 +17,7 @@ def create_guardrails_node(
     llm: BaseChatModel,
     graph: Optional[Neo4jGraph] = None,
     scope_description: Optional[str] = None,
-) -> Callable[[InputState], Dict[str, Any]]:
+) -> Callable[[InputState], Coroutine[Any, Any, dict[str, Any]]]:
     """
     Create a guardrails node to be used in a LangGraph workflow.
 
@@ -44,12 +44,12 @@ def create_guardrails_node(
         guardrails_prompt | llm.with_structured_output(GuardrailsOutput)
     )
 
-    def guardrails(state: InputState) -> Dict[str, Any]:
+    async def guardrails(state: InputState) -> Dict[str, Any]:
         """
         Decides if the question is in scope.
         """
 
-        guardrails_output: GuardrailsOutput = guardrails_chain.invoke(
+        guardrails_output: GuardrailsOutput = await guardrails_chain.ainvoke(
             {"question": state.get("question")}
         )
         summary = None

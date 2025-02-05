@@ -1,4 +1,4 @@
-from typing import Any, Callable, Dict, List
+from typing import Any, Callable, Coroutine, Dict, List
 
 import pandas as pd
 
@@ -13,7 +13,8 @@ from ..state import VisualizationOutputState, VisualizationState
 
 def create_chart_generation_node() -> (
     Callable[
-        [VisualizationState], Dict[str, List[VisualizationOutputState] | List[str]]
+        [VisualizationState],
+        Coroutine[Any, Any, Dict[str, List[VisualizationOutputState] | List[str]]],
     ]
 ):
     """
@@ -25,7 +26,7 @@ def create_chart_generation_node() -> (
         The LangGraph node.
     """
 
-    def generate_chart(
+    async def generate_chart(
         state: VisualizationState,
     ) -> Dict[str, List[VisualizationOutputState] | List[str]]:
         """

@@ -6,6 +6,7 @@
 
 * `CypherQuery` nodes are now removed from graph schema when generating Cypher
 * All graphs and subgraphs have Input, Main and Output states
+* Make all agent workflow nodes async
 
 ### Added
 
