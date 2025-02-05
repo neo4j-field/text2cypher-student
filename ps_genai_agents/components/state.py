@@ -9,6 +9,8 @@ from .visualize.state import VisualizationOutputState
 
 
 class CypherHistoryRecord(TypedDict):
+    """A simplified representation of the CypherOutputState"""
+
     subquestion: str
     statement: str
     records: List[Dict[str, Any]]
@@ -48,11 +50,15 @@ def update_history(
 
 
 class InputState(TypedDict):
+    """The input state for multi agent workflows."""
+
     question: str
     history: Annotated[List[HistoryRecord], update_history]
 
 
 class OverallState(TypedDict):
+    """The main state in multi agent workflows."""
+
     question: str
     subquestions: Annotated[List[SubQuestion], add]
     next_action: str
@@ -64,7 +70,7 @@ class OverallState(TypedDict):
 
 
 class OutputState(TypedDict):
-    """The final output."""
+    """The final output for multi agent workflows."""
 
     answer: str
     question: str

@@ -77,7 +77,9 @@ def create_text2cypher_workflow(
     )
     gather_cypher = create_gather_cypher_node()
     summarize = create_summarization_node(llm=llm)
-    validate_final_answer = create_validate_final_answer_node(llm=llm, graph=graph)
+    validate_final_answer = create_validate_final_answer_node(
+        llm=llm, graph=graph, loop_back_node="text2cypher"
+    )
     final_answer = create_final_answer_node()
 
     main_graph_builder = StateGraph(OverallState, input=InputState, output=OutputState)
@@ -104,7 +106,9 @@ def create_text2cypher_workflow(
     main_graph_builder.add_edge("gather_cypher", "summarize")
     main_graph_builder.add_edge("summarize", "validate_final_answer")
     main_graph_builder.add_conditional_edges(
-        "validate_final_answer", validate_final_answer_router
+        "validate_final_answer",
+        validate_final_answer_router,
+        ["text2cypher", "final_answer"],
     )
     main_graph_builder.add_edge("final_answer", END)
 

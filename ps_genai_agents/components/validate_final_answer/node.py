@@ -12,7 +12,7 @@ from .prompts import create_validate_final_answer_prompt_template
 
 
 def create_validate_final_answer_node(
-    llm: BaseChatModel, graph: Neo4jGraph
+    llm: BaseChatModel, graph: Neo4jGraph, loop_back_node: str = "text2cypher"
 ) -> Callable[[OverallState], Dict[str, Any]]:
     """
     Create a Validate Final Answer node for a LangGraph workflow.
@@ -23,6 +23,8 @@ def create_validate_final_answer_node(
         The LLM do perform processing.
     graph : Neo4jGraph
         The Neo4j graph wrapper.
+    loop_back_node : str, optional
+            The name of the node or subgraph to return to with follow up questions, by default "text2cypher"
 
     Returns
     -------
@@ -35,9 +37,7 @@ def create_validate_final_answer_node(
         | llm.with_structured_output(ValidateFinalAnswerResponse)
     )
 
-    def validate_final_answer(
-        state: OverallState, loop_back_node: str = "text2cypher"
-    ) -> Dict[str, Any]:
+    def validate_final_answer(state: OverallState) -> Dict[str, Any]:
         """
         Validate that the final answer sufficiently answers the initial question before returning to the user.
 

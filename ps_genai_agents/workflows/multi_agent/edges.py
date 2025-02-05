@@ -38,14 +38,16 @@ def tool_select_conditional_edge(
 
 def validate_final_answer_router(
     state: OverallState,
-) -> Literal["final_answer", "text2cypher"]:
+) -> Send:
     match state.get("next_action"):
         case "final_answer":
-            return "final_answer"
+            return Send("final_answer", state)
         case "text2cypher":
-            return "text2cypher"
+            subquestions = state.get("subquestions", list())
+            new_subquestion = subquestions[-1]
+            return Send("text2cypher", {"subquestion": new_subquestion.subquestion})
         case _:
-            return "final_answer"
+            return Send("final_answer", state)
 
 
 def query_mapper_edge(state: OverallState) -> List[Send]:
