@@ -22,9 +22,7 @@ def create_gather_cypher_node() -> Callable[[OverallState], Dict[str, Any]]:
         """
         Gather Cypher task results.
         """
-        # print(
-        #     f"GATHERED {len(state.get('cyphers', []))} of {len(state.get('subquestions', []))} TASKS."
-        # )
+
         return {"steps": ["gather_cypher"]}
 
     return gather_cypher

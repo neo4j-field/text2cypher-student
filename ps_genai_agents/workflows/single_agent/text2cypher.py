@@ -5,24 +5,24 @@ from langchain_neo4j import Neo4jGraph
 from langgraph.constants import END, START
 from langgraph.graph.state import CompiledStateGraph, StateGraph
 
-from ..components.state import (
-    CypherState,
+from ...components.state import (
     OverallState,
 )
-from ..components.text2cypher import (
+from ...components.text2cypher import (
     create_text2cypher_correction_node,
     create_text2cypher_execution_node,
     create_text2cypher_generation_node,
     create_text2cypher_validation_node,
 )
-from ..retrievers.cypher_examples.base import BaseCypherExampleRetriever
+from ...components.text2cypher.state import CypherInputState, CypherState
+from ...retrievers.cypher_examples.base import BaseCypherExampleRetriever
 
 
 def create_text2cypher_agent(
     llm: BaseChatModel,
     graph: Neo4jGraph,
     cypher_example_retriever: BaseCypherExampleRetriever,
-    llm_validation: bool = True,
+    llm_cypher_validation: bool = True,
     max_attempts: int = 3,
     attempt_cypher_execution_on_final_attempt: bool = False,
 ) -> CompiledStateGraph:
@@ -39,7 +39,7 @@ def create_text2cypher_agent(
         The LLM to use for processing.
     cypher_example_retriever: BaseCypherExampleRetriever
         The retriever used to collect Cypher examples for few shot prompting.
-    llm_validation : bool, optional
+    llm_cypher_validation : bool, optional
         Whether to perform LLM validation with the provided LLM, by default True
     max_attempts: int, optional
         The max number of allowed attempts to generate valid Cypher, by default 3
@@ -59,7 +59,7 @@ def create_text2cypher_agent(
     validate_cypher = create_text2cypher_validation_node(
         llm=llm,
         graph=graph,
-        llm_validation=llm_validation,
+        llm_validation=llm_cypher_validation,
         max_attempts=max_attempts,
         attempt_cypher_execution_on_final_attempt=attempt_cypher_execution_on_final_attempt,
     )
@@ -67,7 +67,7 @@ def create_text2cypher_agent(
     execute_cypher = create_text2cypher_execution_node(graph=graph)
 
     text2cypher_graph_builder = StateGraph(
-        CypherState, input=CypherState, output=OverallState
+        CypherState, input=CypherInputState, output=OverallState
     )
     text2cypher_graph_builder.add_node(generate_cypher)
     text2cypher_graph_builder.add_node(validate_cypher)

@@ -2,7 +2,7 @@
 This code is based on content found in the LangGraph documentation: https://python.langchain.com/docs/tutorials/graph/#advanced-implementation-with-langgraph
 """
 
-from typing import Any, Callable, Dict
+from typing import Any, Callable, Coroutine, Dict
 
 from langchain_core.language_models import BaseChatModel
 from langchain_core.output_parsers import StrOutputParser
@@ -15,7 +15,7 @@ generate_summary_prompt = create_summarization_prompt_template()
 
 def create_summarization_node(
     llm: BaseChatModel,
-) -> Callable[[OverallState], Dict[str, Any]]:
+) -> Callable[[OverallState], Coroutine[Any, Any, dict[str, Any]]]:
     """
     Create a Summarization node for a LangGraph workflow.
 
@@ -32,12 +32,12 @@ def create_summarization_node(
 
     generate_summary = generate_summary_prompt | llm | StrOutputParser()
 
-    def summarize(state: OverallState) -> Dict[str, Any]:
+    async def summarize(state: OverallState) -> Dict[str, Any]:
         """
         Summarize results of the performed Cypher queries.
         """
 
-        summary = generate_summary.invoke(
+        summary = await generate_summary.ainvoke(
             {
                 "question": state.get("question"),
                 "results": [

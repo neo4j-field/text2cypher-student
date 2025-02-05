@@ -1,9 +1,11 @@
-from typing import Any, Callable, Dict
+from typing import Any, Callable, Coroutine, Dict
 
 from ...components.state import OverallState
 
 
-def create_final_answer_node() -> Callable[[OverallState], Dict[str, Any]]:
+def create_final_answer_node() -> (
+    Callable[[OverallState], Coroutine[Any, Any, dict[str, Any]]]
+):
     """
     Create a final_answer node for a LangGraph workflow.
 
@@ -18,7 +20,7 @@ def create_final_answer_node() -> Callable[[OverallState], Dict[str, Any]]:
         The LangGraph node.
     """
 
-    def final_answer(state: OverallState) -> Dict[str, Any]:
+    async def final_answer(state: OverallState) -> dict[str, Any]:
         """
         Construct a final answer.
         """

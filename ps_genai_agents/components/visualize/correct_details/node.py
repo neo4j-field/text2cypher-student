@@ -1,20 +1,20 @@
-from typing import Any, Callable, Dict
+from typing import Any, Callable, Coroutine, Dict
 
 from langchain_core.language_models import BaseChatModel
 from langchain_core.runnables.base import Runnable
 
-from ....components.state import VisualizationState
 from ....components.visualize.correct_details.prompts import (
     create_correct_chart_details_prompt_template,
 )
 from ....components.visualize.generate_details.models import ChartDetailsOutput
+from ..state import VisualizationState
 
 correct_chart_details_prompt = create_correct_chart_details_prompt_template()
 
 
 def create_correct_chart_details_node(
     llm: BaseChatModel,
-) -> Callable[[VisualizationState], Dict[str, Any]]:
+) -> Callable[[VisualizationState], Coroutine[Any, Any, dict[str, Any]]]:
     """
     Create a chart details node for a LangGraph workflow.
 
@@ -33,12 +33,12 @@ def create_correct_chart_details_node(
         correct_chart_details_prompt | llm.with_structured_output(ChartDetailsOutput)
     )
 
-    def correct_chart_details(state: VisualizationState) -> Dict[str, Any]:
+    async def correct_chart_details(state: VisualizationState) -> Dict[str, Any]:
         """
         Correct chart details.
         """
 
-        chart_details: ChartDetailsOutput = chart_details_chain.invoke(
+        chart_details: ChartDetailsOutput = await chart_details_chain.ainvoke(
             {
                 "question": state.get("subquestion"),
                 "data": state.get("records"),

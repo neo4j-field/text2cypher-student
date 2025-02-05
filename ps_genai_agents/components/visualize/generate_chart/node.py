@@ -1,27 +1,34 @@
-from typing import Any, Callable, Dict
+from typing import Any, Callable, Coroutine, Dict, List
 
 import pandas as pd
 
-from ....components.state import VisualizationState
 from ....components.visualize.generate_chart.charts import (
     create_bar_plot,
     create_empty_plot,
     create_line_plot,
     create_scatter_plot,
 )
+from ..state import VisualizationOutputState, VisualizationState
 
 
-def create_chart_generation_node() -> Callable[[VisualizationState], Dict[str, Any]]:
+def create_chart_generation_node() -> (
+    Callable[
+        [VisualizationState],
+        Coroutine[Any, Any, Dict[str, List[VisualizationOutputState] | List[str]]],
+    ]
+):
     """
     Create a chart generation node for a LangGraph workflow.
 
     Returns
     -------
-    Callable[[VisualizationState], OverallState]
+    Callable[[VisualizationState], Dict[str, List[VisualizationOutputState] | List[str]]]
         The LangGraph node.
     """
 
-    def generate_chart(state: VisualizationState) -> Dict[str, Any]:
+    async def generate_chart(
+        state: VisualizationState,
+    ) -> Dict[str, List[VisualizationOutputState] | List[str]]:
         """
         Generate a chart based on the provided chart details.
         """
@@ -47,14 +54,16 @@ def create_chart_generation_node() -> Callable[[VisualizationState], Dict[str, A
 
         return {
             "visualizations": [
-                {
-                    "subquestion": state.get("subquestion"),
-                    "chart": chart,
-                    "chart_description": state.get("chart_description"),
-                    "steps": steps,
-                }
+                VisualizationOutputState(
+                    **{
+                        "subquestion": state.get("subquestion", ""),
+                        "chart": chart,
+                        "chart_description": state.get("chart_description", ""),
+                        "steps": steps,
+                    }
+                )
             ],
-            "steps": steps,
+            "steps": ["vizualize"],
         }
 
     return generate_chart

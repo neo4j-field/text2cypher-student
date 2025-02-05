@@ -6,20 +6,25 @@ all: help
 test:
 	poetry run pytest tests
 
+test_local:
+	docker compose -f tests/integration/docker-compose.yml up -d
+	poetry run pytest tests
+	docker compose -f tests/integration/docker-compose.yml stop
+
+test_integration_local:
+	docker compose -f tests/integration/docker-compose.yml up -d
+	poetry run pytest tests/integration -s
+	docker compose -f tests/integration/docker-compose.yml stop
+
 test_integration:
 	poetry run pytest tests/integration
 
 test_unit:
-	poetry run pytest tests/unit
+	poetry run pytest tests/unit -s
 
 init:
 	poetry install --with dev, ui
 	pre-commit install
-	poetry run python3 -m pip install -U --no-cache-dir  \
-            --config-settings="--global-option=build_ext" \
-            --config-settings="--global-option=-I$(brew --prefix graphviz)/include/" \
-            --config-settings="--global-option=-L$(brew --prefix graphviz)/lib/" \
-            pygraphviz
 
 init_workshop:
 	poetry config virtualenvs.in-project true

@@ -1,4 +1,4 @@
-from typing import Any, Callable, Dict
+from typing import Any, Callable, Coroutine, Dict
 
 from langchain_core.language_models import BaseChatModel
 from langchain_core.runnables.base import Runnable
@@ -13,7 +13,7 @@ query_parser_prompt = create_query_parser_prompt_template()
 
 def create_query_parser_node(
     llm: BaseChatModel, ignore_node: bool = False
-) -> Callable[[InputState], Dict[str, Any]]:
+) -> Callable[[InputState], Coroutine[Any, Any, Dict[str, Any]]]:
     """
     Create a query parser node to be used in a LangGraph workflow.
 
@@ -34,13 +34,13 @@ def create_query_parser_node(
         query_parser_prompt | llm.with_structured_output(QueryParserOutput)
     )
 
-    def query_parser(state: InputState) -> Dict[str, Any]:
+    async def query_parser(state: InputState) -> Dict[str, Any]:
         """
         Break user query into chunks, if appropriate.
         """
 
         if not ignore_node:
-            query_parser_output: QueryParserOutput = query_parser_chain.invoke(
+            query_parser_output: QueryParserOutput = await query_parser_chain.ainvoke(
                 {"question": state.get("question")}
             )
         else:

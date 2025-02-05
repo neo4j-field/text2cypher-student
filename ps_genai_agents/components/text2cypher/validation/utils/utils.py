@@ -1,16 +1,20 @@
 from typing import Any, Dict, List, Literal
 
+from ..models import Neo4jStructuredSchema
 from .cypher_extractors import parse_labels_or_types
 
 
 def update_task_list_with_property_type(
     tasks: List[Dict[str, Any]],
-    structure_graph_schema: Dict[str, Dict[str, List[Dict[str, Any]]]],
+    structure_graph_schema: Neo4jStructuredSchema,
     node_or_rel: Literal["node", "rel"],
 ) -> List[Dict[str, Any]]:
     """Assign property types to each entry in the task list."""
 
-    schema = structure_graph_schema.get(f"{node_or_rel}_props", dict())
+    if node_or_rel == "node":
+        schema = structure_graph_schema.node_props
+    else:
+        schema = structure_graph_schema.rel_props
 
     if node_or_rel == "node":
         label_or_type = "labels"
@@ -22,10 +26,8 @@ def update_task_list_with_property_type(
         found_types = set()
 
         for lt in labels_or_types:
-            name_type_map = {
-                d.get("property"): d.get("type") for d in schema.get(lt, dict())
-            }
-            found_types.add(name_type_map.get(task.get("property_name"), ""))
+            name_type_map = {d.property: d.type for d in schema.get(lt, list())}
+            found_types.add(name_type_map.get(task.get("property_name", ""), ""))
 
         if len(found_types) > 1:
             print(

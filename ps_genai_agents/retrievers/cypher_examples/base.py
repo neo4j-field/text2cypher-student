@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
-from typing import List
+from typing import Any, Dict
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class BaseCypherExampleRetriever(BaseModel, ABC):
@@ -10,8 +10,10 @@ class BaseCypherExampleRetriever(BaseModel, ABC):
     Subclasses must implement the `get_examples` method.
     """
 
+    model_config: ConfigDict = ConfigDict(**{"arbitrary_types_allowed": True})  # type: ignore[misc]
+
     @abstractmethod
-    def get_examples(self) -> str:
+    def get_examples(self, *args: Any, **kwargs: Any) -> str:
         """
         Retrieve relevant examples in string format that are ready to be injected into a prompt for few shot prompting.
 

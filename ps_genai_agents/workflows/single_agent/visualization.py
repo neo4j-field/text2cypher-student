@@ -4,16 +4,16 @@ from langchain_core.language_models import BaseChatModel
 from langgraph.constants import END, START
 from langgraph.graph.state import CompiledStateGraph, StateGraph
 
-from ..components.state import (
+from ...components.state import (
     OverallState,
-    VisualizationState,
 )
-from ..components.visualize import (
+from ...components.visualize import (
     create_chart_details_node,
     create_chart_generation_node,
     create_correct_chart_details_node,
     create_validate_chart_details_node,
 )
+from ...components.visualize.state import VisualizationInputState, VisualizationState
 
 
 def create_visualization_agent(llm: BaseChatModel) -> CompiledStateGraph:
@@ -32,7 +32,9 @@ def create_visualization_agent(llm: BaseChatModel) -> CompiledStateGraph:
     correct_chart_details = create_correct_chart_details_node(llm=llm)
     generate_chart = create_chart_generation_node()
 
-    g_builder = StateGraph(VisualizationState, output=OverallState)
+    g_builder = StateGraph(
+        VisualizationState, input=VisualizationInputState, output=OverallState
+    )
     g_builder.add_node(generate_chart_details)
     g_builder.add_node(validate_chart_details)
     g_builder.add_node(correct_chart_details)
