@@ -16,7 +16,7 @@ def append_user_question(question: str) -> None:
     st.chat_message("user").markdown(question)
 
 
-def append_llm_response(question: str) -> None:
+async def append_llm_response(question: str) -> None:
     with st.chat_message("assistant"):
         message_placeholder = st.empty()
         message_placeholder.status("thinking...")
@@ -25,7 +25,7 @@ def append_llm_response(question: str) -> None:
         agent = st.session_state.get("agent")
 
         if agent is not None:
-            response: OutputState = agent.invoke({"question": question})
+            response: OutputState = await agent.ainvoke({"question": question})
 
             message_placeholder.markdown(response.get("answer", ""))
 
@@ -78,10 +78,10 @@ def show_visualizations(response: OutputState) -> None:
             ]
 
 
-def chat(question: str) -> None:
+async def chat(question: str) -> None:
     try:
         append_user_question(question=question)
-        append_llm_response(question=question)
+        await append_llm_response(question=question)
     except SessionExpired as e:
         st.error(f"Neo4j Session expired. Please restart the application. Error: {e}")
 
