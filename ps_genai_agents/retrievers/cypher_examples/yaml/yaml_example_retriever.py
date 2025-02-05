@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Any, Dict, List
 
 import yaml
 from pydantic import Field
@@ -11,7 +11,7 @@ class YAMLCypherExampleRetriever(BaseCypherExampleRetriever):
         description="The local file path to a YAML file containing question and Cypher query pairs."
     )
 
-    def get_examples(self) -> str:
+    def get_examples(self, *args: Any, **kwargs: Any) -> str:
         unformatted_examples = self._get_example_queries_from_yaml()
 
         return self._format_examples_list(unformatted_examples)

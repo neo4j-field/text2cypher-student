@@ -69,6 +69,7 @@ def create_text2cypher_validation_node(
         errors = []
         mapping_errors = []
 
+        # print("syntax error check")
         # Check for syntax errors
         syntax_error = validate_cypher_query_syntax(
             graph=graph, cypher_statement=state.get("statement", "")
@@ -76,10 +77,12 @@ def create_text2cypher_validation_node(
 
         errors.extend(syntax_error)
 
+        # print("write clause check")
         # check for write clauses
         write_errors = validate_no_writes_in_cypher_query(state.get("statement", ""))
         errors.extend(write_errors)
 
+        # print("correct cypher check")
         # Experimental feature for correcting relationship directions
         corrected_cypher = correct_cypher_query_relationship_direction(
             graph=graph, cypher_statement=state.get("statement", "")
@@ -87,6 +90,7 @@ def create_text2cypher_validation_node(
 
         # Use LLM to find additional potential errors and get the mapping for values
         if llm is not None and llm_validation:
+            # print("llm check")
             llm_errors = await validate_cypher_query_with_llm(
                 validate_cypher_chain=validate_cypher_chain,
                 question=state.get("subquestion", ""),
@@ -97,6 +101,7 @@ def create_text2cypher_validation_node(
             mapping_errors.extend(llm_errors.get("mapping_errors", []))
 
         if not llm_validation:
+            # print("schema check")
             cypher_errors = validate_cypher_query_with_schema(
                 graph=graph, cypher_statement=state.get("statement", "")
             )

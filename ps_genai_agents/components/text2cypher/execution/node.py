@@ -38,7 +38,6 @@ def create_text2cypher_execution_node(
         """
         Executes the given Cypher statement.
         """
-
         records = graph.query(state.get("statement", ""))
         steps = state.get("steps", list())
         steps.append("execute_cypher")
