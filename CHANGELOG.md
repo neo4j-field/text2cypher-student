@@ -2,6 +2,9 @@
 
 ### Fixed
 
+* Fixed bugs in Cypher query vector store creation
+* Fixed bug in Cypher query sim search retriever
+
 ### Changed
 
 * `CypherQuery` nodes are now removed from graph schema when generating Cypher
