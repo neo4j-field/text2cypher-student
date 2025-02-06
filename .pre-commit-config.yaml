@@ -28,9 +28,11 @@ repos:
         language: system
         types: [ python ]
         stages: [ commit, push ]
+        # additional_dependencies: ["ruff"]
       - id: ruff-lint
         name: Ruff Lint Check
         entry: poetry run ruff format --check
         language: system
         types: [ python ]
         stages: [ commit, push ]
+        # additional_dependencies: ["ruff"]

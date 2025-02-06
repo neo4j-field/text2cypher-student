@@ -46,7 +46,7 @@ def main() -> None:
 CREATE VECTOR INDEX cypher_query_vector_index IF NOT EXISTS
 FOR (m:CypherQuery)
 ON m.questionEmbedding
-OPTIONS { 
+OPTIONS {
     indexConfig: {
     `vector.dimensions`: 1536,
     `vector.similarity_function`: 'cosine'

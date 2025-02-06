@@ -16,13 +16,11 @@ from ...components.state import (
     OverallState,
 )
 from ...components.summarize import create_summarization_node
-from ...components.tool_selection import create_tool_selection_node
 from ...retrievers.cypher_examples.base import BaseCypherExampleRetriever
 from ..single_agent import create_text2cypher_agent, create_visualization_agent
 from .edges import (
     guardrails_conditional_edge,
     query_mapper_edge,
-    tool_select_conditional_edge,
     viz_mapper_edge,
 )
 
@@ -77,7 +75,7 @@ def create_text2cypher_with_visualization_workflow(
     )
     gather_cypher = create_gather_cypher_node()
     gather_visualizations = create_gather_visualizations_node()
-    tool_select = create_tool_selection_node(llm=llm)
+    # tool_select = create_tool_selection_node(llm=llm)
     visualize = create_visualization_agent(llm=llm)
     summarize = create_summarization_node(llm=llm)
     final_answer = create_final_answer_node()
@@ -89,7 +87,7 @@ def create_text2cypher_with_visualization_workflow(
     main_graph_builder.add_node("text2cypher", text2cypher)
     main_graph_builder.add_node(gather_cypher)
     main_graph_builder.add_node(gather_visualizations)
-    main_graph_builder.add_node(tool_select)
+    # main_graph_builder.add_node(tool_select)
     main_graph_builder.add_node("visualize", visualize)
     main_graph_builder.add_node(summarize)
     main_graph_builder.add_node(final_answer)
@@ -108,14 +106,14 @@ def create_text2cypher_with_visualization_workflow(
     main_graph_builder.add_conditional_edges(
         "gather_cypher",
         viz_mapper_edge,  # type: ignore[arg-type, unused-ignore]
-        ["visualize", "tool_select"],
+        ["visualize", "gather_visualizations"],
     )
     main_graph_builder.add_edge("visualize", "gather_visualizations")
-    main_graph_builder.add_conditional_edges(
-        "tool_select", tool_select_conditional_edge
-    )
-    main_graph_builder.add_edge("summarize", "tool_select")
-    main_graph_builder.add_edge("gather_visualizations", "tool_select")
+    # main_graph_builder.add_conditional_edges(
+    #     "tool_select", tool_select_conditional_edge
+    # )
+    main_graph_builder.add_edge("summarize", "final_answer")
+    main_graph_builder.add_edge("gather_visualizations", "summarize")
     main_graph_builder.add_edge("final_answer", END)
 
     return main_graph_builder.compile()
