@@ -43,6 +43,7 @@ def validate_final_answer_router(
         case "final_answer":
             return Send("final_answer", state)
         case "text2cypher":
+            # currently only allow for a single follow up question at a time
             subquestions = state.get("subquestions", list())
             new_subquestion = subquestions[-1]
             return Send("text2cypher", {"subquestion": new_subquestion.subquestion})
@@ -62,25 +63,32 @@ def query_mapper_edge(state: OverallState) -> List[Send]:
 def viz_mapper_edge(state: OverallState) -> List[Send]:
     """Map each sub question to a Visualize subgraph if a visual is required."""
 
+    # need to check existing charts in case of follow up questions
+    existing_chart_questions = [
+        x.get("subquestion", "") for x in state.get("visualizations", list())
+    ]
+
     indexes = [
         idx
         for idx, subquestion in enumerate(state.get("subquestions", []))
         if subquestion.requires_visualization
+        and subquestion.subquestion not in existing_chart_questions
     ]
     tasks = list()
     for idx in indexes:
         try:
             cypher_state: CypherOutputState = state.get("cyphers", list())[idx]
+            task = Send(
+                "visualize",
+                {
+                    "subquestion": cypher_state.get("subquestion"),
+                    "records": cypher_state.get("records"),
+                },
+            )
+            tasks.append(task)
+
         except Exception as e:
             print(f"Viz mapper edge error: {e}")
             continue
-        task = Send(
-            "visualize",
-            {
-                "subquestion": cypher_state.get("subquestion"),
-                "records": cypher_state.get("records"),
-            },
-        )
-        tasks.append(task)
 
     return tasks or [Send("gather_visualizations", state)]
