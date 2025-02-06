@@ -2,6 +2,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 import regex as re
 
+from ..models import CypherValidationTask
 from .regex_patterns import (
     get_node_label_pattern,
     get_node_pattern,
@@ -16,7 +17,7 @@ from .regex_patterns import (
 
 def extract_entities_for_validation(
     cypher_statement: str,
-) -> Dict[str, List[Dict[str, Union[str, int, float]]]]:
+) -> Dict[str, List[CypherValidationTask]]:
     nodes = _extract_nodes_and_properties_from_cypher_statement(cypher_statement)
     rels = _extract_relationships_and_properties_from_cypher_statement(cypher_statement)
 
@@ -25,7 +26,7 @@ def extract_entities_for_validation(
 
 def _extract_nodes_and_properties_from_cypher_statement(
     cypher_statement: str,
-) -> List[Dict[str, Any]]:
+) -> List[CypherValidationTask]:
     """
     Extract Node and Property pairs from the Cypher statement.
 
@@ -36,10 +37,10 @@ def _extract_nodes_and_properties_from_cypher_statement(
 
     Returns
     -------
-    List[Dict[str, Any]]
-        A List of Python dictionaries with keys `labels`, `operator`, `property_name` and `property_value`.
+    List[CypherValidationTask]
+        A List of CypherValidationTasks with keys `labels`, `operator`, `property_name` and `property_value`.
     """
-    result = list()
+    tasks = list()
 
     nodes = re.findall(get_node_pattern(), cypher_statement)
     used_variables = set()
@@ -57,25 +58,30 @@ def _extract_nodes_and_properties_from_cypher_statement(
             match_props_parsed: List[Dict[str, Any]] = (
                 process_match_clause_property_ids(match_props)
             )
-            [e.update({"labels": label, "operator": "="}) for e in match_props_parsed]
-            result.extend(match_props_parsed)
+            [
+                e.update({"labels_or_types": label, "operator": "="})
+                for e in match_props_parsed
+            ]
+            tasks.extend(match_props_parsed)
 
         # find and process property filters based on variables
         if k is not None and k not in used_variables:
             filters: List[Dict[str, Any]] = _find_all_filters(
                 variable=k, cypher_statement=cypher_statement
             )
-            [e.update({"labels": label}) for e in filters]
-            result.extend(filters)
+            [e.update({"labels_or_types": label}) for e in filters]
+            tasks.extend(filters)
 
         used_variables.add(k)
 
-    return result
+    # validate all found tasks
+    validated_tasks = [CypherValidationTask.model_validate(task) for task in tasks]
+    return validated_tasks
 
 
 def _extract_relationships_and_properties_from_cypher_statement(
     cypher_statement: str,
-) -> List[Dict[str, Any]]:
+) -> List[CypherValidationTask]:
     """
     Extract Relationship and Property pairs from the Cypher statement.
 
@@ -86,10 +92,10 @@ def _extract_relationships_and_properties_from_cypher_statement(
 
     Returns
     -------
-    List[Dict[str, Any]]
-        A List of Python dictionaries with keys `rel_types`, `operator`, `property_name` and `property_value`.
+    List[CypherValidationTask]
+        A List of CypherValidationTasks with keys `rel_types`, `operator`, `property_name` and `property_value`.
     """
-    result = list()
+    tasks = list()
 
     rels = re.findall(get_relationship_pattern(), cypher_statement)
     used_variables = set()
@@ -110,20 +116,24 @@ def _extract_relationships_and_properties_from_cypher_statement(
                 process_match_clause_property_ids(match_props)
             )
             [
-                e.update({"rel_types": rel_type, "operator": "="})
+                e.update({"labels_or_types": rel_type, "operator": "="})
                 for e in match_props_parsed
             ]
-            result.extend(match_props_parsed)
+            tasks.extend(match_props_parsed)
 
         # find and process property filters based on variables
         if k is not None and k not in used_variables:
             filters: List[Dict[str, Any]] = _find_all_filters(
                 variable=k, cypher_statement=cypher_statement
             )
-            [e.update({"rel_types": rel_type}) for e in filters]
-            result.extend(filters)
+            [e.update({"labels_or_types": rel_type}) for e in filters]
+            tasks.extend(filters)
         used_variables.add(k)
-    return result
+
+    # validate all found tasks
+    validated_tasks = [CypherValidationTask.model_validate(task) for task in tasks]
+
+    return validated_tasks
 
 
 def process_match_clause_property_ids(
@@ -158,24 +168,24 @@ def _process_prop_val(prop: str) -> str:
     return prop.replace("'", "")
 
 
-def parse_labels_or_types(labels_str: Optional[str]) -> List[str]:
-    """Parse labels or types in cases with & / | and !."""
+# def parse_labels_or_types(labels_str: Optional[str]) -> List[str]:
+#     """Parse labels or types in cases with & / | and !."""
 
-    if labels_str is None:
-        return list()
+#     if labels_str is None:
+#         return list()
 
-    if "&" in labels_str:
-        labels = [lbl.strip() for lbl in labels_str.split("&")]
-    elif "|" in labels_str:
-        labels = [lbl.strip() for lbl in labels_str.split("|")]
-    elif ":" in labels_str:
-        labels = [lbl.strip() for lbl in labels_str.split(":")]
-    else:
-        labels = [labels_str]
+#     if "&" in labels_str:
+#         labels = [lbl.strip() for lbl in labels_str.split("&")]
+#     elif "|" in labels_str:
+#         labels = [lbl.strip() for lbl in labels_str.split("|")]
+#     elif ":" in labels_str:
+#         labels = [lbl.strip() for lbl in labels_str.split(":")]
+#     else:
+#         labels = [labels_str]
 
-    labels = [lbl for lbl in labels if not lbl.startswith("!")]
+#     labels = [lbl for lbl in labels if not lbl.startswith("!")]
 
-    return labels
+#     return labels
 
 
 def _find_all_filters(variable: str, cypher_statement: str) -> List[Dict[str, Any]]:

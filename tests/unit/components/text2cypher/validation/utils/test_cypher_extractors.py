@@ -1,7 +1,10 @@
+from ps_genai_agents.components.text2cypher.validation.models import (
+    CypherValidationTask,
+)
 from ps_genai_agents.components.text2cypher.validation.utils.cypher_extractors import (
     _extract_nodes_and_properties_from_cypher_statement,
     _extract_relationships_and_properties_from_cypher_statement,
-    parse_labels_or_types,
+    # parse_labels_or_types,
     process_match_clause_property_ids,
 )
 
@@ -30,32 +33,34 @@ def test_process_match_clause_property_ids_bad_input() -> None:
     assert len(res) == 0
 
 
-def test_parse_labels_or_types_or() -> None:
-    res = parse_labels_or_types("NodeA|NodeB")
+def test_parse_labels_or_types_or(nodes_task_or: CypherValidationTask) -> None:
+    res = nodes_task_or.parsed_labels_or_types
 
     assert len(res) == 2
     assert res[0] == "NodeA"
     assert res[1] == "NodeB"
 
 
-def test_parse_labels_or_types_and() -> None:
-    res = parse_labels_or_types("NodeA&NodeB")
+def test_parse_labels_or_types_and(nodes_task_and: CypherValidationTask) -> None:
+    res = nodes_task_and.parsed_labels_or_types
 
     assert len(res) == 2
     assert res[0] == "NodeA"
     assert res[1] == "NodeB"
 
 
-def test_parse_labels_or_types_semicolon() -> None:
-    res = parse_labels_or_types("NodeA:NodeB")
+def test_parse_labels_or_types_colon(nodes_task_colon: CypherValidationTask) -> None:
+    res = nodes_task_colon.parsed_labels_or_types
 
     assert len(res) == 2
     assert res[0] == "NodeA"
     assert res[1] == "NodeB"
 
 
-def test_parse_labels_or_types_and_length_4() -> None:
-    res = parse_labels_or_types("NodeA&NodeB&NodeC&NodeD")
+def test_parse_labels_or_types_and_length_4(
+    nodes_task_and_many: CypherValidationTask,
+) -> None:
+    res = nodes_task_and_many.parsed_labels_or_types
 
     assert len(res) == 4
     assert res[0] == "NodeA"
@@ -64,22 +69,28 @@ def test_parse_labels_or_types_and_length_4() -> None:
     assert res[3] == "NodeD"
 
 
-def test_parse_labels_or_types_exclamation() -> None:
-    res = parse_labels_or_types("NodeA:!NodeB")
+def test_parse_labels_or_types_exclamation(
+    nodes_task_colon_not: CypherValidationTask,
+) -> None:
+    res = nodes_task_colon_not.parsed_labels_or_types
 
     assert len(res) == 1
     assert res[0] == "NodeA"
 
 
-def test_parse_labels_or_types_single() -> None:
-    res = parse_labels_or_types("NodeA")
+def test_parse_labels_or_types_single(
+    nodes_task_standard: CypherValidationTask,
+) -> None:
+    res = nodes_task_standard.parsed_labels_or_types
 
     assert len(res) == 1
     assert res[0] == "NodeA"
 
 
-def test_parse_labels_or_types_single_exclamation() -> None:
-    res = parse_labels_or_types("!NodeA")
+def test_parse_labels_or_types_single_exclamation(
+    nodes_task_not: CypherValidationTask,
+) -> None:
+    res = nodes_task_not.parsed_labels_or_types
 
     assert len(res) == 0
 
@@ -94,8 +105,8 @@ def test_extract_nodes_and_properties_from_cypher_statement_1(
     ]
 
     assert len(ents) == len(answer)
-    assert ents[0].get("property_name") == "id"
-    assert ents[0].get("property_value") == "001"
+    assert ents[0].property_name == "id"
+    assert ents[0].property_value == "001"
 
 
 def test_extract_relationships_and_properties_from_cypher_statement_1(
@@ -110,6 +121,6 @@ def test_extract_relationships_and_properties_from_cypher_statement_1(
     ]
 
     assert len(ents) == len(answer)
-    assert ents[0].get("rel_types") == "RELATIONSHIP"
-    assert ents[0].get("property_name") == "id"
-    assert ents[0].get("property_value") == "1"
+    assert ents[0].labels_or_types == "RELATIONSHIP"
+    assert ents[0].property_name == "id"
+    assert ents[0].property_value == "1"

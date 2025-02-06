@@ -4,7 +4,7 @@ This code is based on content found in the LangGraph documentation: https://pyth
 
 from typing import Any, Dict, List, Optional, Set
 
-from pydantic import BaseModel, Field, computed_field, field_validator
+from pydantic import BaseModel, Field, field_validator
 
 NUMBER_ENUM = {"INTEGER", "FLOAT"}
 
@@ -328,3 +328,42 @@ class Neo4jStructuredSchema(BaseModel):
             }
             for rel_type, prop_list in self.node_props.items()
         }
+
+
+class CypherValidationTask(BaseModel):
+    labels_or_types: Optional[str] = Field(
+        description="The extracted node labels or relationship types pattern. May be None if only a variable is provided.",
+        examples=["NodeA", "NodeA&!NodeB", "REL_A|REL_B"],
+        default=None,
+    )
+    operator: str = Field(description="The operator used to check the property value.")
+    property_name: str = Field(
+        description="The property name in the extracted node or relationship instance."
+    )
+    property_value: Any = Field(
+        description="The property value declared in the extracted node or relationship instance."
+    )
+    property_type: Optional[str] = Field(
+        description="The property type found in the schema. This may be assigned in a later step and is allowed to be None.",
+        default=None,
+    )
+
+    @property
+    def parsed_labels_or_types(self) -> List[str]:
+        """Parse labels or types in cases with & / | and !."""
+
+        if self.labels_or_types is None:
+            return list()
+
+        if "&" in self.labels_or_types:
+            parsed = [lbl.strip() for lbl in self.labels_or_types.split("&")]
+        elif "|" in self.labels_or_types:
+            parsed = [lbl.strip() for lbl in self.labels_or_types.split("|")]
+        elif ":" in self.labels_or_types:
+            parsed = [lbl.strip() for lbl in self.labels_or_types.split(":")]
+        else:
+            parsed = [self.labels_or_types]
+
+        parsed_final = [lbl for lbl in parsed if not lbl.startswith("!")]
+
+        return parsed_final

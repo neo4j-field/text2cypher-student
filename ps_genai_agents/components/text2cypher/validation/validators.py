@@ -12,11 +12,16 @@ from neo4j.exceptions import CypherSyntaxError
 from ....components.text2cypher.validation.models import ValidateCypherOutput
 from ....constants import WRITE_CLAUSES
 from ...utils.utils import retrieve_and_parse_schema_from_graph_for_prompts
-from .models import Neo4jStructuredSchema, Neo4jStructuredSchemaPropertyNumber
+from .models import (
+    CypherValidationTask,
+    Neo4jStructuredSchema,
+    Neo4jStructuredSchemaPropertyNumber,
+)
 from .utils.cypher_extractors import (
     extract_entities_for_validation,
-    parse_labels_or_types,
 )
+
+# parse_labels_or_types,
 from .utils.utils import update_task_list_with_property_type
 
 
@@ -173,23 +178,19 @@ def validate_cypher_query_with_schema(
     errors: List[str] = list()
 
     node_prop_name_enum_tasks = node_tasks
-    node_prop_val_enum_tasks = [
-        n for n in node_tasks if n.get("property_type") == "STRING"
-    ]
+    node_prop_val_enum_tasks = [n for n in node_tasks if n.property_type == "STRING"]
     node_prop_val_range_tasks = [
         n
         for n in node_tasks
-        if (n.get("property_type") == "INTEGER" or n.get("property_type") == "FLOAT")
+        if (n.property_type == "INTEGER" or n.property_type == "FLOAT")
     ]
 
     rel_prop_name_enum_tasks = rel_tasks
-    rel_prop_val_enum_tasks = [
-        n for n in rel_tasks if n.get("property_type") == "STRING"
-    ]
+    rel_prop_val_enum_tasks = [n for n in rel_tasks if n.property_type == "STRING"]
     rel_prop_val_range_tasks = [
         n
         for n in rel_tasks
-        if (n.get("property_type") == "INTEGER" or n.get("property_type") == "FLOAT")
+        if (n.property_type == "INTEGER" or n.property_type == "FLOAT")
     ]
 
     errors.extend(
@@ -222,21 +223,21 @@ def validate_cypher_query_with_schema(
 
 
 def _validate_node_property_values_with_enum(
-    structure_graph_schema: Neo4jStructuredSchema, tasks: List[Dict[str, str]]
+    structure_graph_schema: Neo4jStructuredSchema, tasks: List[CypherValidationTask]
 ) -> List[str]:
     prop_values_enum = structure_graph_schema.get_node_property_values_enum()
 
     errors = list()
 
     for t in tasks:
-        labels = parse_labels_or_types(t.get("labels", ""))
+        labels = t.parsed_labels_or_types
 
         prop_val_validation_error = _validate_property_value_with_enum(
             enum_dict=prop_values_enum,
             labels_or_types=labels,
             node_or_rel="Node",
-            property_name=t.get("property_name", ""),
-            property_value=t.get("property_value", ""),
+            property_name=t.property_name,
+            property_value=t.property_value,
         )
         if prop_val_validation_error:
             errors.append(prop_val_validation_error)
@@ -245,20 +246,20 @@ def _validate_node_property_values_with_enum(
 
 
 def _validate_node_property_names_with_enum(
-    structure_graph_schema: Neo4jStructuredSchema, tasks: List[Dict[str, str]]
+    structure_graph_schema: Neo4jStructuredSchema, tasks: List[CypherValidationTask]
 ) -> List[str]:
     prop_enum = structure_graph_schema.get_node_properties_enum()
 
     errors = list()
 
     for t in tasks:
-        labels = parse_labels_or_types(t.get("labels", ""))
+        labels = t.parsed_labels_or_types
 
         prop_validation_error = _validate_property_with_enum(
             enum_dict=prop_enum,
             labels_or_types=labels,
             node_or_rel="Node",
-            property_name=t.get("property_name", ""),
+            property_name=t.property_name,
         )
 
         if prop_validation_error:
@@ -267,20 +268,20 @@ def _validate_node_property_names_with_enum(
 
 
 def _validate_relationship_property_names_with_enum(
-    structure_graph_schema: Neo4jStructuredSchema, tasks: List[Dict[str, str]]
+    structure_graph_schema: Neo4jStructuredSchema, tasks: List[CypherValidationTask]
 ) -> List[str]:
     prop_enum = structure_graph_schema.get_relationship_properties_enum()
 
     errors = list()
 
     for t in tasks:
-        rel_types = parse_labels_or_types(t.get("rel_types", ""))
+        rel_types = t.parsed_labels_or_types
 
         prop_validation_error = _validate_property_with_enum(
             enum_dict=prop_enum,
             labels_or_types=rel_types,
             node_or_rel="Relationship",
-            property_name=t.get("property_name", ""),
+            property_name=t.property_name,
         )
 
         if prop_validation_error:
@@ -289,20 +290,20 @@ def _validate_relationship_property_names_with_enum(
 
 
 def _validate_relationship_property_values_with_enum(
-    structure_graph_schema: Neo4jStructuredSchema, tasks: List[Dict[str, str]]
+    structure_graph_schema: Neo4jStructuredSchema, tasks: List[CypherValidationTask]
 ) -> List[str]:
     prop_values_enum = structure_graph_schema.get_relationship_property_values_enum()
 
     errors = list()
 
     for t in tasks:
-        rel_types = parse_labels_or_types(t.get("rel_types", ""))
+        rel_types = t.parsed_labels_or_types
         prop_val_validation_error = _validate_property_value_with_enum(
             enum_dict=prop_values_enum,
             labels_or_types=rel_types,
             node_or_rel="Relationship",
-            property_name=t.get("property_name", ""),
-            property_value=t.get("property_value", ""),
+            property_name=t.property_name,
+            property_value=t.property_value,
         )
         if prop_val_validation_error:
             errors.append(prop_val_validation_error)
@@ -312,20 +313,20 @@ def _validate_relationship_property_values_with_enum(
 
 def _validate_node_property_values_with_range(
     structure_graph_schema: Neo4jStructuredSchema,
-    tasks: List[Dict[str, Union[str, int, float]]],
+    tasks: List[CypherValidationTask],
 ) -> List[str]:
     prop_values_range = structure_graph_schema.get_node_property_values_range()
 
     errors = list()
 
     for t in tasks:
-        rel_types = parse_labels_or_types(str(t.get("rel_types", "")))
+        rel_types = t.parsed_labels_or_types
         prop_val_validation_error = _validate_property_value_with_range(
             enum_dict=prop_values_range,
             labels_or_types=rel_types,
             node_or_rel="Node",
-            property_name=str(t.get("property_name", "")),
-            property_value=float(t.get("property_value", float("inf"))),
+            property_name=t.property_name,
+            property_value=t.property_value,
         )
         if prop_val_validation_error:
             errors.append(prop_val_validation_error)
@@ -335,20 +336,20 @@ def _validate_node_property_values_with_range(
 
 def _validate_relationship_property_values_with_range(
     structure_graph_schema: Neo4jStructuredSchema,
-    tasks: List[Dict[str, Union[str, int, float]]],
+    tasks: List[CypherValidationTask],
 ) -> List[str]:
     prop_values_range = structure_graph_schema.get_relationship_property_values_range()
 
     errors = list()
 
     for t in tasks:
-        rel_types = parse_labels_or_types(str(t.get("rel_types", "")))
+        rel_types = t.parsed_labels_or_types
         prop_val_validation_error = _validate_property_value_with_range(
             enum_dict=prop_values_range,
             labels_or_types=rel_types,
             node_or_rel="Relationship",
-            property_name=str(t.get("property_name", "")),
-            property_value=float(t.get("property_value", float("inf"))),
+            property_name=t.property_name,
+            property_value=t.property_value,
         )
         if prop_val_validation_error:
             errors.append(prop_val_validation_error)
@@ -439,7 +440,7 @@ def _validate_property_value_with_range(
         if r is None:
             # return None
             continue
-        if property_value < r.min or property_value > r.max:
+        if float(property_value) < r.min or float(property_value) > r.max:
             invalid_labels_or_types.append((lt, r))
 
     for e in invalid_labels_or_types:

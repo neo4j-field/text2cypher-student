@@ -22,7 +22,7 @@ def test_validate_cypher_query_with_schema_1_invalid(
         cypher_statement=cypher_statement_1_invalid, graph=mock_graph_1
     )
     assert errors is not None
-    assert len(errors) == 3
+    assert len(errors) == 4
 
 
 def test_validate_cypher_query_with_schema_iqs_valid(
