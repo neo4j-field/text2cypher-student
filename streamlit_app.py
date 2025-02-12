@@ -25,6 +25,7 @@ def get_args() -> Dict[str, Any]:
     """Parse the command line arguments to configure the application."""
 
     args = sys.argv
+    print("a: ", args)
     if len(args) > 1:
         config_path: str = args[1]
         assert config_path.lower().endswith(
@@ -90,6 +91,7 @@ async def run_app(title: str = "Neo4j GenAI Demo") -> None:
 
 if __name__ == "__main__":
     args = get_args()
+    print("ARGS: ", args)
     initialize_state(
         cypher_query_yaml_file_path=args.get("cypher_query_yaml_file_path", ""),
         scope_description=args.get("scope_description", ""),

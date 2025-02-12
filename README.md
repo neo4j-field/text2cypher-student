@@ -29,13 +29,13 @@ Then:
 
 *Note: The queries.yml file will contain questions that define the scope of your application.*
 
-### Streamlit Demo App
-To use the Streamlit application - *Optional*
+### Streamlit Demo App | *Optional*
+To use the Streamlit application
 * Create a config JSON file that follows the format of `example-ui-config.json`
 * Run with `poetry run streamlit run streamlit_app.py path/to/config.json`
 
-### LangGraph Studio
-To Use LangGraph Studio - *Optional*
+### LangGraph Studio | *Optional*
+To Use LangGraph Studio
 * Ensure that the `.env` file contains the following
   * LANGSMITH_API_KEY="..."
   * LANGSMITH_TRACING=true
@@ -51,7 +51,7 @@ You may find additional documentation on LangGraph Studio [here](https://langcha
 
 ## Agents & Workflows
 
-This repository contains single and multi-agent workflows. The single agent workflows primarily function as subgraphs in larger multi-agent workflows, but may be ran independently.
+This repository contains single and multi-agent workflows. The single agent workflows primarily function as subgraphs in larger multi-agent workflows, but may be run independently.
 
 All agents and workflows are built with async and run asynchronously. Please reference the example notebooks and Streamlit application code for implementation details.
 
@@ -74,7 +74,7 @@ This agent is based on the work done by Tomaz Bratanic and the original code may
 
 Below is the agent workflow.
 
-![text2cypher-agent](./docs/assets/images/text2cypher-workflow.png)
+![text2cypher-agent](./docs/assets/images/workflows/text2cypher-workflow.png)
 
 ### Data Visualization
 
@@ -87,7 +87,7 @@ Possible Plots
 
 Below is the agent workflow.
 
-![data-viz-agent](./docs/assets/images/visualization-workflow.png)
+![data-viz-agent](./docs/assets/images/workflows/visualization-workflow.png)
 
 
 ### Multi-Agent Workflows
@@ -102,4 +102,24 @@ The multi-agent workflows contain combinations of the above agents as well as th
 
 Below is an example of a multi-agent workflow that includes both Text2Cypher and data visualization.
 
-![multi-agent-workflow](./docs/assets/images/text2cypher-with-visualization-workflow-v2.png)
+![multi-agent-workflow](./docs/assets/images/workflows/text2cypher-with-visualization-workflow-v2.png)
+
+
+## Streamlit Application
+
+This is a demo application that demonstrates a simple UI.
+
+Responses will include 
+* Summary of retrieved data
+* Any visualizations generated and their descriptions
+* Download option for retrieved data tables
+* Cypher queries and results for each question identified in the input question
+
+Below is an example text response using the IQS data.
+
+![st-chat](./docs/assets/images/streamlit/ps-genai-agents-st-qa.png)
+
+
+Below are the Cypher details contained in the Cypher dropdown seen above.
+
+![st-cypher](./docs/assets/images/streamlit/ps-genai-agents-st-cypher.png)
