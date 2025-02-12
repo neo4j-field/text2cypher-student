@@ -36,6 +36,7 @@ toml = "^0.10.2"
 types-PyYAML = "^6.0.12.20240724"
 ipykernel = "^6.29.5"
 nest-asyncio = "^1.6.0"
+langgraph-cli = {extras = ["inmem"], version = "^0.1.70"}
 
 [tool.poetry.group.ui.dependencies]
 streamlit = "^1.37.1"

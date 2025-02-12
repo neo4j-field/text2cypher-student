@@ -20,6 +20,21 @@ driver = GraphDatabase.driver(
 )
 embedder = OpenAIEmbeddings()
 
+
+# Create a vector index if it doesn't exist
+with driver.session() as session:
+    session.run("""
+CREATE VECTOR INDEX cypher_query_vector_index IF NOT EXISTS
+FOR (m:CypherQuery)
+ON m.questionEmbedding
+OPTIONS {
+    indexConfig: {
+    `vector.dimensions`: 1536,
+    `vector.similarity_function`: 'cosine'
+                }
+        }
+""")
+
 # read question and cql pairs from a YAML file
 # this is optional as long as there is a list of Python dictionaries prepared for processing
 unembedded_tasks = read_cypher_examples_from_yaml_file(file_path=file_path)

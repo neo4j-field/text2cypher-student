@@ -1,0 +1,7 @@
+{
+    "dependencies": ["./ps_genai_agents"],
+    "graphs": {
+      "agent": "./ps_genai_agents/agent.py:graph"
+    },
+    "env": ".env"
+  }
