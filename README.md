@@ -123,3 +123,19 @@ Below is an example text response using the IQS data.
 Below are the Cypher details contained in the Cypher dropdown seen above.
 
 ![st-cypher](./docs/assets/images/streamlit/ps-genai-agents-st-cypher.png)
+
+
+## Cypher Query Vector Store
+
+This repo contains code to create and update a Cypher query Vector Store in Neo4j. This can then be used retrieve examples for Cypher generation. This provides the benefit of allowing many Cypher queries to be accessible without needing to store them in a YAML file or passing them *all* in the prompt. We can instead select the top k most relevant queries by matching the input question embedding to question embeddings in the vector store. 
+
+By using this method we
+* Reduce tokens passed to the LLM
+* Reduce processing time
+* Reduce processing cost
+* Increase the scope of our application
+* Remove irrelevant examples for a specific question
+
+Below we see a sample of the Cypher Queries stored in Neo4j.
+
+![cypher-vector-store](./docs/assets/images/vector_store/ps-genai-agents-cypher-vector-store.png)
