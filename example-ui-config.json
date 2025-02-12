@@ -1,0 +1,9 @@
+{
+    "title": "title",
+    "scope_description": "This application may answer questions related to ...",
+    "cypher_query_yaml_file_path": "data/topic/queries/queries.yml",
+    "example_questions": [
+        "question 1",
+        "question 2"
+    ]
+}

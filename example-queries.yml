@@ -1,0 +1,10 @@
+queries:
+  - question: question 1
+    cql: |-
+      MATCH (n:NodeA)
+      RETURN n.id
+  - question: Question 2
+    cql: |-
+      MATCH p = (n:NodeA)-->(:NodeB)
+      WHERE n.id = 'abc'
+      RETURN nodes(p)
