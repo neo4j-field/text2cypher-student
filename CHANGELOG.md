@@ -17,3 +17,4 @@
 * Add final answer validator node that will send generated follow up questions to fill gaps in the response
 * Add LangGraph Studio implementation
 * Add Similarity Search for Cypher example retrieval in the `adv_t2c_with_viz.ipynb` example
+* updated README
