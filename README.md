@@ -136,6 +136,13 @@ By using this method we
 * Increase the scope of our application
 * Remove irrelevant examples for a specific question
 
+
+An example script for creating and updating the vector store can be found at `data/utils/create_or_update_cypher_example_vector_store.py`
+
+Below is an example of running this script from the command line:
+```
+poetry run python3 -m data.utils.create_or_update_cypher_example_vector_store ./data/iqs/queries/queries.yml
+```
 Below we see a sample of the Cypher Queries stored in Neo4j.
 
 ![cypher-vector-store](./docs/assets/images/vector_store/ps-genai-agents-cypher-vector-store.png)
