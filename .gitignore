@@ -1,6 +1,10 @@
 private/
 .langgraph_api/
 
+# data
+data/iqs/dataset/embeddings_*
+data/iqs/dataset/neo4j_iqs_ingest.csv
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
