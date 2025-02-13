@@ -3,6 +3,22 @@
 # Default target executed when no arguments are given to make.
 all: help
 
+######################
+# SET UP
+######################
+
+init:
+	poetry install --with dev, ui
+	pre-commit install
+
+init_workshop:
+	poetry config virtualenvs.in-project true
+	poetry install --with workshop
+
+######################
+# TESTING
+######################
+
 test:
 	poetry run pytest tests
 
@@ -22,20 +38,6 @@ test_integration:
 test_unit:
 	poetry run pytest tests/unit -s
 
-init:
-	poetry install --with dev, ui
-	pre-commit install
-
-init_workshop:
-	poetry config virtualenvs.in-project true
-	poetry install --with workshop
-
-make streamlit:
-	poetry run streamlit run streamlit_app.py $(file_path)
-
-make streamlit_dm:
-	poetry run streamlit run streamlit_app.py data/discrete_manufacturing/config.json
-
 ######################
 # LINTING AND FORMATTING
 ######################
@@ -45,7 +47,6 @@ format:
 	poetry run ruff check --select I . --fix
 	poetry run ruff check .
 
-
 ######################
 # MYPY CHECK
 ######################
@@ -53,6 +54,21 @@ format:
 mypy:
 	poetry run mypy --strict --ignore-missing-imports --allow-subclassing-any --allow-untyped-calls .
 
+######################
+# DATA LOADING
+######################
+
+make load_iqs:
+	poetry run python3 data/iqs/ingest/ingest_iqs.py
+	poetry run python3 -m data.utils.create_or_update_cypher_example_vector_store ./data/iqs/queries/queries.yml
+
+
+######################
+# STREAMLIT APP
+######################
+
+make streamlit:
+	poetry run streamlit run streamlit_app.py $(file_path)
 
 ######################
 # HELP

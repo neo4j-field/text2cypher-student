@@ -1,0 +1,159 @@
+initializing_queries:
+  constraints:
+    unique_customer: |
+      CREATE CONSTRAINT unique_customer IF NOT EXISTS FOR (c:Customer) REQUIRE c.id IS UNIQUE;
+    unique_category: |
+      CREATE CONSTRAINT unique_category IF NOT EXISTS FOR (c:Category) REQUIRE c.id IS UNIQUE;
+    unique_problem: |
+      CREATE CONSTRAINT problem_id IF NOT EXISTS FOR (p:Problem) REQUIRE p.id IS UNIQUE;
+    unique_question: |
+      CREATE CONSTRAINT question_id IF NOT EXISTS FOR (q:Question) REQUIRE q.id IS UNIQUE;
+    unique_vehicle: |
+      CREATE CONSTRAINT vehicle_series IF NOT EXISTS FOR (v:Vehicle) REQUIRE v.id IS UNIQUE;
+    unique_verbatim: |
+      CREATE CONSTRAINT verbatim_rid IF NOT EXISTS FOR (v:Verbatim) REQUIRE (v.verbatim, v.id) IS NODE KEY;
+
+  indexes:
+    verbatim_text_index: |
+      CREATE TEXT INDEX verbatim_text FOR (v:Verbatim) ON (v.verbatimText);
+
+    create_ada_vector_index: |
+      CREATE VECTOR INDEX adaEmbeddings IF NOT EXISTS
+          FOR (v:Verbatim)
+          ON v.adaEmbedding
+          OPTIONS {indexConfig: {
+            `vector.dimensions`: 1536,
+            `vector.similarity_function`: 'cosine'
+        }};
+
+loading_queries:
+  nodes:
+    category: |
+      WITH $rows AS rows
+      UNWIND rows AS row
+      MERGE (n:Category {id: row.category})
+    
+    problem: |
+      WITH $rows AS rows
+      UNWIND rows AS row
+      MERGE (p:Problem {id: row.qIdentifier})
+        SET p.problem = row.problem
+
+    question: |
+      WITH $rows AS rows
+      UNWIND rows AS row
+      MERGE (q:Question {id: row.qNumber})
+        SET q.question = row.question
+
+    vehicle: |
+      WITH $rows AS rows
+      UNWIND rows AS row
+      MERGE (v:Vehicle {id: row.series})
+        SET v.totalProblems = row.totalProblems
+    
+    verbatim: |
+      WITH $rows AS rows
+      UNWIND rows AS row
+      MERGE (v:Verbatim {verbatim: row.verbatim, id: row.rid})
+        SET v.ageBucket = (CASE WHEN row.ageBucket = '' THEN NULL ELSE row.ageBucket END), 
+            v.severity = (CASE WHEN row.severity = '' THEN NULL ELSE row.severity END),
+            v.gender = row.gender,
+            v.make = row.make,
+            v.model = split(row.series, ' ')[1], 
+            v.minAge = toInteger(row.minAge), 
+            v.maxAge = toInteger(row.maxAge)
+  
+    customer: |
+      WITH $rows AS rows
+      UNWIND rows AS row
+      MERGE (c:Customer{id: row.rid})
+        SET c.ageBucket = row.ageBucket,
+            c.gender = row.gender
+
+  relationships:
+    vehicle_category: |
+      WITH $rows AS rows
+      UNWIND rows as row
+      MATCH (source:Vehicle {id: row.series})
+      MATCH (target:Category {id: row.category})
+      MERGE (source)-[n:HAS_CATEGORY]->(target)
+
+    problem_category: |
+      WITH $rows AS rows
+      UNWIND rows as row
+      MATCH (source:Problem {id: row.qIdentifier})
+      MATCH (target:Category {id: row.category})
+      MERGE (source)-[n:HAS_CATEGORY]->(target)
+
+    question_problem: |
+      WITH $rows AS rows
+      UNWIND rows as row
+      MATCH (source:Question {id: row.qNumber})
+      MATCH (target:Problem {id: row.qIdentifier})
+      MERGE (source)-[n:HAS_PROBLEM]->(target)
+
+    verbatim_question: |
+      WITH $rows AS rows
+      UNWIND rows as row
+      MATCH (source:Verbatim {verbatim: row.verbatim, id: row.rid})
+      MATCH (target:Question {id: row.qNumber})
+      MERGE (source)-[n:HAS_QUESTION]->(target)
+
+    vehicle_verbatim: |
+      WITH $rows AS rows
+      UNWIND rows as row
+      MATCH (source:Vehicle {id: row.series})
+      MATCH (target:Verbatim {verbatim: row.verbatim, id: row.rid})
+      MERGE (source)-[n:HAS_VERBATIM]->(target)
+    
+    verbatim_problem: |
+      WITH $rows AS rows
+      UNWIND rows as row
+      MATCH (source:Verbatim {verbatim: row.verbatim, id: row.rid})
+      MATCH (target:Problem {id: row.qIdentifier})
+      MERGE (source)-[n:HAS_PROBLEM]->(target)
+    
+    verbatim_category: |
+      WITH $rows AS rows
+      UNWIND rows as row
+      MATCH (source:Verbatim {verbatim: row.verbatim, id: row.rid})
+      MATCH (target:Category {id: row.category})
+      MERGE (source)-[n:HAS_CATEGORY]->(target)
+    
+    customer_verbatim: |
+      WITH $rows AS rows
+      UNWIND rows as row
+      MATCH (source:Customer {id: row.rid})
+      MATCH (target:Verbatim {verbatim: row.verbatim, id: row.rid})
+      MERGE (source)-[n:SUBMITTED]->(target)
+
+post_processing_queries:
+  create_verbatim_text: |
+    MATCH (n:Verbatim)-[:HAS_CATEGORY]->(c:Category) WHERE n.verbatim <> ''
+    MATCH (n)-[:HAS_PROBLEM]->(p:Problem), (n)-[:HAS_QUESTION]->(q:Question)
+    WITH DISTINCT n, n.make || ' ' || n.model || ' ' || c.id || ' ' || p.problem || ' ' || q.question || ' ' || n.verbatim AS text
+    SET n.verbatimText = toLower(text)
+
+  generate_ada_embedding: |
+              MATCH (v:Verbatim) 
+                WHERE v.verbatim <> ''
+              WITH collect(v) AS verbatimList,
+                  count(*) AS total,
+                  100 AS batchSize
+              UNWIND range(0, total, batchSize) AS batchStart
+              CALL {
+                WITH verbatimList, 
+                  batchStart, 
+                  batchSize
+                WITH verbatimList, 
+                  batchStart,
+                  [v IN verbatimList [batchStart .. batchStart + batchSize] |'Vehicle: '|| v.make + ' ' + v.model ||' | Category: '|| [(v)-[:HAS_CATEGORY]->(c:Category) | c.id][0] ||' | Problem: '||[(v)-[:HAS_PROBLEM]->(p:Problem) | p.problem][0] || ' | Question: ' ||[(v)-[:HAS_QUESTION]->(q:Question) | q.question][0] ||' | Survey Verbatim Response: '||v.verbatim] AS batch
+                CALL genai.vector.encodeBatch(batch, 'OpenAI', { token: $key }) YIELD index, vector
+                CALL db.create.setNodeVectorProperty(verbatimList[batchStart + index], 'adaEmbedding', vector)
+              } IN TRANSACTIONS OF 1 ROW
+
+  load_pregenerated_embeddings: |
+              WITH $rows AS rows
+              UNWIND rows as row
+              MATCH (n:Verbatim {id: row.id})
+              CALL db.create.setNodeVectorProperty(n, 'adaEmbedding', row.adaEmbedding)
