@@ -19,3 +19,4 @@
 * Add Similarity Search for Cypher example retrieval in the `adv_t2c_with_viz.ipynb` example
 * updated README
 * Add ingest code and embeddings data for IQS data
+* Add BBC Good Food recipes data
