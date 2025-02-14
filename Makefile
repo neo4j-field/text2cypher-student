@@ -62,6 +62,10 @@ make load_iqs:
 	poetry run python3 data/iqs/ingest/ingest_iqs.py
 	poetry run python3 -m data.utils.create_or_update_cypher_example_vector_store ./data/iqs/queries/queries.yml
 
+make load_bbc_recipes:
+	poetry run python3 data/bbc_recipes/ingest/ingest_bbc_recipes.py
+	poetry run python3 -m data.utils.create_or_update_cypher_example_vector_store ./data/bbc_recipes/queries/queries.yml
+
 
 ######################
 # STREAMLIT APP
