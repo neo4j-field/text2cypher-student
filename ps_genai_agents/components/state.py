@@ -53,6 +53,7 @@ class InputState(TypedDict):
     """The input state for multi agent workflows."""
 
     question: str
+    data: List[Dict[str, Any]]
     history: Annotated[List[HistoryRecord], update_history]
 
 
