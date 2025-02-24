@@ -56,7 +56,7 @@ def create_chart_generation_node() -> (
             "visualizations": [
                 VisualizationOutputState(
                     **{
-                        "subquestion": state.get("subquestion", ""),
+                        "task": state.get("task", ""),
                         "chart": chart,
                         "chart_description": state.get("chart_description", ""),
                         "steps": steps,

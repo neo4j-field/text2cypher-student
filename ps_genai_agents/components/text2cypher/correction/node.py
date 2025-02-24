@@ -44,7 +44,7 @@ def create_text2cypher_correction_node(
 
         corrected_cypher = await correct_cypher_chain.ainvoke(
             {
-                "question": state.get("subquestion"),
+                "question": state.get("task"),
                 "errors": state.get("errors"),
                 "cypher": state.get("statement"),
                 "schema": graph.schema,

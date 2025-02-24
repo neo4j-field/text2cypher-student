@@ -50,7 +50,7 @@ def show_cypher_response_information(response: OutputState) -> None:
         with st.expander("Cypher"):
             [
                 (
-                    st.write(c.get("subquestion", "")),
+                    st.write(c.get("task", "")),
                     st.code(c.get("statement"), language="cypher"),
                     st.json(
                         c.get("records") if c.get("records") is not None else "",
@@ -69,7 +69,7 @@ def show_visualizations(response: OutputState) -> None:
         with st.expander("Visuals", expanded=True):
             [
                 (
-                    st.write(c.get("subquestion", "")),
+                    st.write(c.get("task", "")),
                     st.write(c.get("chart_description", "")),
                     st.pyplot(c.get("chart"), clear_figure=False),
                 )

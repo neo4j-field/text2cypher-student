@@ -84,7 +84,7 @@ class Neo4jVectorSearchCypherExampleRetriever(BaseCypherExampleRetriever):
         if len(unformatted_examples) > 0:
             return ("\n" * 2).join(
                 [
-                    f"Question: {el['question']}\nCypher:{el['cypherStatement']}"
+                    f"Question: {el['question']}\nCypher:\n{el['cypherStatement']}"
                     for el in unformatted_examples
                 ]
             )

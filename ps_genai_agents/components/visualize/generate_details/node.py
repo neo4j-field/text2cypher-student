@@ -39,7 +39,7 @@ def create_chart_details_node(
         """
 
         chart_details: ChartDetailsOutput = await chart_details_chain.ainvoke(
-            {"question": state.get("subquestion"), "data": state.get("records")}
+            {"question": state.get("task"), "data": state.get("records")}
         )
         return {
             "title": chart_details.title,

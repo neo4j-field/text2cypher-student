@@ -3,7 +3,7 @@ from typing import Annotated, Any, Dict, List
 
 from typing_extensions import TypedDict
 
-from ..components.models import SubQuestion
+from ..components.models import Task
 from .text2cypher.state import CypherOutputState
 from .visualize.state import VisualizationOutputState
 
@@ -11,7 +11,7 @@ from .visualize.state import VisualizationOutputState
 class CypherHistoryRecord(TypedDict):
     """A simplified representation of the CypherOutputState"""
 
-    subquestion: str
+    task: str
     statement: str
     records: List[Dict[str, Any]]
 
@@ -56,11 +56,24 @@ class InputState(TypedDict):
     history: Annotated[List[HistoryRecord], update_history]
 
 
+# class OverallState(TypedDict):
+#     """The main state in multi agent workflows."""
+
+#     question: str
+#     subquestions: Annotated[List[SubQuestion], add]
+#     next_action: str
+#     cyphers: Annotated[List[CypherOutputState], add]
+#     summary: str
+#     visualizations: Annotated[List[VisualizationOutputState], add]
+#     steps: Annotated[List[str], add]
+#     history: Annotated[List[HistoryRecord], update_history]
+
+
 class OverallState(TypedDict):
     """The main state in multi agent workflows."""
 
     question: str
-    subquestions: Annotated[List[SubQuestion], add]
+    tasks: Annotated[List[Task], add]
     next_action: str
     cyphers: Annotated[List[CypherOutputState], add]
     summary: str
@@ -78,3 +91,13 @@ class OutputState(TypedDict):
     cyphers: List[CypherOutputState]
     visualizations: List[VisualizationOutputState]
     history: Annotated[List[HistoryRecord], update_history]
+
+
+class TaskState(TypedDict):
+    """The state of a task."""
+
+    question: str
+    parent_task: str
+    requires_visualization: bool
+    data: CypherOutputState
+    visualization: VisualizationOutputState
