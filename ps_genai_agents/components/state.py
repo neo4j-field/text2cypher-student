@@ -1,6 +1,7 @@
 from operator import add
-from typing import Annotated, Any, Dict, List
+from typing import Annotated, Any, Dict, List, Optional
 
+from langchain_core.messages import InvalidToolCall, ToolCall
 from typing_extensions import TypedDict
 
 from ..components.models import Task
@@ -56,19 +57,6 @@ class InputState(TypedDict):
     history: Annotated[List[HistoryRecord], update_history]
 
 
-# class OverallState(TypedDict):
-#     """The main state in multi agent workflows."""
-
-#     question: str
-#     subquestions: Annotated[List[SubQuestion], add]
-#     next_action: str
-#     cyphers: Annotated[List[CypherOutputState], add]
-#     summary: str
-#     visualizations: Annotated[List[VisualizationOutputState], add]
-#     steps: Annotated[List[str], add]
-#     history: Annotated[List[HistoryRecord], update_history]
-
-
 class OverallState(TypedDict):
     """The main state in multi agent workflows."""
 
@@ -101,3 +89,35 @@ class TaskState(TypedDict):
     requires_visualization: bool
     data: CypherOutputState
     visualization: VisualizationOutputState
+
+
+class PredefinedCypherInputState(TypedDict):
+    """The input state for a predefined Cypher node."""
+
+    task: str
+    tool_call: ToolCall
+    steps: List[str]
+
+
+class ToolSelectionInputState(TypedDict):
+    """The input state for the Tool Selection node."""
+
+    question: str
+    parent_task: str
+    requires_visualization: bool
+    context: Any
+
+
+class ToolSelectionOutputState(TypedDict):
+    tool_selection_task: str
+    tool_call: Optional[ToolCall]
+    # next_action: str
+    steps: List[str]
+
+
+class ToolSelectionErrorState(TypedDict):
+    """The input state to the tool selection error handling node."""
+
+    task: str
+    invalid_tool_call: InvalidToolCall
+    steps: List[str]

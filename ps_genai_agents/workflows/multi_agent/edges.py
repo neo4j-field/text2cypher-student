@@ -4,9 +4,7 @@ from typing import List, Literal
 
 from langgraph.types import Send
 
-from ...components.state import (
-    OverallState,
-)
+from ...components.state import OverallState, ToolSelectionOutputState
 from ...components.text2cypher.state import CypherOutputState
 
 
@@ -58,6 +56,41 @@ def query_mapper_edge(state: OverallState) -> List[Send]:
         Send("text2cypher", {"task": task.question})
         for task in state.get("tasks", list())
     ]
+
+
+def map_reduce_planner_to_tool_selection(state: OverallState) -> List[Send]:
+    """Map each identified task in the planner stage to a tool_selection node."""
+
+    return [
+        Send(
+            "tool_selection",
+            {
+                "question": task.question,
+                "parent_task": task.parent_task,
+                "requires_visualization": task.requires_visualization,
+            },
+        )
+        for task in state.get("tasks", list())
+    ]
+
+
+def tool_selection_output_router(state: ToolSelectionOutputState) -> Send:
+    print("in router")
+    match state.get("next_action", ""):
+        case "text2cypher":
+            return Send("text2cypher", {"task": state.get("task", "")})
+        case "predefined_cypher":
+            return Send(
+                "predefined_cypher",
+                {
+                    "task": state.get("task", ""),
+                    "tool_call": state.get("tool_call", dict()),
+                },
+            )
+        case "error":
+            return Send("final_answer", dict())
+        case _:
+            return Send("final_answer", dict())
 
 
 def viz_mapper_edge(state: OverallState) -> List[Send]:

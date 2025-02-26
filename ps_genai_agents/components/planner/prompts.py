@@ -18,7 +18,6 @@ def create_planner_prompt_template() -> ChatPromptTemplate:
         The prompt template.
     """
     message = """Rules:
-* Return as few tasks as possible. This is important to reduce costs.
 * Ensure that the tasks are not returning duplicated or similar information.
 * Ensure that tasls are NOT dependent on information gathered from other tasks!
 * tasks that are dependent on each other should be combined into a single question.

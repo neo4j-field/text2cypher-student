@@ -7,14 +7,14 @@ from ....components.visualize.generate_details.models import ChartDetailsOutput
 from ....components.visualize.generate_details.prompts import (
     create_chart_details_prompt_template,
 )
-from ..state import VisualizationState
+from ..state import VisualizationInputState
 
 generate_chart_details_prompt = create_chart_details_prompt_template()
 
 
 def create_chart_details_node(
     llm: BaseChatModel,
-) -> Callable[[VisualizationState], Coroutine[Any, Any, Dict[str, Any]]]:
+) -> Callable[[VisualizationInputState], Coroutine[Any, Any, Dict[str, Any]]]:
     """
     Create a chart details node for a LangGraph workflow.
 
@@ -33,7 +33,7 @@ def create_chart_details_node(
         generate_chart_details_prompt | llm.with_structured_output(ChartDetailsOutput)
     )
 
-    async def generate_chart_details(state: VisualizationState) -> Dict[str, Any]:
+    async def generate_chart_details(state: VisualizationInputState) -> Dict[str, Any]:
         """
         Generate chart details to be used for generating a chart visualization of the data.
         """

@@ -1,9 +1,9 @@
-from typing import Literal
+from typing import Optional, TypedDict
 
-from pydantic import BaseModel, Field
+from langchain_core.messages import ToolCall
 
 
-class ToolSelectionOutput(BaseModel):
-    tool_selection: Literal["summarize", "final_result"] = Field(
-        description="The next tool used to process Cypher results."
-    )
+class ToolSelectionOutputState(TypedDict):
+    tool_selection_task: str
+    tool_call: Optional[ToolCall]
+    next_action: str

@@ -37,14 +37,23 @@ def create_summarization_node(
         Summarize results of the performed Cypher queries.
         """
 
-        summary = await generate_summary.ainvoke(
-            {
-                "question": state.get("question"),
-                "results": [
-                    cypher.get("records") for cypher in state.get("cyphers", list())
-                ],
-            }
-        )
+        results = [
+            cypher.get("records")
+            for cypher in state.get("cyphers", list())
+            if cypher.get("records") is not None
+        ]
+
+        if results:
+            summary = await generate_summary.ainvoke(
+                {
+                    "question": state.get("question"),
+                    "results": results,
+                }
+            )
+
+        else:
+            summary = "No data to summarize."
+
         return {"summary": summary, "steps": ["summarize"]}
 
     return summarize

@@ -15,7 +15,7 @@ def create_planner_node(
     llm: BaseChatModel, ignore_node: bool = False, next_action: str = "supervisor"
 ) -> Callable[[InputState], Coroutine[Any, Any, Dict[str, Any]]]:
     """
-    Create a query parser node to be used in a LangGraph workflow.
+    Create a planner node to be used in a LangGraph workflow.
 
     Parameters
     ----------
