@@ -71,7 +71,9 @@ def create_tool_selection_node(
         Choose the appropriate tool for the given task.
         """
 
-        go_to_text2cypher: Command[Literal["text2cypher", "error_tool_selection", "predefined_cypher"]] = Command(
+        go_to_text2cypher: Command[
+            Literal["text2cypher", "error_tool_selection", "predefined_cypher"]
+        ] = Command(
             goto=Send(
                 "text2cypher",
                 {
