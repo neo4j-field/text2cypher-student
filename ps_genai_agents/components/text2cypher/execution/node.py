@@ -42,7 +42,7 @@ def create_text2cypher_execution_node(
             "cyphers": [
                 CypherOutputState(
                     **{
-                        "subquestion": state.get("subquestion", ""),
+                        "task": state.get("task", ""),
                         "statement": state.get("statement", ""),
                         "errors": state.get("errors", list()),
                         "records": records if records else NO_CYPHER_RESULTS,

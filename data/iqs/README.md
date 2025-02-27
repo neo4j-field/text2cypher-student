@@ -1,6 +1,6 @@
 # IQS Data
 
-This directory contains data on customer feedback and demographics for Honda vehicles. 
+This directory contains data on customer feedback and demographics for Honda vehicles.
 
 ## Data Loading
 

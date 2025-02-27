@@ -5,34 +5,33 @@ repos:
     hooks:
     - id: trailing-whitespace
     - id: end-of-file-fixer
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.10.0
+  - repo: local
     hooks:
       - id: mypy
         name: Mypy Python 3.12
-        entry: mypy
-        language: python
+        entry: poetry run mypy --strict --ignore-missing-imports --allow-subclassing-any --allow-untyped-calls --explicit-package-bases .
+        language: system
         types: [python]
         stages: [commit]
-        args: [--strict, --ignore-missing-imports, --allow-subclassing-any, --allow-untyped-calls, --python-version=3.12]
-        additional_dependencies:
-          - pytest
-          - pydantic
-          - types-PyYAML
-        require_serial: true
+        # pass_filenames: false
+        # args: [--strict, --ignore-missing-imports, --allow-subclassing-any, --allow-untyped-calls, --python-version=3.12, --exclude='./docs/|./scripts/|./archive/']
   - repo: local
     hooks:
-      - id: ruff-lint-isort
-        name: Ruff Lint Sort Imports
-        entry: poetry run ruff check --select I .
+      # - id: ruff-lint-isort
+      #   name: Ruff Lint Sort Imports
+      #   entry: poetry run ruff check --select I .
+      #   language: system
+      #   types: [ python ]
+      #   stages: [ commit, push ]
+      # - id: ruff-lint
+      #   name: Ruff Lint Check
+      #   entry: poetry run ruff format --check
+      #   language: system
+      #   types: [ python ]
+      #   stages: [ commit, push ]
+      - id: ruff-check
+        name: Ruff Check
+        entry: make format
         language: system
         types: [ python ]
         stages: [ commit, push ]
-        # additional_dependencies: ["ruff"]
-      - id: ruff-lint
-        name: Ruff Lint Check
-        entry: poetry run ruff format --check
-        language: system
-        types: [ python ]
-        stages: [ commit, push ]
-        # additional_dependencies: ["ruff"]

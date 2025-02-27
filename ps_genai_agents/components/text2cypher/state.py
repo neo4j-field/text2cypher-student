@@ -9,11 +9,11 @@ from typing_extensions import TypedDict
 
 
 class CypherInputState(TypedDict):
-    subquestion: str
+    task: str
 
 
 class CypherState(TypedDict):
-    subquestion: str
+    task: str
     statement: str
     errors: List[str]
     records: List[Dict[str, Any]]
@@ -23,7 +23,7 @@ class CypherState(TypedDict):
 
 
 class CypherOutputState(TypedDict):
-    subquestion: str
+    task: str
     statement: str
     errors: List[str]
     records: List[Dict[str, Any]]

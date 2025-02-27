@@ -40,62 +40,61 @@ queries:
               AS ingredients
         ORDER BY size(ingredients)
         LIMIT 20
-    
+
     - question: What are some recipes written by Tony Tobin?
       cql: |-
-        MATCH (a:Author)-[:WROTE]->(r:Recipe)  
-        WHERE a.name = "Tony Tobin"  
+        MATCH (a:Author)-[:WROTE]->(r:Recipe)
+        WHERE a.name = "Tony Tobin"
         RETURN r.name
         LIMIT 10
-    
+
     - question: Do you have any vegetarian and gluten free dishes?
       cql: |-
         MATCH (r:Recipe)
         WHERE EXISTS {
-          (r)-[:DIET_TYPE]->(dt:DietType {name: "Vegetarian"})  
-        }  
+          (r)-[:DIET_TYPE]->(dt:DietType {name: "Vegetarian"})
+        }
         AND EXISTS {
-            (r)-[:DIET_TYPE]->(dt:DietType {name: "Gluten-free"})  
+            (r)-[:DIET_TYPE]->(dt:DietType {name: "Gluten-free"})
         }
         RETURN r.name
         LIMIT 20
-    
+
     - question: What are some easy recipes that can be prepared in under 20 minutes?
       cql: |-
-        MATCH (r:Recipe)  
-        WHERE r.skillLevel = "Easy" 
-            AND (r.cookingTimeMinutes + r.preparationTimeMinutes) < 20  
+        MATCH (r:Recipe)
+        WHERE r.skillLevel = "Easy"
+            AND (r.cookingTimeMinutes + r.preparationTimeMinutes) < 20
         RETURN r.name as name, r.cookingTimeMinutes as cookingTimeMinutes, r.preparationTimeMinutes as preparationTimeMinutes, r.cookingTimeMinutes + r.preparationTimeMinutes as totalTime
         ORDER BY totalTime
         LIMIT 20
 
     - question: What are a few recipes I can make in under thirty minutes?
       cql: |-
-        MATCH (r:Recipe)  
+        MATCH (r:Recipe)
         WHERE (r.cookingTimeMinutes + r.preparationTimeMinutes) < 30
         RETURN r.name as name, r.cookingTimeMinutes + r.preparationTimeMinutes as totalTime
         ORDER BY totalTime
         LIMIT 20
-    
+
     - question: Can you find me a dessert with chocolate?
       cql: |-
-        MATCH (r:Recipe)-[:KEYWORD]->(k:Keyword)  
-        WHERE k.name = "Chocolate"  
+        MATCH (r:Recipe)-[:KEYWORD]->(k:Keyword)
+        WHERE k.name = "Chocolate"
         RETURN r.name
         LIMIT 10
-      
+
     - question: What can I make with couscous?
       cql: |-
-        MATCH (r:Recipe)-[:CONTAINS_INGREDIENT]->(i:Ingredient)  
-        WHERE i.name = "couscous"  
+        MATCH (r:Recipe)-[:CONTAINS_INGREDIENT]->(i:Ingredient)
+        WHERE i.name = "couscous"
         RETURN r.name
         LIMIT 10
-    
+
     - question: I really like spicy chicken. Can you recommend what I should make today?
       cql: |-
-        MATCH (r:Recipe)-[:COLLECTION]->(c:Collection)  
-        WHERE c.name = "Spicy chicken"  
-        RETURN r.name  
-        ORDER BY rand()  
+        MATCH (r:Recipe)-[:COLLECTION]->(c:Collection)
+        WHERE c.name = "Spicy chicken"
+        RETURN r.name
+        ORDER BY rand()
         LIMIT 1;
-    

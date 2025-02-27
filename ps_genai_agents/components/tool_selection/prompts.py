@@ -1,9 +1,8 @@
-from langchain.prompts import ChatPromptTemplate
+from langchain_core.prompts import ChatPromptTemplate
 
-tool_selection_system = """
-You must analyze the input question to assess which additional tool should be used to process the Cypher query results in order to sufficiently answer the question.
-* 'summarize' will summarize the Cypher query results.
-* 'final_result' will format the final result object and requires a summary to exist.
+system = """
+You are responsible for choosing the appropriate tool for the given question. Use only the tools available to you.
+You should select the text2cypher tool, unless another tool exactly matches what the question is asking for.
 """
 
 
@@ -13,22 +12,29 @@ def create_tool_selection_prompt_template() -> ChatPromptTemplate:
 
     Returns
     -------
-    str
-        The template.
+    ChatPromptTemplate
+        The prompt template.
     """
+
+    message = "Question: {question}"
 
     return ChatPromptTemplate.from_messages(
         [
             (
                 "system",
-                tool_selection_system,
+                system,
             ),
             (
                 "human",
-                (
-                    """Original question: {question}
-Summary Exists: {does_summary_exist}"""
-                ),
+                (message),
             ),
         ]
     )
+
+
+# def _format_tool_options(tool_options_dict: Dict[str, str]) -> str:
+#     result = "Tool Options:"
+#     for t in tool_options_dict.items():
+#         result += f"\n* {t.get("name", "")}({t.get("parameters", "")}): {t.get("description", "")}"
+
+#     return result

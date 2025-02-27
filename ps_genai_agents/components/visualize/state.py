@@ -10,12 +10,12 @@ from typing_extensions import TypedDict
 
 
 class VisualizationInputState(TypedDict):
-    subquestion: str
+    task: str
     records: List[Dict[str, Any]]
 
 
 class VisualizationState(TypedDict):
-    subquestion: str
+    task: str
     records: List[Dict[str, Any]]
     title: str
     x_axis_key: str
@@ -29,7 +29,7 @@ class VisualizationState(TypedDict):
 
 
 class VisualizationOutputState(TypedDict):
-    subquestion: str
+    task: str
     chart: Any
     chart_description: str
     steps: List[str]

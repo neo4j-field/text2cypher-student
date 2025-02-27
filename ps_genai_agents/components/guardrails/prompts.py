@@ -13,7 +13,7 @@ guardrails_system = """
 You must decide whether the provided question is in scope.
 Assume the question might be related.
 If you're absolutely sure it is NOT related, output "end".
-Provide only the specified output: "query_parser" or "end".
+Provide only the specified output: "planner" or "end".
 """
 
 

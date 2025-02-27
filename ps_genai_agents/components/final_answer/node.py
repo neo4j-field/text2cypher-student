@@ -34,7 +34,7 @@ def create_final_answer_node() -> (
             "answer": answer,
             "cyphers": [
                 {
-                    "subquestion": c.get("subquestion", ""),
+                    "task": c.get("task", ""),
                     "statement": c.get("statement", ""),
                     "records": c.get("records", list()),
                 }

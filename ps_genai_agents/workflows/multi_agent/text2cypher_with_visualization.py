@@ -9,7 +9,7 @@ from ...components.final_answer import create_final_answer_node
 from ...components.gather_cypher import create_gather_cypher_node
 from ...components.gather_visualizations import create_gather_visualizations_node
 from ...components.guardrails import create_guardrails_node
-from ...components.query_parser import create_query_parser_node
+from ...components.planner import create_planner_node
 from ...components.state import (
     InputState,
     OutputState,
@@ -64,7 +64,7 @@ def create_text2cypher_with_visualization_workflow(
     guardrails = create_guardrails_node(
         llm=llm, graph=graph, scope_description=scope_description
     )
-    query_parser = create_query_parser_node(llm=llm)
+    planner = create_planner_node(llm=llm, next_action="text2cypher")
     text2cypher = create_text2cypher_agent(
         llm=llm,
         graph=graph,
@@ -75,7 +75,6 @@ def create_text2cypher_with_visualization_workflow(
     )
     gather_cypher = create_gather_cypher_node()
     gather_visualizations = create_gather_visualizations_node()
-    # tool_select = create_tool_selection_node(llm=llm)
     visualize = create_visualization_agent(llm=llm)
     summarize = create_summarization_node(llm=llm)
     final_answer = create_final_answer_node()
@@ -83,11 +82,10 @@ def create_text2cypher_with_visualization_workflow(
     main_graph_builder = StateGraph(OverallState, input=InputState, output=OutputState)
 
     main_graph_builder.add_node(guardrails)
-    main_graph_builder.add_node(query_parser)
+    main_graph_builder.add_node(planner)
     main_graph_builder.add_node("text2cypher", text2cypher)
     main_graph_builder.add_node(gather_cypher)
     main_graph_builder.add_node(gather_visualizations)
-    # main_graph_builder.add_node(tool_select)
     main_graph_builder.add_node("visualize", visualize)
     main_graph_builder.add_node(summarize)
     main_graph_builder.add_node(final_answer)
@@ -98,7 +96,7 @@ def create_text2cypher_with_visualization_workflow(
         guardrails_conditional_edge,
     )
     main_graph_builder.add_conditional_edges(
-        "query_parser",
+        "planner",
         query_mapper_edge,  # type: ignore[arg-type, unused-ignore]
         ["text2cypher"],
     )
@@ -109,9 +107,6 @@ def create_text2cypher_with_visualization_workflow(
         ["visualize", "gather_visualizations"],
     )
     main_graph_builder.add_edge("visualize", "gather_visualizations")
-    # main_graph_builder.add_conditional_edges(
-    #     "tool_select", tool_select_conditional_edge
-    # )
     main_graph_builder.add_edge("summarize", "final_answer")
     main_graph_builder.add_edge("gather_visualizations", "summarize")
     main_graph_builder.add_edge("final_answer", END)

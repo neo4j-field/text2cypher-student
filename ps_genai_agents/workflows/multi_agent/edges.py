@@ -4,22 +4,20 @@ from typing import List, Literal
 
 from langgraph.types import Send
 
-from ...components.state import (
-    OverallState,
-)
+from ...components.state import OverallState, ToolSelectionOutputState
 from ...components.text2cypher.state import CypherOutputState
 
 
 def guardrails_conditional_edge(
     state: OverallState,
-) -> Literal["query_parser", "final_answer"]:
+) -> Literal["planner", "final_answer"]:
     match state.get("next_action"):
         case "final_answer":
             return "final_answer"
         case "end":
             return "final_answer"
-        case "query_parser":
-            return "query_parser"
+        case "planner":
+            return "planner"
         case _:
             return "final_answer"
 
@@ -44,20 +42,55 @@ def validate_final_answer_router(
             return Send("final_answer", state)
         case "text2cypher":
             # currently only allow for a single follow up question at a time
-            subquestions = state.get("subquestions", list())
-            new_subquestion = subquestions[-1]
-            return Send("text2cypher", {"subquestion": new_subquestion.subquestion})
+            tasks = state.get("tasks", list())
+            new_task = tasks[-1]
+            return Send("text2cypher", {"task": new_task.question})
         case _:
             return Send("final_answer", state)
 
 
 def query_mapper_edge(state: OverallState) -> List[Send]:
-    """Map each sub question to a Text2Cypher subgraph."""
+    """Map each task question to a Text2Cypher subgraph."""
 
     return [
-        Send("text2cypher", {"subquestion": question.subquestion})
-        for question in state.get("subquestions", list())
+        Send("text2cypher", {"task": task.question})
+        for task in state.get("tasks", list())
     ]
+
+
+def map_reduce_planner_to_tool_selection(state: OverallState) -> List[Send]:
+    """Map each identified task in the planner stage to a tool_selection node."""
+
+    return [
+        Send(
+            "tool_selection",
+            {
+                "question": task.question,
+                "parent_task": task.parent_task,
+                "requires_visualization": task.requires_visualization,
+            },
+        )
+        for task in state.get("tasks", list())
+    ]
+
+
+def tool_selection_output_router(state: ToolSelectionOutputState) -> Send:
+    print("in router")
+    match state.get("next_action", ""):
+        case "text2cypher":
+            return Send("text2cypher", {"task": state.get("task", "")})
+        case "predefined_cypher":
+            return Send(
+                "predefined_cypher",
+                {
+                    "task": state.get("task", ""),
+                    "tool_call": state.get("tool_call", dict()),
+                },
+            )
+        case "error":
+            return Send("final_answer", dict())
+        case _:
+            return Send("final_answer", dict())
 
 
 def viz_mapper_edge(state: OverallState) -> List[Send]:
@@ -65,15 +98,15 @@ def viz_mapper_edge(state: OverallState) -> List[Send]:
 
     # need to check existing charts in case of follow up questions
     existing_chart_questions = [
-        x.get("subquestion", "") for x in state.get("visualizations", list())
+        x.get("task", "") for x in state.get("visualizations", list())
     ]
 
     indexes = [
         idx
-        for idx, subquestion in enumerate(state.get("subquestions", []))
-        if subquestion.requires_visualization
-        and subquestion.subquestion not in existing_chart_questions
+        for idx, task in enumerate(state.get("tasks", []))
+        if task.requires_visualization and task.question not in existing_chart_questions
     ]
+
     tasks = list()
     for idx in indexes:
         try:
@@ -81,7 +114,7 @@ def viz_mapper_edge(state: OverallState) -> List[Send]:
             task = Send(
                 "visualize",
                 {
-                    "subquestion": cypher_state.get("subquestion"),
+                    "task": cypher_state.get("task"),
                     "records": cypher_state.get("records"),
                 },
             )
