@@ -9,10 +9,11 @@ repos:
     hooks:
       - id: mypy
         name: Mypy Python 3.12
-        entry: mypy .
+        entry: poetry run mypy .
         language: system
         types: [python]
         stages: [commit]
+        pass_filenames: false
         args: [--strict, --ignore-missing-imports, --allow-subclassing-any, --allow-untyped-calls, --python-version=3.12]
   - repo: local
     hooks:
