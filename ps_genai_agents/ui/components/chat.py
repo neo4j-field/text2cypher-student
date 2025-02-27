@@ -50,7 +50,7 @@ def show_cypher_response_information(response: OutputState) -> None:
         with st.expander("Cypher"):
             [
                 (
-                    st.write(c.get("subquestion", "")),
+                    st.write(c.get("task", "")),
                     st.code(c.get("statement"), language="cypher"),
                     st.json(
                         c.get("records") if c.get("records") is not None else "",
@@ -69,7 +69,7 @@ def show_visualizations(response: OutputState) -> None:
         with st.expander("Visuals", expanded=True):
             [
                 (
-                    st.write(c.get("subquestion", "")),
+                    st.write(c.get("task", "")),
                     st.write(c.get("chart_description", "")),
                     st.pyplot(c.get("chart"), clear_figure=False),
                 )
@@ -109,7 +109,7 @@ def download_csv_button(cypher_results: List[List[Dict[str, Any]]]) -> None:
             buf = io.BytesIO()
             with zipfile.ZipFile(buf, "x") as zip:
                 for file_num, csv in enumerate(content):
-                    zip.writestr(f"cypher_result_part_{str(file_num+1)}.csv", csv)
+                    zip.writestr(f"cypher_result_part_{str(file_num + 1)}.csv", csv)
 
             st.download_button(
                 label="Download Cypher Results Tables as CSV",

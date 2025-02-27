@@ -40,7 +40,7 @@ def create_correct_chart_details_node(
 
         chart_details: ChartDetailsOutput = await chart_details_chain.ainvoke(
             {
-                "question": state.get("subquestion"),
+                "question": state.get("task"),
                 "data": state.get("records"),
                 "errors": state.get("errors"),
                 "details": {

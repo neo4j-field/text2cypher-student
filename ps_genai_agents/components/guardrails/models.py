@@ -8,6 +8,6 @@ from pydantic import BaseModel, Field
 
 
 class GuardrailsOutput(BaseModel):
-    decision: Literal["end", "query_parser"] = Field(
+    decision: Literal["end", "planner"] = Field(
         description="Decision on whether the question is related to the graph contents."
     )

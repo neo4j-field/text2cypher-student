@@ -58,9 +58,9 @@ def test_ingest_workflow_with_preexisting_nodes(
     embedder_results = embed_cypher_query_nodes(
         mock_embedder, unembedded_cypher_examples_for_init
     )
-    print("\n\nembedder results: ", embedder_results, "\n\n")
+    # print("\n\nembedder results: ", embedder_results, "\n\n")
     init_tasks: List[CypherIngestRecord] = embedder_results.get("nodes", list())
-    print("\n\ninit tasks: ", init_tasks, "\n\n")
+    # print("\n\ninit tasks: ", init_tasks, "\n\n")
     load_cypher_query_nodes(driver=neo4j_driver, nodes=init_tasks, database="neo4j")
 
     # test
@@ -72,8 +72,8 @@ def test_ingest_workflow_with_preexisting_nodes(
         ingest_tasks=unembedded_cypher_examples,
         existing_node_questions=nodes_from_database,
     )
-    print("nodes from db: ", nodes_from_database)
-    print("cleaned tasks: ", cleaned_tasks)
+    # print("nodes from db: ", nodes_from_database)
+    # print("cleaned tasks: ", cleaned_tasks)
     assert len(cleaned_tasks) == len(unembedded_cypher_examples) - len(
         unembedded_cypher_examples_for_init
     )

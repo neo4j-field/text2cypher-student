@@ -32,7 +32,7 @@ loading_queries:
       WITH $rows AS rows
       UNWIND rows AS row
       MERGE (n:Category {id: row.category})
-    
+
     problem: |
       WITH $rows AS rows
       UNWIND rows AS row
@@ -50,19 +50,19 @@ loading_queries:
       UNWIND rows AS row
       MERGE (v:Vehicle {id: row.series})
         SET v.totalProblems = row.totalProblems
-    
+
     verbatim: |
       WITH $rows AS rows
       UNWIND rows AS row
       MERGE (v:Verbatim {verbatim: row.verbatim, id: row.rid})
-        SET v.ageBucket = (CASE WHEN row.ageBucket = '' THEN NULL ELSE row.ageBucket END), 
+        SET v.ageBucket = (CASE WHEN row.ageBucket = '' THEN NULL ELSE row.ageBucket END),
             v.severity = (CASE WHEN row.severity = '' THEN NULL ELSE row.severity END),
             v.gender = row.gender,
             v.make = row.make,
-            v.model = split(row.series, ' ')[1], 
-            v.minAge = toInteger(row.minAge), 
+            v.model = split(row.series, ' ')[1],
+            v.minAge = toInteger(row.minAge),
             v.maxAge = toInteger(row.maxAge)
-  
+
     customer: |
       WITH $rows AS rows
       UNWIND rows AS row
@@ -105,21 +105,21 @@ loading_queries:
       MATCH (source:Vehicle {id: row.series})
       MATCH (target:Verbatim {verbatim: row.verbatim, id: row.rid})
       MERGE (source)-[n:HAS_VERBATIM]->(target)
-    
+
     verbatim_problem: |
       WITH $rows AS rows
       UNWIND rows as row
       MATCH (source:Verbatim {verbatim: row.verbatim, id: row.rid})
       MATCH (target:Problem {id: row.qIdentifier})
       MERGE (source)-[n:HAS_PROBLEM]->(target)
-    
+
     verbatim_category: |
       WITH $rows AS rows
       UNWIND rows as row
       MATCH (source:Verbatim {verbatim: row.verbatim, id: row.rid})
       MATCH (target:Category {id: row.category})
       MERGE (source)-[n:HAS_CATEGORY]->(target)
-    
+
     customer_verbatim: |
       WITH $rows AS rows
       UNWIND rows as row
@@ -135,17 +135,17 @@ post_processing_queries:
     SET n.verbatimText = toLower(text)
 
   generate_ada_embedding: |
-              MATCH (v:Verbatim) 
+              MATCH (v:Verbatim)
                 WHERE v.verbatim <> ''
               WITH collect(v) AS verbatimList,
                   count(*) AS total,
                   100 AS batchSize
               UNWIND range(0, total, batchSize) AS batchStart
               CALL {
-                WITH verbatimList, 
-                  batchStart, 
+                WITH verbatimList,
+                  batchStart,
                   batchSize
-                WITH verbatimList, 
+                WITH verbatimList,
                   batchStart,
                   [v IN verbatimList [batchStart .. batchStart + batchSize] |'Vehicle: '|| v.make + ' ' + v.model ||' | Category: '|| [(v)-[:HAS_CATEGORY]->(c:Category) | c.id][0] ||' | Problem: '||[(v)-[:HAS_PROBLEM]->(p:Problem) | p.problem][0] || ' | Question: ' ||[(v)-[:HAS_QUESTION]->(q:Question) | q.question][0] ||' | Survey Verbatim Response: '||v.verbatim] AS batch
                 CALL genai.vector.encodeBatch(batch, 'OpenAI', { token: $key }) YIELD index, vector

@@ -5,7 +5,7 @@ from langchain_core.runnables.base import Runnable
 from langchain_neo4j import Neo4jGraph
 
 from ...components.state import OverallState
-from ..models import SubQuestion
+from ..models import Task
 from ..utils.utils import retrieve_and_parse_schema_from_graph_for_prompts
 from .models import ValidateFinalAnswerResponse
 from .prompts import create_validate_final_answer_prompt_template
@@ -76,7 +76,10 @@ def create_validate_final_answer_node(
                 {
                     "next_action": loop_back_node,
                     "subquestions": [
-                        SubQuestion(subquestion=response.follow_up_question or "")
+                        Task(
+                            question=response.follow_up_question or "",
+                            parent_task="follow up question",
+                        )
                     ],
                 }
             )

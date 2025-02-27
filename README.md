@@ -1,6 +1,6 @@
 # PS GenAI Agents
 
-This repository contains the `ps-genai-agents` package which may be used to create off-the-shelf agentic workflows built for Neo4j. The purpose of this repo is to provide foundational agents and workflows that may function with any underlying Neo4j graph. While these workflows should function well on their own - it is expected that they will be augmented to serve more specific use cases once pulled into other projects. 
+This repository contains the `ps-genai-agents` package which may be used to create off-the-shelf agentic workflows built for Neo4j. The purpose of this repo is to provide foundational agents and workflows that may function with any underlying Neo4j graph. While these workflows should function well on their own - it is expected that they will be augmented to serve more specific use cases once pulled into other projects.
 
 This package uses the [LangChain](https://github.com/langchain-ai) and [Neo4j GraphRAG](https://github.com/neo4j/neo4j-graphrag-python) libraries for LLM and database connections.
 
@@ -9,9 +9,9 @@ This package uses [LangGraph](https://github.com/langchain-ai/langgraph) for wor
 ## Contents
 
 This repository contains
-* Predefined agentic workflows for 
+* Predefined agentic workflows for
   * Text2Cypher
-  * Data Visualization 
+  * Data Visualization
 * Cypher Query Vector Store Ingestion Code
 * Streamlit Demo Application
 * LangGraph Studio Integration
@@ -20,7 +20,7 @@ This repository contains
 ## Getting Started
 
 ### Basic Set Up
-To use `ps-genai-agents` package you can either clone or fork the repository. 
+To use `ps-genai-agents` package you can either clone or fork the repository.
 
 Then:
 * Install all the dependencies using Poetry by running `poetry install --with dev, ui`
@@ -43,7 +43,7 @@ To Use LangGraph Studio
   * LANGSMITH_PROJECT="..."
 * Deploy a development LangGraph Studio server from the CLI with `langgraph dev`
 
-LangGraph Studio will use the workflow created in `ps_genai_agents/agent.py` with the variable name `graph` by default. 
+LangGraph Studio will use the workflow created in `ps_genai_agents/agent.py` with the variable name `graph` by default.
 
 You may modify what workflow is used by modifying the contents of `langgraph.json`.
 
@@ -57,13 +57,13 @@ All agents and workflows are built with async and run asynchronously. Please ref
 
 ### Text2Cypher
 
-This agent will generate, validate, correct and execute Cypher statements. 
-This agent requires Cypher examples to inform the Cypher generation step. 
+This agent will generate, validate, correct and execute Cypher statements.
+This agent requires Cypher examples to inform the Cypher generation step.
 Cypher validation may be performed using an LLM or the validation logic found in  `ps_genai_agents/components/text2cypher/validation/`.
 
 Validation Checks
 * No Syntax Errors
-* No Write Clauses 
+* No Write Clauses
 * Proper Relationship Directions
 * Correct Property Mappings
 * Node Label Existence
@@ -80,7 +80,7 @@ Below is the agent workflow.
 
 This agent will generate visualizations using Matplotlib and Seaborn based on the provided data. It will also include a description of the visual.
 
-Possible Plots 
+Possible Plots
 * Line
 * Bar
 * Scatter
@@ -109,7 +109,7 @@ Below is an example of a multi-agent workflow that includes both Text2Cypher and
 
 This is a demo application that demonstrates a simple UI.
 
-Responses will include 
+Responses will include
 * Summary of retrieved data
 * Any visualizations generated and their descriptions
 * Download option for retrieved data tables
@@ -127,7 +127,7 @@ Below are the Cypher details contained in the Cypher dropdown seen above.
 
 ## Cypher Query Vector Store
 
-This repo contains code to create and update a Cypher query Vector Store in Neo4j. This can then be used retrieve examples for Cypher generation. This provides the benefit of allowing many Cypher queries to be accessible without needing to store them in a YAML file or passing them *all* in the prompt. We can instead select the top k most relevant queries by matching the input question embedding to question embeddings in the vector store. 
+This repo contains code to create and update a Cypher query Vector Store in Neo4j. This can then be used retrieve examples for Cypher generation. This provides the benefit of allowing many Cypher queries to be accessible without needing to store them in a YAML file or passing them *all* in the prompt. We can instead select the top k most relevant queries by matching the input question embedding to question embeddings in the vector store.
 
 By using this method we
 * Reduce tokens passed to the LLM

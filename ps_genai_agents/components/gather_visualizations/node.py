@@ -1,11 +1,6 @@
 from typing import Any, Callable, Dict
 
 from ...components.state import OverallState
-from ...components.tool_selection.prompts import (
-    create_tool_selection_prompt_template,
-)
-
-generate_tool_select_prompt = create_tool_selection_prompt_template()
 
 
 def create_gather_visualizations_node() -> Callable[[OverallState], Dict[str, Any]]:

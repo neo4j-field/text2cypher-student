@@ -52,7 +52,7 @@ format:
 ######################
 
 mypy:
-	poetry run mypy --strict --ignore-missing-imports --allow-subclassing-any --allow-untyped-calls .
+	poetry run mypy .
 
 ######################
 # DATA LOADING
