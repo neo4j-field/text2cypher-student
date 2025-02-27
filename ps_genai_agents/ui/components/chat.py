@@ -109,7 +109,7 @@ def download_csv_button(cypher_results: List[List[Dict[str, Any]]]) -> None:
             buf = io.BytesIO()
             with zipfile.ZipFile(buf, "x") as zip:
                 for file_num, csv in enumerate(content):
-                    zip.writestr(f"cypher_result_part_{str(file_num+1)}.csv", csv)
+                    zip.writestr(f"cypher_result_part_{str(file_num + 1)}.csv", csv)
 
             st.download_button(
                 label="Download Cypher Results Tables as CSV",

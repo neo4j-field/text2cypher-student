@@ -101,9 +101,9 @@ def node_property_names_enum_dict() -> Dict[str, Any]:
 
 
 @pytest.fixture(scope="function")
-def node_property_values_range_dict() -> (
-    Dict[str, Dict[str, Neo4jStructuredSchemaPropertyNumber]]
-):
+def node_property_values_range_dict() -> Dict[
+    str, Dict[str, Neo4jStructuredSchemaPropertyNumber]
+]:
     return {
         "NodeA": {
             "prop_1": Neo4jStructuredSchemaPropertyNumber(

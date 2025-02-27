@@ -11,12 +11,10 @@ from ....components.visualize.generate_chart.charts import (
 from ..state import VisualizationOutputState, VisualizationState
 
 
-def create_chart_generation_node() -> (
-    Callable[
-        [VisualizationState],
-        Coroutine[Any, Any, Dict[str, List[VisualizationOutputState] | List[str]]],
-    ]
-):
+def create_chart_generation_node() -> Callable[
+    [VisualizationState],
+    Coroutine[Any, Any, Dict[str, List[VisualizationOutputState] | List[str]]],
+]:
     """
     Create a chart generation node for a LangGraph workflow.
 

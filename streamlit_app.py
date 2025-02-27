@@ -27,9 +27,9 @@ def get_args() -> Dict[str, Any]:
     args = sys.argv
     if len(args) > 1:
         config_path: str = args[1]
-        assert config_path.lower().endswith(
-            ".json"
-        ), f"provided file is not JSON | {config_path}"
+        assert config_path.lower().endswith(".json"), (
+            f"provided file is not JSON | {config_path}"
+        )
         with open(config_path, "r") as f:
             config: Dict[str, Any] = json.load(f)
     else:

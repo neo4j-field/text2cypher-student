@@ -17,9 +17,9 @@ def load_config(config_file_path: str) -> Dict[str, Any]:
         A Python dictionary containing the configuration.
     """
 
-    assert config_file_path.lower().endswith(
-        ".json"
-    ), f"provided file is not JSON | {config_file_path}"
+    assert config_file_path.lower().endswith(".json"), (
+        f"provided file is not JSON | {config_file_path}"
+    )
 
     with open(config_file_path, "r") as f:
         config: Dict[str, Any] = json.load(f)

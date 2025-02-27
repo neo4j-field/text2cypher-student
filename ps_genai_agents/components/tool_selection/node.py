@@ -53,7 +53,7 @@ def create_tool_selection_node(
     """
 
     tool_selection_chain: Runnable[Dict[str, Any], Any] = (
-        tool_selection_prompt | llm.bind_tools(tools=tool_schemas) # type: ignore[arg-type]
+        tool_selection_prompt | llm.bind_tools(tools=tool_schemas)  # type: ignore[arg-type]
     )
 
     # get a set of tool names that require the custom cypher executor
@@ -68,7 +68,7 @@ def create_tool_selection_node(
 
     async def tool_selection(
         state: ToolSelectionInputState,
-    ) -> Command[Literal[*next_node_options]]: # type: ignore
+    ) -> Command[Literal[*next_node_options]]:  # type: ignore
         """
         Choose the appropriate tool for the given task.
         """
@@ -128,7 +128,7 @@ def create_tool_selection_node(
                     name="tool_selection",
                     args=None,
                     id="err-" + str(uuid4()),
-                    error=f"Unable to assign tool to question: '{state.get("question", "")}'",
+                    error=f"Unable to assign tool to question: `{state.get('question', '')}`",
                 )
             return Command(
                 goto=Send(
