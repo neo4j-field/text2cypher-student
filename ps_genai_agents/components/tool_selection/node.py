@@ -64,11 +64,10 @@ def create_tool_selection_node(
     tool_names.discard("text2cypher")
     tool_names.discard("visualize")
 
-    next_node_options = ["text2cypher", "error_tool_selection", "predefined_cypher"]
 
     async def tool_selection(
         state: ToolSelectionInputState,
-    ) -> Command[Literal[*next_node_options]]:  # type: ignore
+    ) -> Command[Literal["text2cypher", "error_tool_selection", "predefined_cypher"]]:
         """
         Choose the appropriate tool for the given task.
         """
