@@ -10,6 +10,8 @@
 * `CypherQuery` nodes are now removed from graph schema when generating Cypher
 * All graphs and subgraphs have Input, Main and Output states
 * Make all agent workflow nodes async
+* rename `query_parser` node to `planner` node
+* Tool Selection node now uses LLM to decide which tool to use
 
 ### Added
 
@@ -20,3 +22,6 @@
 * updated README
 * Add ingest code and embeddings data for IQS data
 * Add BBC Good Food recipes data
+* Add support for generic Cypher executor
+    * This enables pre written Cypher tools to be used
+* Add example notebook demonstrating the multi tool agent with Text2Cypher and predefined Cypher tools

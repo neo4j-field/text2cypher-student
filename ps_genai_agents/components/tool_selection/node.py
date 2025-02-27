@@ -14,17 +14,16 @@ A tool_selection node must
 """
 
 from collections.abc import Sequence
-from typing import Any, Callable, Coroutine, Dict, List, Literal, Set, Union
+from typing import Any, Callable, Coroutine, Dict, List, Literal, Set
 from uuid import uuid4
 
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import AIMessage, InvalidToolCall, ToolCall
 from langchain_core.runnables.base import Runnable
-from langchain_core.tools import BaseTool
 from langgraph.types import Command, Send
 from pydantic import BaseModel
 
-from ...components.state import ToolSelectionInputState, ToolSelectionOutputState
+from ...components.state import ToolSelectionInputState
 from ...components.tool_selection.prompts import create_tool_selection_prompt_template
 
 tool_selection_prompt = create_tool_selection_prompt_template()

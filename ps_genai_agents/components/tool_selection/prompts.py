@@ -1,4 +1,3 @@
-from typing import Dict
 
 from langchain_core.prompts import ChatPromptTemplate
 
