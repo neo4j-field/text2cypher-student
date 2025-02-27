@@ -6,9 +6,9 @@ from ....components.visualize.generate_details.models import ChartDetailsOutput
 from ..state import VisualizationState
 
 
-def create_validate_chart_details_node() -> Callable[
-    [VisualizationState], Dict[str, Any]
-]:
+def create_validate_chart_details_node() -> (
+    Callable[[VisualizationState], Dict[str, Any]]
+):
     """
     Create a validate chart details node for a LangGraph workflow.
 

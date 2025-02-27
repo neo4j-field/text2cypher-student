@@ -3,9 +3,9 @@ from typing import Any, Callable, Coroutine
 from ...components.state import OverallState
 
 
-def create_final_answer_node() -> Callable[
-    [OverallState], Coroutine[Any, Any, dict[str, Any]]
-]:
+def create_final_answer_node() -> (
+    Callable[[OverallState], Coroutine[Any, Any, dict[str, Any]]]
+):
     """
     Create a final_answer node for a LangGraph workflow.
 

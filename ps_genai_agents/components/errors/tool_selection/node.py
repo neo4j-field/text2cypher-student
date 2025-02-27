@@ -4,9 +4,9 @@ from ....components.state import ToolSelectionErrorState
 from ....components.text2cypher.state import CypherOutputState
 
 
-def create_error_tool_selection_node() -> Callable[
-    [ToolSelectionErrorState], Coroutine[Any, Any, Dict[str, Any]]
-]:
+def create_error_tool_selection_node() -> (
+    Callable[[ToolSelectionErrorState], Coroutine[Any, Any, Dict[str, Any]]]
+):
     """
     Create a error_tool_selection node for a LangGraph workflow.
 
