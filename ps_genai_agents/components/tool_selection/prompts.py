@@ -1,8 +1,8 @@
 from langchain_core.prompts import ChatPromptTemplate
 
 system = """
-You are responsible for choosing the appropriate tool for the given question. Use only the tools available to you. 
-You should select the text2cypher tool, unless another tool exactly matches what the question is asking for. 
+You are responsible for choosing the appropriate tool for the given question. Use only the tools available to you.
+You should select the text2cypher tool, unless another tool exactly matches what the question is asking for.
 """
 
 

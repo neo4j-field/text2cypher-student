@@ -53,7 +53,7 @@ def create_tool_selection_node(
     """
 
     tool_selection_chain: Runnable[Dict[str, Any], Any] = (
-        tool_selection_prompt | llm.bind_tools(tools=tool_schemas)  # type: ignore[arg-type]
+        tool_selection_prompt | llm.bind_tools(tools=tool_schemas) # type: ignore[arg-type]
     )
 
     # get a set of tool names that require the custom cypher executor
@@ -66,9 +66,9 @@ def create_tool_selection_node(
 
     next_node_options = ["text2cypher", "error_tool_selection", "predefined_cypher"]
 
-    async def tool_selection(  # type: ignore[return]
+    async def tool_selection(
         state: ToolSelectionInputState,
-    ) -> Command[Literal[*next_node_options]]:  # type: ignore[syntax]
+    ) -> Command[Literal[*next_node_options]]: # type: ignore
         """
         Choose the appropriate tool for the given task.
         """
@@ -140,5 +140,7 @@ def create_tool_selection_node(
                     },
                 )
             )
+
+        return go_to_text2cypher
 
     return tool_selection

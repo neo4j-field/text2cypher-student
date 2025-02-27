@@ -1,6 +1,6 @@
 # BBC Good Food Recipes Data
 
-This directory contains data on recipes from BBC Good Food. 
+This directory contains data on recipes from BBC Good Food.
 
 ## Data Loading
 
