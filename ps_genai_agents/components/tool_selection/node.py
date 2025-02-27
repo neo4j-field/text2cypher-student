@@ -68,7 +68,7 @@ def create_tool_selection_node(
 
     async def tool_selection(  # type: ignore[return]
         state: ToolSelectionInputState,
-    ) -> Command[Literal[*next_node_options]]:  # type: ignore
+    ) -> Command[Literal[*next_node_options]]:  # type: ignore[syntax]
         """
         Choose the appropriate tool for the given task.
         """
