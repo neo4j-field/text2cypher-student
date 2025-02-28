@@ -23,11 +23,11 @@ FOR (n:Collection) REQUIRE (n.name) IS NODE KEY;
 //import recipes to the graph
 CALL apoc.load.json('https://raw.githubusercontent.com/neo4j-examples/graphgists/master/browser-guides/data/stream_clean.json') YIELD value
 WITH value.page.article.id AS id,
-       value.page.title AS title,
-       value.page.article.description AS description,
+       toLower(value.page.title) AS title,
+       toLower(value.page.article.description) AS description,
        value.page.recipe.cooking_time AS cookingTime,
        value.page.recipe.prep_time AS preparationTime,
-       value.page.recipe.skill_level AS skillLevel
+       toLower(value.page.recipe.skill_level) AS skillLevel
 MERGE (r:Recipe {name: title})
 ON CREATE
 SET r.cookingTimeMinutes = cookingTime / 60,
@@ -39,7 +39,7 @@ SET r.cookingTimeMinutes = cookingTime / 60,
 //import authors and connect to recipes
 CALL apoc.load.json('https://raw.githubusercontent.com/neo4j-examples/graphgists/master/browser-guides/data/stream_clean.json') YIELD value
 WITH value.page.article.id AS id,
-       value.page.article.author AS author
+       toLower(value.page.article.author) AS author
 MERGE (a:Author {name: author})
 WITH a,id
 MATCH (r:Recipe {id:id})
@@ -51,7 +51,7 @@ WITH value.page.article.id AS id,
        value.page.recipe.ingredients AS ingredients
 MATCH (r:Recipe {id:id})
 FOREACH (ingredient IN ingredients |
-  MERGE (i:Ingredient {name: ingredient})
+  MERGE (i:Ingredient {name: toLower(ingredient)})
   MERGE (r)-[:CONTAINS_INGREDIENT]->(i)
 );
 
@@ -61,7 +61,7 @@ WITH value.page.article.id AS id,
        value.page.recipe.keywords AS keywords
 MATCH (r:Recipe {id:id})
 FOREACH (keyword IN keywords |
-  MERGE (k:Keyword {name: keyword})
+  MERGE (k:Keyword {name: toLower(keyword)})
   MERGE (r)-[:KEYWORD]->(k)
 );
 
@@ -71,7 +71,7 @@ WITH value.page.article.id AS id,
        value.page.recipe.diet_types AS dietTypes
 MATCH (r:Recipe {id:id})
 FOREACH (dietType IN dietTypes |
-  MERGE (d:DietType {name: dietType})
+  MERGE (d:DietType {name: toLower(dietType)})
   MERGE (r)-[:DIET_TYPE]->(d)
 );
 
@@ -81,6 +81,6 @@ WITH value.page.article.id AS id,
        value.page.recipe.collections AS collections
 MATCH (r:Recipe {id:id})
 FOREACH (collection IN collections |
-  MERGE (c:Collection {name: collection})
+  MERGE (c:Collection {name: toLower(collection)})
   MERGE (r)-[:COLLECTION]->(c)
 );

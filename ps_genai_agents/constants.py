@@ -9,6 +9,6 @@ WRITE_CLAUSES = {
 }
 
 
-NO_CYPHER_RESULT = [
+NO_CYPHER_RESULTS = [
     {"error": "I couldn't find any relevant information in the database."}
 ]

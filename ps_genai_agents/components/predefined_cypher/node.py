@@ -3,7 +3,7 @@ from typing import Any, Callable, Coroutine, Dict, List
 from langchain_core.messages import ToolCall
 from langchain_neo4j import Neo4jGraph
 
-from ...constants import NO_CYPHER_RESULT
+from ...constants import NO_CYPHER_RESULTS
 from ..state import PredefinedCypherInputState
 from ..text2cypher.state import CypherOutputState
 
@@ -61,7 +61,7 @@ def create_predefined_cypher_node(
                         "task": state.get("task", ""),
                         "statement": statement or "",
                         "errors": errors,
-                        "records": records or NO_CYPHER_RESULT,
+                        "records": records or NO_CYPHER_RESULTS,
                         "steps": ["execute_predefined_cypher"],
                     }
                 )
