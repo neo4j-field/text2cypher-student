@@ -13,12 +13,10 @@ A tool_selection node must
 * send the validated parameters to the appropriate tool node
 """
 
-from collections.abc import Sequence
 from typing import Any, Callable, Coroutine, Dict, List, Literal, Set
-from uuid import uuid4
 
 from langchain_core.language_models import BaseChatModel
-from langchain_core.messages import AIMessage, InvalidToolCall, ToolCall
+from langchain_core.output_parsers import PydanticToolsParser
 from langchain_core.runnables.base import Runnable
 from langgraph.types import Command, Send
 from pydantic import BaseModel
@@ -31,7 +29,7 @@ tool_selection_prompt = create_tool_selection_prompt_template()
 
 def create_tool_selection_node(
     llm: BaseChatModel,
-    tool_schemas: Sequence[BaseModel],
+    tool_schemas: List[type[BaseModel]],
     default_to_text2cypher: bool = True,
 ) -> Callable[[ToolSelectionInputState], Coroutine[Any, Any, Command[Any]]]:
     """
@@ -53,16 +51,18 @@ def create_tool_selection_node(
     """
 
     tool_selection_chain: Runnable[Dict[str, Any], Any] = (
-        tool_selection_prompt | llm.bind_tools(tools=tool_schemas)  # type: ignore[arg-type]
+        tool_selection_prompt
+        | llm.bind_tools(tools=tool_schemas)
+        | PydanticToolsParser(tools=tool_schemas, first_tool_only=True)
     )
 
     # get a set of tool names that require the custom cypher executor
-    tool_names: Set[str] = {
+    predefined_cypher_tools: Set[str] = {
         t.model_json_schema().get("title", "") for t in tool_schemas
     }
 
-    tool_names.discard("text2cypher")
-    tool_names.discard("visualize")
+    predefined_cypher_tools.discard("text2cypher")
+    predefined_cypher_tools.discard("visualize")
 
     async def tool_selection(
         state: ToolSelectionInputState,
@@ -72,7 +72,9 @@ def create_tool_selection_node(
         """
 
         go_to_text2cypher: Command[
-            Literal["text2cypher", "error_tool_selection", "predefined_cypher"]
+            Literal[
+                "text2cypher", "error_tool_selection", "predefined_cypher"
+            ]  # obviously this only goes to text2cypher, but this definition satisfies mypy...
         ] = Command(
             goto=Send(
                 "text2cypher",
@@ -84,57 +86,50 @@ def create_tool_selection_node(
         )
 
         # if possible determine tool without LLM
-        if len(tool_names) == 1 and tool_names.pop().lower() == "text2cypher":
+        if (
+            len(predefined_cypher_tools) == 1
+            and predefined_cypher_tools.pop().lower() == "text2cypher"
+        ):
             return go_to_text2cypher
 
         # use LLM to determine tool
-        tool_selection_output: AIMessage = await tool_selection_chain.ainvoke(
+        tool_selection_output: BaseModel = await tool_selection_chain.ainvoke(
             {"question": state.get("question", "")}
         )
 
-        tool_calls: List[ToolCall] = tool_selection_output.tool_calls
-
         # route to chosen tool node
-        if tool_calls:
-            chosen_tool_call: ToolCall = tool_calls[0]
-            tool_name: str = chosen_tool_call.get("name", "").lower()
+        if tool_selection_output is not None:
+            tool_name: str = tool_selection_output.model_json_schema().get("title", "")
+            tool_args: Dict[str, Any] = tool_selection_output.model_dump()
 
-            if tool_name == "text2cypher":
-                return go_to_text2cypher
-            elif tool_name in tool_names:
+            if tool_name in predefined_cypher_tools:
                 return Command(
                     goto=Send(
                         "predefined_cypher",
                         {
                             "task": state.get("question", ""),
-                            "tool_call": chosen_tool_call,
+                            "query_name": tool_name,
+                            "query_parameters": tool_args,
                             "steps": ["tool_selection"],
                         },
                     )
                 )
+            elif tool_name == "text2cypher":
+                return go_to_text2cypher
 
         elif default_to_text2cypher:
             return go_to_text2cypher
+
         # handle instance where no tool is chosen
         else:
-            invalid_tool_calls: List[InvalidToolCall] = (
-                tool_selection_output.invalid_tool_calls
-            )
-            if len(invalid_tool_calls) > 0:
-                invalid_tool_call: InvalidToolCall = invalid_tool_calls[0]
-            else:
-                invalid_tool_call = InvalidToolCall(
-                    name="tool_selection",
-                    args=None,
-                    id="err-" + str(uuid4()),
-                    error=f"Unable to assign tool to question: `{state.get('question', '')}`",
-                )
             return Command(
                 goto=Send(
                     "error_tool_selection",
                     {
                         "task": state.get("question", ""),
-                        "tool_call": invalid_tool_call,
+                        "errors": [
+                            f"Unable to assign tool to question: `{state.get('question', '')}`"
+                        ],
                         "steps": ["tool_selection"],
                     },
                 )

@@ -6,6 +6,7 @@ from typing import Any, Callable, Coroutine, Dict, List
 
 from langchain_neo4j import Neo4jGraph
 
+from ....constants import NO_CYPHER_RESULTS
 from ..state import CypherOutputState, CypherState
 
 
@@ -28,10 +29,6 @@ def create_text2cypher_execution_node(
         The LangGraph node.
     """
 
-    no_results = [
-        {"error": "I couldn't find any relevant information in the database."}
-    ]
-
     async def execute_cypher(
         state: CypherState,
     ) -> Dict[str, List[CypherOutputState] | List[str]]:
@@ -47,8 +44,9 @@ def create_text2cypher_execution_node(
                     **{
                         "task": state.get("task", ""),
                         "statement": state.get("statement", ""),
+                        "parameters": None,
                         "errors": state.get("errors", list()),
-                        "records": records if records else no_results,
+                        "records": records if records else NO_CYPHER_RESULTS,
                         "steps": steps,
                     }
                 )

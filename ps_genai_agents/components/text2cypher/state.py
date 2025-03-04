@@ -3,7 +3,7 @@ This file contains classes that manage the state of a Text2Cypher Agent or subgr
 """
 
 from operator import add
-from typing import Annotated, Any, Dict, List
+from typing import Annotated, Any, Dict, List, Optional
 
 from typing_extensions import TypedDict
 
@@ -15,6 +15,7 @@ class CypherInputState(TypedDict):
 class CypherState(TypedDict):
     task: str
     statement: str
+    parameters: Optional[Dict[str, Any]]
     errors: List[str]
     records: List[Dict[str, Any]]
     next_action_cypher: str
@@ -25,6 +26,7 @@ class CypherState(TypedDict):
 class CypherOutputState(TypedDict):
     task: str
     statement: str
+    parameters: Optional[Dict[str, Any]]
     errors: List[str]
     records: List[Dict[str, Any]]
     steps: List[str]

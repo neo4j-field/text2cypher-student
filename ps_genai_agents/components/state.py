@@ -1,7 +1,7 @@
 from operator import add
 from typing import Annotated, Any, Dict, List, Optional
 
-from langchain_core.messages import InvalidToolCall, ToolCall
+from langchain_core.messages import ToolCall
 from typing_extensions import TypedDict
 
 from ..components.models import Task
@@ -54,6 +54,7 @@ class InputState(TypedDict):
     """The input state for multi agent workflows."""
 
     question: str
+    data: List[Dict[str, Any]]
     history: Annotated[List[HistoryRecord], update_history]
 
 
@@ -95,7 +96,8 @@ class PredefinedCypherInputState(TypedDict):
     """The input state for a predefined Cypher node."""
 
     task: str
-    tool_call: ToolCall
+    query_name: str
+    query_parameters: Dict[str, Any]
     steps: List[str]
 
 
@@ -111,7 +113,6 @@ class ToolSelectionInputState(TypedDict):
 class ToolSelectionOutputState(TypedDict):
     tool_selection_task: str
     tool_call: Optional[ToolCall]
-    # next_action: str
     steps: List[str]
 
 
@@ -119,5 +120,5 @@ class ToolSelectionErrorState(TypedDict):
     """The input state to the tool selection error handling node."""
 
     task: str
-    invalid_tool_call: InvalidToolCall
+    errors: List[str]
     steps: List[str]

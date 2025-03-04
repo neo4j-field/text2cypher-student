@@ -11,9 +11,6 @@ init:
 	poetry install --with dev, ui
 	pre-commit install
 
-init_workshop:
-	poetry config virtualenvs.in-project true
-	poetry install --with workshop
 
 ######################
 # TESTING
@@ -46,6 +43,10 @@ format:
 	poetry run ruff format
 	poetry run ruff check --select I . --fix
 	poetry run ruff check .
+
+clean:
+	poetry run ruff check --select I . --fix
+	poetry run ruff check . --fix
 
 ######################
 # MYPY CHECK
