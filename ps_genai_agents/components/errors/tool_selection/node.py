@@ -22,17 +22,16 @@ def create_error_tool_selection_node() -> (
         """
         errors: List[str] = list()
         steps = ["error_tool_selection"]
-        invalid_tool_call = state.get("invalid_tool_call")
-        if invalid_tool_call is not None:
-            error = invalid_tool_call.get("error")
-            if error is not None:
-                errors.append(error)
+
+        errors.extend(state.get("errors", list()))
+
         return {
             "cyphers": [
                 CypherOutputState(
                     **{
                         "task": state.get("task", ""),
                         "statement": "",
+                        "parameters": None,
                         "errors": errors,
                         "records": list(),
                         "steps": steps,

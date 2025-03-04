@@ -21,7 +21,6 @@ class get_most_common_ingredients_an_author_uses(BaseModel):
         return v.lower()
 
 
-
 class get_recipes_for_diet_restrictions(BaseModel):
     """Retrieve a list of recipes that adhere to the requested diet restrictions."""
 
@@ -51,6 +50,7 @@ class get_difficult_recipes(BaseModel):
         ..., description="The desired number of recipes to be returned."
     )
 
+
 def get_tool_schemas() -> List[type[BaseModel]]:
     return [
         get_allergen_free_recipes,
@@ -58,5 +58,5 @@ def get_tool_schemas() -> List[type[BaseModel]]:
         get_recipes_for_diet_restrictions,
         get_easy_recipes,
         get_mid_difficulty_recipes,
-        get_difficult_recipes
+        get_difficult_recipes,
     ]

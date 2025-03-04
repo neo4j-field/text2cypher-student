@@ -1,5 +1,6 @@
 from typing import Dict
 
+
 def get_allergen_free_recipes() -> str:
     """
     This Cypher statement will find all recipes that don't include the identified allergens and return the recipe name as well as the ingredients list.
@@ -55,7 +56,7 @@ def get_easy_recipes() -> str:
     number_of_recipes : int
     """
     return """
-MATCH (r:Recipe {skillLevel: "aasy"})
+MATCH (r:Recipe {skillLevel: "easy"})
 RETURN r.name as name
 LIMIT $number_of_recipes
 """
@@ -85,6 +86,7 @@ MATCH (r:Recipe {skillLevel: "a challenge"})
 RETURN r.name as name
 LIMIT $number_of_recipes
 """
+
 
 def get_cypher_statements_dictionary() -> Dict[str, str]:
     """

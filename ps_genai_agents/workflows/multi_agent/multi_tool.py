@@ -29,7 +29,7 @@ from .edges import (
 def create_multi_tool_workflow(
     llm: BaseChatModel,
     graph: Neo4jGraph,
-    tool_schemas: List[BaseModel],
+    tool_schemas: List[type[BaseModel]],
     predefined_cypher_dict: Dict[str, str],
     cypher_example_retriever: BaseCypherExampleRetriever,
     scope_description: Optional[str] = None,

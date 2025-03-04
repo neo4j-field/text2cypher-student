@@ -1,6 +1,5 @@
 from typing import Any, Callable, Coroutine, Dict, List
 
-from langchain_core.messages import ToolCall
 from langchain_neo4j import Neo4jGraph
 
 from ...constants import NO_CYPHER_RESULTS
@@ -37,11 +36,11 @@ def create_predefined_cypher_node(
         Executes a predefined Cypher statement with found parameters.
         """
         errors = list()
-        tool_call: ToolCall | None = state.get("tool_call")
-        assert tool_call is not None, "no tool call found in `predefined_cypher` node"
-        statement_name = tool_call.get("name", "")
-        params = tool_call.get(
-            "args", dict()
+        # tool_call: ToolCall | None = state.get("tool_call")
+        # assert tool_call is not None, "no tool call found in `predefined_cypher` node"
+        statement_name = state.get("query_name", "")
+        params = state.get(
+            "query_parameters", dict()
         )  # these should have been validated already during LLM output parsing
 
         statement = predefined_cypher_dict.get(statement_name)
@@ -60,6 +59,7 @@ def create_predefined_cypher_node(
                     **{
                         "task": state.get("task", ""),
                         "statement": statement or "",
+                        "parameters": params,
                         "errors": errors,
                         "records": records or NO_CYPHER_RESULTS,
                         "steps": ["execute_predefined_cypher"],

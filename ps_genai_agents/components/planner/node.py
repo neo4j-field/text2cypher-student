@@ -12,7 +12,7 @@ planner_prompt = create_planner_prompt_template()
 
 
 def create_planner_node(
-    llm: BaseChatModel, ignore_node: bool = False, next_action: str = "supervisor"
+    llm: BaseChatModel, ignore_node: bool = False, next_action: str = "tool_selection"
 ) -> Callable[[InputState], Coroutine[Any, Any, Dict[str, Any]]]:
     """
     Create a planner node to be used in a LangGraph workflow.

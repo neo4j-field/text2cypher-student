@@ -44,6 +44,7 @@ def create_text2cypher_execution_node(
                     **{
                         "task": state.get("task", ""),
                         "statement": state.get("statement", ""),
+                        "parameters": None,
                         "errors": state.get("errors", list()),
                         "records": records if records else NO_CYPHER_RESULTS,
                         "steps": steps,
