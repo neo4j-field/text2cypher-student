@@ -30,11 +30,3 @@ def create_tool_selection_prompt_template() -> ChatPromptTemplate:
             ),
         ]
     )
-
-
-# def _format_tool_options(tool_options_dict: Dict[str, str]) -> str:
-#     result = "Tool Options:"
-#     for t in tool_options_dict.items():
-#         result += f"\n* {t.get("name", "")}({t.get("parameters", "")}): {t.get("description", "")}"
-
-#     return result
