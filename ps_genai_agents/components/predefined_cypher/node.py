@@ -53,6 +53,9 @@ def create_predefined_cypher_node(
             )
             records = list()
 
+        steps = state.get("prev_steps", list())
+        steps.append("execute_predeined_cypher")
+
         return {
             "cyphers": [
                 CypherOutputState(
@@ -62,7 +65,7 @@ def create_predefined_cypher_node(
                         "parameters": params,
                         "errors": errors,
                         "records": records or NO_CYPHER_RESULTS,
-                        "steps": ["execute_predefined_cypher"],
+                        "cypher_steps": steps,
                     }
                 )
             ],

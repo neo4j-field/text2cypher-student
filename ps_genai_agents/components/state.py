@@ -67,7 +67,7 @@ class OverallState(TypedDict):
     cyphers: Annotated[List[CypherOutputState], add]
     summary: str
     visualizations: Annotated[List[VisualizationOutputState], add]
-    steps: Annotated[List[str], add]
+    steps: Annotated[List[Any], add]
     history: Annotated[List[HistoryRecord], update_history]
 
 
@@ -76,7 +76,7 @@ class OutputState(TypedDict):
 
     answer: str
     question: str
-    steps: List[str]
+    steps: List[Any]
     cyphers: List[CypherOutputState]
     visualizations: List[VisualizationOutputState]
     history: Annotated[List[HistoryRecord], update_history]
@@ -98,7 +98,7 @@ class PredefinedCypherInputState(TypedDict):
     task: str
     query_name: str
     query_parameters: Dict[str, Any]
-    steps: List[str]
+    prev_steps: List[Any]
 
 
 class ToolSelectionInputState(TypedDict):
@@ -113,7 +113,7 @@ class ToolSelectionInputState(TypedDict):
 class ToolSelectionOutputState(TypedDict):
     tool_selection_task: str
     tool_call: Optional[ToolCall]
-    steps: List[str]
+    prev_steps: Optional[List[Any]]
 
 
 class ToolSelectionErrorState(TypedDict):
@@ -121,4 +121,4 @@ class ToolSelectionErrorState(TypedDict):
 
     task: str
     errors: List[str]
-    steps: List[str]
+    cypher_steps: List[Any]

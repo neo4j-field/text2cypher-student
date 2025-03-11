@@ -60,7 +60,7 @@ def create_correct_chart_details_node(
             "hue_key": chart_details.hue_key,
             "chart_type": chart_details.chart_type,
             "chart_description": chart_details.chart_description,
-            "steps": ["correct_chart_details"],
+            "vis_steps": ["correct_chart_details"],
         }
 
     return correct_chart_details

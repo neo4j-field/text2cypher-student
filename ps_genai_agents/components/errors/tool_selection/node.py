@@ -21,7 +21,9 @@ def create_error_tool_selection_node() -> (
         Handle errors in tool selection node.
         """
         errors: List[str] = list()
-        steps = ["error_tool_selection"]
+
+        steps = state.get("cypher_steps", list())
+        steps.append("error_tool_selection")
 
         errors.extend(state.get("errors", list()))
 
@@ -34,7 +36,7 @@ def create_error_tool_selection_node() -> (
                         "parameters": None,
                         "errors": errors,
                         "records": list(),
-                        "steps": steps,
+                        "cypher_steps": steps,
                     }
                 )
             ],

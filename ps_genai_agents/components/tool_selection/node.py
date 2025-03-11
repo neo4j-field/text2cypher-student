@@ -80,7 +80,7 @@ def create_tool_selection_node(
                 "text2cypher",
                 {
                     "task": state.get("question", ""),
-                    "steps": ["tool_selection"],
+                    "prev_steps": ["tool_selection"],
                 },
             )
         )
@@ -110,7 +110,7 @@ def create_tool_selection_node(
                             "task": state.get("question", ""),
                             "query_name": tool_name,
                             "query_parameters": tool_args,
-                            "steps": ["tool_selection"],
+                            "prev_steps": ["tool_selection"],
                         },
                     )
                 )
@@ -130,7 +130,7 @@ def create_tool_selection_node(
                         "errors": [
                             f"Unable to assign tool to question: `{state.get('question', '')}`"
                         ],
-                        "steps": ["tool_selection"],
+                        "prev_steps": ["tool_selection"],
                     },
                 )
             )

@@ -1,4 +1,4 @@
-from typing import Any, Callable, Coroutine, Dict
+from typing import Any, Callable, Coroutine, Dict, List
 
 from langchain_core.language_models import BaseChatModel
 from langchain_core.runnables.base import Runnable
@@ -41,13 +41,14 @@ def create_chart_details_node(
         chart_details: ChartDetailsOutput = await chart_details_chain.ainvoke(
             {"question": state.get("task"), "data": state.get("records")}
         )
+        steps: List[str] = state.get("prev_steps", list()) + ["generate_chart_details"]
         return {
             "title": chart_details.title,
             "x_axis_key": chart_details.x_axis_key,
             "y_axis_key": chart_details.y_axis_key,
             "chart_type": chart_details.chart_type,
             "chart_description": chart_details.chart_description,
-            "steps": ["generate_chart_details"],
+            "vis_steps": steps,
         }
 
     return generate_chart_details

@@ -31,12 +31,12 @@ def create_text2cypher_execution_node(
 
     async def execute_cypher(
         state: CypherState,
-    ) -> Dict[str, List[CypherOutputState] | List[str]]:
+    ) -> Dict[str, List[CypherOutputState] | List[Any]]:
         """
         Executes the given Cypher statement.
         """
         records = graph.query(state.get("statement", ""))
-        steps = state.get("steps", list())
+        steps = state.get("cypher_steps", list())
         steps.append("execute_cypher")
         return {
             "cyphers": [
@@ -47,11 +47,11 @@ def create_text2cypher_execution_node(
                         "parameters": None,
                         "errors": state.get("errors", list()),
                         "records": records if records else NO_CYPHER_RESULTS,
-                        "steps": steps,
+                        "cypher_steps": steps,
                     }
                 )
             ],
-            "steps": ["text2cypher"],
+            "steps": [steps],
         }
 
     return execute_cypher

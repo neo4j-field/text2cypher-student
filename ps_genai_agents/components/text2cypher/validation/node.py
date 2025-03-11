@@ -125,7 +125,7 @@ def create_text2cypher_validation_node(
             "statement": corrected_cypher,
             "errors": errors,
             "attempts": GENERATION_ATTEMPT,
-            "steps": ["validate_cypher"],
+            "cypher_steps": ["validate_cypher"],
         }
 
     return validate_cypher

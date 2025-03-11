@@ -54,7 +54,7 @@ def create_validate_chart_details_node() -> (
         return {
             "errors": errors,
             "next_action_visualization": next_action_visualization,
-            "steps": ["validate_chart_details"],
+            "vis_steps": ["validate_chart_details"],
         }
 
     return validate_chart_details
