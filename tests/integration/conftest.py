@@ -54,7 +54,7 @@ detach delete n
 @pytest.fixture(scope="session")
 def init_database(neo4j_driver: Driver, healthcheck: None) -> None:
     """
-    Init Steps
+    Init List[Step]
     * Create vector index for CypherQuery nodes
     """
 

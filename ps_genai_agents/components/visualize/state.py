@@ -12,6 +12,7 @@ from typing_extensions import TypedDict
 class VisualizationInputState(TypedDict):
     task: str
     records: List[Dict[str, Any]]
+    prev_steps: List[str]
 
 
 class VisualizationState(TypedDict):
@@ -25,11 +26,11 @@ class VisualizationState(TypedDict):
     chart_description: str
     errors: List[ErrorDetails]
     next_action_visualization: str
-    steps: Annotated[List[str], add]
+    vis_steps: Annotated[List[str], add]
 
 
 class VisualizationOutputState(TypedDict):
     task: str
     chart: Any
     chart_description: str
-    steps: List[str]
+    vis_steps: List[str]

@@ -28,7 +28,7 @@ def create_chart_generation_node() -> (
 
     async def generate_chart(
         state: VisualizationState,
-    ) -> Dict[str, List[VisualizationOutputState] | List[str]]:
+    ) -> Dict[str, List[VisualizationOutputState] | List[Any]]:
         """
         Generate a chart based on the provided chart details.
         """
@@ -49,7 +49,7 @@ def create_chart_generation_node() -> (
             case _:
                 chart = create_empty_plot()
 
-        steps = state.get("steps", list())
+        steps = state.get("vis_steps", list())
         steps.append("generate_chart")
 
         return {
@@ -59,11 +59,11 @@ def create_chart_generation_node() -> (
                         "task": state.get("task", ""),
                         "chart": chart,
                         "chart_description": state.get("chart_description", ""),
-                        "steps": steps,
+                        "vis_steps": steps,
                     }
                 )
             ],
-            "steps": ["vizualize"],
+            "steps": [steps],
         }
 
     return generate_chart

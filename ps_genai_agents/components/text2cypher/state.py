@@ -10,6 +10,7 @@ from typing_extensions import TypedDict
 
 class CypherInputState(TypedDict):
     task: str
+    prev_steps: List[str]
 
 
 class CypherState(TypedDict):
@@ -20,7 +21,7 @@ class CypherState(TypedDict):
     records: List[Dict[str, Any]]
     next_action_cypher: str
     attempts: int
-    steps: Annotated[List[str], add]
+    cypher_steps: Annotated[List[str], add]
 
 
 class CypherOutputState(TypedDict):
@@ -29,4 +30,4 @@ class CypherOutputState(TypedDict):
     parameters: Optional[Dict[str, Any]]
     errors: List[str]
     records: List[Dict[str, Any]]
-    steps: List[str]
+    cypher_steps: List[str]

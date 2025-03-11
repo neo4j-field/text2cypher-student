@@ -42,6 +42,7 @@ def create_text2cypher_generation_node(
             }
         )
         # print("GENERATED CYPHER: ", generated_cypher, "\n\n")
-        return {"statement": generated_cypher, "steps": ["generate_cypher"]}
+        steps = state.get("prev_steps", list()) + ["generate_cypher"]
+        return {"statement": generated_cypher, "cypher_steps": steps}
 
     return generate_cypher
