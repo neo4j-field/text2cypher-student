@@ -1,8 +1,8 @@
 [tool.poetry]
-name = "ps-genai-agents"
+name = "text2cypher-student"
 version = "0.1.0"
-description = "The goal of this project is to provide a generalized agent architecture that can be applied to many graph use cases."
-authors = ["Alex Gilmore", "Yancarlo Perez", "Henry Lin", "Ravi Kiran Ponduri", "Chris Upkes"]
+description = "Text2Cypher agentic workflow that is able to iteratively update it's knowledge base and learn from past mistakes."
+authors = ["Alex Gilmore"]
 license = "Apache License, Version 2.0"
 readme = "README.md"
 package-mode = false
@@ -45,10 +45,6 @@ rouge-score = "^0.1.2"
 [tool.poetry.group.ui.dependencies]
 streamlit = "^1.37.1"
 
-[tool.poetry.group.workshop.dependencies]
-ipykernel = "^6.29.5"
-streamlit = "^1.37.1"
-
 [tool.mypy]
 strict = true
 ignore_missing_imports = true
@@ -63,7 +59,7 @@ show-fixes = true
 exclude = ["archive/"]
 
 [tool.coverage.paths]
-source = ["ps_genai_agents"]
+source = ["agent"]
 
 [build-system]
 requires = ["poetry-core"]
