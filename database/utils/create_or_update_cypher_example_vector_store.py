@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 from neo4j import Driver, GraphDatabase
 from neo4j_graphrag.embeddings import OpenAIEmbeddings
 
-from ps_genai_agents.ingest.cypher_examples import (
+from ..ingest.cypher_examples import (
     embed_cypher_query_nodes,
     get_existing_questions,
     load_cypher_query_nodes,

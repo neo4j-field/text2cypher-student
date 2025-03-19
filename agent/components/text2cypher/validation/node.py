@@ -15,7 +15,6 @@ from ..state import CypherState
 from .validators import (
     correct_cypher_query_relationship_direction,
     validate_cypher_query_syntax,
-    validate_cypher_query_with_llm,
     validate_cypher_query_with_schema,
     validate_no_writes_in_cypher_query,
 )
@@ -26,7 +25,7 @@ validation_prompt_template = create_text2cypher_validation_prompt_template()
 def create_text2cypher_validation_node(
     graph: Neo4jGraph,
     llm: Optional[BaseChatModel] = None,
-    llm_validation: bool = True,
+    llm_validation: bool = False,
     max_attempts: int = 3,
     attempt_cypher_execution_on_final_attempt: bool = False,
 ) -> Callable[[CypherState], Coroutine[Any, Any, dict[str, Any]]]:
@@ -42,7 +41,7 @@ def create_text2cypher_validation_node(
     llm : Optional[BaseChatModel], optional
         The LLM to use for processing if LLM validation is desired. By default None
     llm_validation : bool, optional
-        Whether to perform LLM validation with the provided LLM, by default True
+        Whether to perform LLM validation with the provided LLM, by default False
     max_attempts: int, optional
         The max number of allowed attempts to generate valid Cypher, by default 3
     attempt_cypher_execution_on_final_attempt, bool, optional
@@ -88,24 +87,13 @@ def create_text2cypher_validation_node(
             graph=graph, cypher_statement=state.get("statement", "")
         )
 
-        # Use LLM to find additional potential errors and get the mapping for values
-        if llm is not None and llm_validation:
-            # print("llm check")
-            llm_errors = await validate_cypher_query_with_llm(
-                validate_cypher_chain=validate_cypher_chain,
-                question=state.get("task", ""),
-                graph=graph,
-                cypher_statement=state.get("statement", ""),
-            )
-            errors.extend(llm_errors.get("errors", []))
-            mapping_errors.extend(llm_errors.get("mapping_errors", []))
-
-        if not llm_validation:
-            # print("schema check")
-            cypher_errors = validate_cypher_query_with_schema(
-                graph=graph, cypher_statement=state.get("statement", "")
-            )
-            errors.extend(cypher_errors)
+       
+        # if not llm_validation:
+        # print("schema check")
+        cypher_errors = validate_cypher_query_with_schema(
+            graph=graph, cypher_statement=state.get("statement", "")
+        )
+        errors.extend(cypher_errors)
 
         # determine next node in workflow
         if (errors or mapping_errors) and GENERATION_ATTEMPT < max_attempts:

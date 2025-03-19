@@ -3,13 +3,13 @@ from unittest.mock import MagicMock
 
 from neo4j import Driver
 
-from ps_genai_agents.ingest.cypher_examples.ingest_neo4j import (
+from agent.ingest.cypher_examples.ingest_neo4j import (
     embed_cypher_query_nodes,
     get_existing_questions,
     load_cypher_query_nodes,
 )
-from ps_genai_agents.ingest.cypher_examples.models import CypherIngestRecord
-from ps_genai_agents.ingest.cypher_examples.utils import (
+from agent.ingest.cypher_examples.models import CypherIngestRecord
+from agent.ingest.cypher_examples.utils import (
     remove_preexisting_nodes_from_ingest_tasks,
 )
 

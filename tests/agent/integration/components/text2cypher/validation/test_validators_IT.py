@@ -1,6 +1,6 @@
 from unittest.mock import MagicMock
 
-from ps_genai_agents.components.text2cypher.validation.validators import (
+from agent.components.text2cypher.validation.validators import (
     validate_cypher_query_with_schema,
 )
 

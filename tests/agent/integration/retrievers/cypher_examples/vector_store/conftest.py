@@ -3,8 +3,8 @@ from unittest.mock import MagicMock
 import pytest
 from neo4j import Driver
 
-from ps_genai_agents.embeddings import EmbedderProtocol
-from ps_genai_agents.retrievers.cypher_examples.vector_store import (
+from agent.embeddings import EmbedderProtocol
+from agent.retrievers.cypher_examples.vector_store import (
     Neo4jVectorSearchCypherExampleRetriever,
 )
 

@@ -1,8 +1,7 @@
 {
     "dependencies": ["./ps_genai_agents"],
     "graphs": {
-      "agent": "./ps_genai_agents/agent.py:graph",
-      "cooking_assistant": "./ps_genai_agents/agent_cooking_assistant.py:graph"
+      "agent": "./agent/agent.py:graph"
     },
     "env": ".env"
   }

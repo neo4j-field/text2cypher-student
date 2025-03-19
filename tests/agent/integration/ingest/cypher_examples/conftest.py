@@ -3,7 +3,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from ps_genai_agents.embeddings import EmbedderProtocol
+from agent.embeddings import EmbedderProtocol
 
 
 @pytest.fixture(scope="function")

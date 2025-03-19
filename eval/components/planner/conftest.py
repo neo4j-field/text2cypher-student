@@ -4,8 +4,8 @@ import evaluate
 import pytest
 from langchain_openai import ChatOpenAI
 
-from ps_genai_agents.components.planner import create_planner_node
-from ps_genai_agents.components.state import InputState
+from agent.components.planner import create_planner_node
+from agent.components.state import InputState
 
 
 @pytest.fixture(scope="module")

@@ -6,13 +6,13 @@ from langchain_neo4j import Neo4jGraph
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from neo4j import GraphDatabase
 
-from ps_genai_agents.retrievers.cypher_examples import (
+from agent.retrievers.cypher_examples import (
     Neo4jVectorSearchCypherExampleRetriever,
 )
 
-# from ps_genai_agents.workflows.single_agent import create_text2cypher_agent
-from ps_genai_agents.workflows.multi_agent import (
-    create_text2cypher_with_visualization_workflow,
+# from agent.workflows.single_agent import create_text2cypher_agent
+from agent.workflows import (
+    create_advanced_text2cypher_agentic_workflow,
 )
 
 neo4j_graph = Neo4jGraph(enhanced_schema=True)
@@ -30,7 +30,7 @@ cypher_example_retriever = Neo4jVectorSearchCypherExampleRetriever(
 )
 
 # Create the graph to be found by LangGraph Studio
-graph = create_text2cypher_with_visualization_workflow(
+graph = create_advanced_text2cypher_agentic_workflow(
     llm=llm,
     cypher_example_retriever=cypher_example_retriever,
     llm_cypher_validation=False,

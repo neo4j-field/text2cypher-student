@@ -1,4 +1,4 @@
-from ps_genai_agents.components.text2cypher.validation.utils.regex_patterns import (
+from agent.components.text2cypher.validation.utils.regex_patterns import (
     get_node_label_pattern,
 )
 

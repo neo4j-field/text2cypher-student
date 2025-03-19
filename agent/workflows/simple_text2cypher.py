@@ -5,20 +5,21 @@ from langchain_neo4j import Neo4jGraph
 from langgraph.constants import END, START
 from langgraph.graph.state import CompiledStateGraph, StateGraph
 
-from ...components.state import (
+from ..components.state import (
     OverallState,
 )
-from ...components.text2cypher import (
+from ..components.text2cypher import (
     create_text2cypher_correction_node,
     create_text2cypher_execution_node,
     create_text2cypher_generation_node,
     create_text2cypher_validation_node,
 )
-from ...components.text2cypher.state import CypherInputState, CypherState
-from ...retrievers.cypher_examples.base import BaseCypherExampleRetriever
+from ..components.text2cypher.state import CypherInputState, CypherState
+from ..retrievers.cypher_examples.base import BaseCypherExampleRetriever
+from .edges import validate_cypher_conditional_edge
 
 
-def create_text2cypher_agent(
+def create_simple_text2cypher_agentic_workflow(
     llm: BaseChatModel,
     graph: Neo4jGraph,
     cypher_example_retriever: BaseCypherExampleRetriever,
@@ -84,17 +85,3 @@ def create_text2cypher_agent(
     text2cypher_graph_builder.add_edge("execute_cypher", END)
 
     return text2cypher_graph_builder.compile()
-
-
-def validate_cypher_conditional_edge(
-    state: CypherState,
-) -> Literal["correct_cypher", "execute_cypher", "__end__"]:
-    match state.get("next_action_cypher"):
-        case "correct_cypher":
-            return "correct_cypher"
-        case "execute_cypher":
-            return "execute_cypher"
-        case "__end__":
-            return "__end__"
-        case _:
-            return "__end__"

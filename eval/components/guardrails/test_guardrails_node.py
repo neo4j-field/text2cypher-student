@@ -3,7 +3,7 @@ from typing import Any, Callable, Coroutine, Dict
 import pytest
 from langsmith import Client
 
-from ps_genai_agents.components.state import InputState
+from agent.components.state import InputState
 
 
 @pytest.mark.asyncio

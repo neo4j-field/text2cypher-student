@@ -1,6 +1,6 @@
 from typing import Dict, List
 
-from ps_genai_agents.ingest.cypher_examples.utils import (
+from agent.ingest.cypher_examples.utils import (
     remove_preexisting_nodes_from_ingest_tasks,
 )
 

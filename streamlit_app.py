@@ -9,9 +9,9 @@ from dotenv import load_dotenv
 from langchain_neo4j import Neo4jGraph
 from langchain_openai import ChatOpenAI
 
-from ps_genai_agents.retrievers.cypher_examples import YAMLCypherExampleRetriever
-from ps_genai_agents.ui.components import chat, display_chat_history, sidebar
-from ps_genai_agents.workflows.multi_agent import (
+from agent.retrievers.cypher_examples import YAMLCypherExampleRetriever
+from agent.ui.components import chat, display_chat_history, sidebar
+from agent.workflows.multi_agent import (
     create_text2cypher_with_visualization_workflow,
 )
 

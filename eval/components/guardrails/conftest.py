@@ -6,8 +6,8 @@ import pytest
 from langchain_neo4j import Neo4jGraph
 from langchain_openai import ChatOpenAI
 
-from ps_genai_agents.components.guardrails import create_guardrails_node
-from ps_genai_agents.components.state import InputState
+from agent.components.guardrails import create_guardrails_node
+from agent.components.state import InputState
 
 
 @pytest.fixture(scope="module")

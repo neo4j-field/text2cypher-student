@@ -1,4 +1,4 @@
-from ps_genai_agents.components.text2cypher.validation.utils.cypher_extractors import (
+from agent.components.text2cypher.validation.utils.cypher_extractors import (
     _extract_nodes_and_properties_from_cypher_statement,
     _extract_relationships_and_properties_from_cypher_statement,
 )

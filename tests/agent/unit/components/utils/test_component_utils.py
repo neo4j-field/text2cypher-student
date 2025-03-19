@@ -1,6 +1,6 @@
 from unittest.mock import MagicMock
 
-from ps_genai_agents.components.utils.utils import (
+from agent.components.utils.utils import (
     retrieve_and_parse_schema_from_graph_for_prompts,
 )
 

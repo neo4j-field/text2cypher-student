@@ -1,6 +1,6 @@
 from neo4j import Driver
 
-from ps_genai_agents.retrievers.cypher_examples.vector_store import (
+from agent.retrievers.cypher_examples.vector_store import (
     Neo4jVectorSearchCypherExampleRetriever,
 )
 

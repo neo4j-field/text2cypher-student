@@ -1,10 +1,10 @@
 from typing import Dict, List
 from unittest.mock import MagicMock
 
-from ps_genai_agents.ingest.cypher_examples.ingest_neo4j import (
+from agent.ingest.cypher_examples.ingest_neo4j import (
     embed_cypher_query_nodes,
 )
-from ps_genai_agents.ingest.cypher_examples.models import CypherIngestRecord
+from agent.ingest.cypher_examples.models import CypherIngestRecord
 
 
 def test_embed_cypher_query_nodes(

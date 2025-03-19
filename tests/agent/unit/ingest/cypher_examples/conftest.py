@@ -3,8 +3,8 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from ps_genai_agents.embeddings import EmbedderProtocol
-from ps_genai_agents.ingest.cypher_examples.models import CypherIngestRecord
+from agent.embeddings import EmbedderProtocol
+from agent.ingest.cypher_examples.models import CypherIngestRecord
 
 
 @pytest.fixture(scope="function")

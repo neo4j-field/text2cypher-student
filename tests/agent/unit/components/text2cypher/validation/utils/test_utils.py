@@ -1,10 +1,10 @@
 from typing import Any, Dict, List
 
-from ps_genai_agents.components.text2cypher.validation.models import (
+from agent.components.text2cypher.validation.models import (
     CypherValidationTask,
     Neo4jStructuredSchema,
 )
-from ps_genai_agents.components.text2cypher.validation.utils.utils import (
+from agent.components.text2cypher.validation.utils.utils import (
     update_task_list_with_property_type,
 )
 

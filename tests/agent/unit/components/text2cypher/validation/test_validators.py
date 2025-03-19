@@ -1,9 +1,9 @@
 from typing import Any, Dict, Literal
 
-from ps_genai_agents.components.text2cypher.validation.models import (
+from agent.components.text2cypher.validation.models import (
     Neo4jStructuredSchemaPropertyNumber,
 )
-from ps_genai_agents.components.text2cypher.validation.validators import (
+from agent.components.text2cypher.validation.validators import (
     _validate_property_value_with_enum,
     _validate_property_value_with_range,
     _validate_property_with_enum,

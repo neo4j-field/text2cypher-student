@@ -2,7 +2,7 @@ from typing import Any, Dict, List
 
 import pytest
 
-from ps_genai_agents.components.text2cypher.validation.models import (
+from agent.components.text2cypher.validation.models import (
     CypherValidationTask,
 )
 
