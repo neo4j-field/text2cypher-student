@@ -19,9 +19,10 @@ def create_planner_prompt_template() -> ChatPromptTemplate:
     """
     message = """Rules:
 * Ensure that the tasks are not returning duplicated or similar information.
-* Ensure that tasls are NOT dependent on information gathered from other tasks!
+* Ensure that tasks are NOT dependent on information gathered from other tasks!
 * tasks that are dependent on each other should be combined into a single question.
 * tasks that return the same information should be combined into a single question.
+* Do not create novel sub tasks that are not directly related to the question.
 
 question: {question}
 """
